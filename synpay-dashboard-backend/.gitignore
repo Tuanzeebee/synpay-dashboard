@@ -63,3 +63,7 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 AGENTS.md
 .cursor/
 .vscode/
+
+.github
+.claude
+.copilot

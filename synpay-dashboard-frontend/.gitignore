@@ -43,3 +43,7 @@ next-env.d.ts
 AGENTS.md
 .cursor/
 .vscode/
+
+.github
+.claude
+.copilot

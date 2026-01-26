@@ -69,3 +69,7 @@ synpay-dashboard-python-api/__pycache__/
 AGENTS.md
 .cursor/
 .vscode/
+
+.github
+.claude
+.copilot
