@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="vi" style="height: auto; min-height: 100%;">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Báo Cáo & Phân Tích - HR Nexus</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #475569;
+        }
+        .dark ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+        .chart-container {
+            position: relative;
+            height: 320px;
+        }
+        .chart-container-large {
+            position: relative;
+            height: 420px;
+        }
+        .language-toggle {
+            transition: all 0.3s ease;
+        }
+        .language-toggle:hover {
+            transform: scale(1.05);
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3b82f6',
+                        secondary: '#64748b',
+                        success: '#10b981',
+                        warning: '#f59e0b',
+                        critical: '#ef4444',
+                        info: '#06b6d4',
+                        purple: '#8b5cf6'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body style="height: auto; min-height: 100%;" class="bg-slate-50 dark:bg-slate-900 transition-colors duration-300">
+
+    <div class="flex w-full">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex-col hidden lg:flex shrink-0 transition-colors duration-300">
+            <div class="p-6 border-b border-slate-100 dark:border-slate-700">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 dark:from-blue-500 dark:to-blue-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg">H</div>
+                    <div>
+                        <span class="font-bold text-xl text-slate-800 dark:text-white block" data-i18n="app-name">HR Nexus</span>
+                        <span class="text-xs text-slate-500 dark:text-slate-400" data-i18n="app-subtitle">Phiên Bản Doanh Nghiệp</span>
+                    </div>
+                </div>
+            </div>
+
+            <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
+                <div class="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-4 px-2" data-i18n="menu-main">Menu Chính</div>
+                
+                <a href="#" class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white rounded-lg font-medium transition-colors">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                    <span data-i18n="menu-dashboard">Bảng Điều Khiển</span>
+                </a>
+                <a href="#" class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white rounded-lg font-medium transition-colors">
+                    <i data-lucide="users" class="w-5 h-5"></i>
+                    <span data-i18n="menu-employees">Nhân Viên</span>
+                    <span class="ml-auto px-2 py-0.5 text-xs font-semibold rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400">342</span>
+                </a>
+                <a href="#" class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white rounded-lg font-medium transition-colors">
+                    <i data-lucide="calendar-check" class="w-5 h-5"></i>
+                    <span data-i18n="menu-attendance">Chấm Công</span>
+                </a>
+                <a href="#" class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white rounded-lg font-medium transition-colors">
+                    <i data-lucide="banknote" class="w-5 h-5"></i>
+                    <span data-i18n="menu-payroll">Bảng Lương</span>
+                </a>
+                <a href="#" class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white rounded-lg font-medium transition-colors">
+                    <i data-lucide="building-2" class="w-5 h-5"></i>
+                    <span data-i18n="menu-organization">Tổ Chức</span>
+                </a>
+                <a href="#" class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white rounded-lg font-medium transition-colors">
+                    <i data-lucide="file-text" class="w-5 h-5"></i>
+                    <span data-i18n="menu-leave">Đơn Xin Nghỉ</span>
+                    <span class="ml-auto px-2 py-0.5 text-xs font-semibold rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400">12</span>
+                </a>
+                <a href="#" class="flex items-center gap-3 px-3 py-2.5 bg-gradient-to-r from-blue-50 to-blue-100/50 dark:from-blue-900/30 dark:to-blue-900/20 text-blue-700 dark:text-blue-400 rounded-lg font-semibold transition-colors shadow-sm">
+                    <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
+                    <span data-i18n="menu-reports">Báo Cáo & Phân Tích</span>
+                </a>
+                
+                <div class="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-4 px-2 pt-6" data-i18n="menu-settings">Cài Đặt</div>
+                
+                <a href="#" class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white rounded-lg font-medium transition-colors">
+                    <i data-lucide="settings" class="w-5 h-5"></i>
+                    <span data-i18n="menu-system">Cài Đặt Hệ Thống</span>
+                </a>
+            </nav>
+            
+            <div class="p-4 border-t border-slate-100 dark:border-slate-700">
+                <div class="flex items-center gap-3 px-3 py-3 bg-slate-50 dark:bg-slate-900/50 rounded-lg">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-600 flex items-center justify-center text-xs font-bold text-slate-600 dark:text-slate-300 shadow-inner">v2.1</div>
+                    <div class="text-xs text-slate-500 dark:text-slate-400">
+                        <p class="font-semibold text-slate-700 dark:text-slate-300">HR Nexus Pro</p>
+                        <p>© 2024 TechCorp Inc.</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col min-w-0">
+            <!-- Header -->
+            <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-20 transition-colors duration-300">
+                <div class="px-4 md:px-8 py-4 flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <button class="text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 lg:hidden">
+                            <i data-lucide="menu" class="w-6 h-6"></i>
+                        </button>
+                        <div>
+                            <h1 class="text-xl font-bold text-slate-900 dark:text-white" data-i18n="page-title">Báo Cáo & Phân Tích</h1>
+                            <p class="text-sm text-slate-500 dark:text-slate-400 hidden sm:block" data-i18n="page-subtitle">Tổng quan dữ liệu và xu hướng kinh doanh</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <button class="p-2 text-slate-400 dark:text-slate-300 hover:text-slate-600 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg transition-colors relative" title="Thông báo">
+                            <i data-lucide="bell" class="w-5 h-5"></i>
+                            <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                        </button>
+
+                        <!-- Language Toggle Button -->
+                        <button onclick="toggleLanguage()" class="language-toggle p-2 text-slate-400 dark:text-slate-300 hover:text-slate-600 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg transition-all relative group" title="Chuyển đổi ngôn ngữ">
+                            <i data-lucide="languages" class="w-5 h-5"></i>
+                            <span id="currentLang" class="absolute -bottom-1 -right-1 w-5 h-5 bg-blue-600 dark:bg-blue-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center shadow-lg">VI</span>
+                        </button>
+
+                        <!-- Dark Mode Toggle Button -->
+                        <button onclick="toggleDarkMode()" class="p-2 text-slate-400 dark:text-slate-300 hover:text-slate-600 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg transition-colors" title="Chuyển chế độ">
+                            <i data-lucide="moon" class="w-5 h-5 dark:hidden"></i>
+                            <i data-lucide="sun" class="w-5 h-5 hidden dark:block"></i>
+                        </button>
+
+                        <button onclick="refreshData()" class="px-4 py-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg font-medium transition-colors flex items-center gap-2">
+                            <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                            <span class="hidden sm:inline" data-i18n="btn-refresh">Làm Mới</span>
+                        </button>
+                        
+                        <div class="relative ml-2">
+                            <button class="flex items-center gap-3 p-1.5 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+                                <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="Hồ sơ" class="w-10 h-10 rounded-full border-2 border-slate-200 dark:border-slate-600 shadow-sm">
+                                <div class="hidden md:block text-left">
+                                    <p class="text-sm font-semibold text-slate-900 dark:text-white" data-i18n="user-name">Nguyễn Thị Mai</p>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400" data-i18n="user-role">Giám Đốc Nhân Sự</p>
+                                </div>
+                                <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 hidden md:block"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filters Bar -->
+                <div class="px-4 md:px-8 py-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50">
+                    <div class="flex flex-wrap items-center gap-3">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="filter" class="w-4 h-4 text-slate-500 dark:text-slate-400"></i>
+                            <span class="text-sm font-semibold text-slate-700 dark:text-slate-300" data-i18n="filter-label">Bộ Lọc:</span>
+                        </div>
+                        
+                        <select id="departmentFilter" class="px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors">
+                            <option value="all" data-i18n="filter-all-dept">Tất cả phòng ban</option>
+                            <option value="tech" data-i18n="dept-tech">Phòng Kỹ Thuật</option>
+                            <option value="sales" data-i18n="dept-sales">Phòng Kinh Doanh</option>
+                            <option value="marketing" data-i18n="dept-marketing">Phòng Marketing</option>
+                            <option value="hr" data-i18n="dept-hr">Phòng Nhân Sự</option>
+                            <option value="finance" data-i18n="dept-finance">Phòng Tài Chính</option>
+                            <option value="operations" data-i18n="dept-operations">Phòng Vận Hành</option>
+                        </select>
+
+                        <select id="periodFilter" class="px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors">
+                            <option value="month" data-i18n="period-month">Tháng này</option>
+                            <option value="quarter" data-i18n="period-quarter">Quý này</option>
+                            <option value="year" data-i18n="period-year">Năm này</option>
+                            <option value="custom" data-i18n="period-custom">Tùy chỉnh</option>
+                        </select>
+
+                        <input type="date" id="startDate" value="2024-01-01" class="px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors">
+                        
+                        <span class="text-slate-500 dark:text-slate-400 text-sm" data-i18n="date-to">đến</span>
+                        
+                        <input type="date" id="endDate" value="2024-12-31" class="px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors">
+
+                        <button onclick="applyFilters()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white rounded-lg font-medium transition-colors flex items-center gap-2 text-sm">
+                            <i data-lucide="search" class="w-4 h-4"></i>
+                            <span data-i18n="btn-apply">Áp Dụng</span>
+                        </button>
+
+                        <div class="ml-auto flex items-center gap-2">
+                            <button onclick="exportCSV()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white rounded-lg font-medium transition-colors flex items-center gap-2 text-sm">
+                                <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+                                <span class="hidden sm:inline" data-i18n="btn-export-csv">Xuất CSV</span>
+                            </button>
+                            <button onclick="exportPDF()" class="px-4 py-2 bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 text-white rounded-lg font-medium transition-colors flex items-center gap-2 text-sm">
+                                <i data-lucide="file-text" class="w-4 h-4"></i>
+                                <span class="hidden sm:inline" data-i18n="btn-export-pdf">Xuất PDF</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content -->
+            <div class="flex-1 p-4 md:p-8 overflow-y-auto">
+                <!-- KPI Summary Cards -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    <div class="bg-gradient-to-br from-white to-blue-50/30 dark:from-slate-800 dark:to-blue-900/10 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all duration-300">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide" data-i18n="kpi-total-employees">Tổng Nhân Viên</span>
+                                <div class="text-3xl font-bold text-slate-900 dark:text-white mt-2">342</div>
+                            </div>
+                            <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
+                                <i data-lucide="users" class="w-6 h-6 text-blue-600 dark:text-blue-400"></i>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1">
+                                <i data-lucide="trending-up" class="w-3 h-3"></i>
+                                <span data-i18n="kpi-growth">+8.2% so với tháng trước</span>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="bg-gradient-to-br from-white to-emerald-50/30 dark:from-slate-800 dark:to-emerald-900/10 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all duration-300">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide" data-i18n="kpi-total-salary">Tổng Lương Tháng</span>
+                                <div class="text-3xl font-bold text-slate-900 dark:text-white mt-2" data-i18n="kpi-salary-value">8.4 tỷ</div>
+                            </div>
+                            <div class="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl flex items-center justify-center">
+                                <i data-lucide="banknote" class="w-6 h-6 text-emerald-600 dark:text-emerald-400"></i>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs text-slate-500 dark:text-slate-400" data-i18n="kpi-avg-salary">Trung bình: 24.6 triệu/người</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-gradient-to-br from-white to-amber-50/30 dark:from-slate-800 dark:to-amber-900/10 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all duration-300">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide" data-i18n="kpi-total-leave">Tổng Ngày Nghỉ</span>
+                                <div class="text-3xl font-bold text-slate-900 dark:text-white mt-2">248</div>
+                            </div>
+                            <div class="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-xl flex items-center justify-center">
+                                <i data-lucide="calendar-off" class="w-6 h-6 text-amber-600 dark:text-amber-400"></i>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs text-amber-600 dark:text-amber-400 font-semibold flex items-center gap-1">
+                                <i data-lucide="trending-down" class="w-3 h-3"></i>
+                                <span data-i18n="kpi-leave-change">-3.5% so với tháng trước</span>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="bg-gradient-to-br from-white to-purple-50/30 dark:from-slate-800 dark:to-purple-900/10 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all duration-300">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide" data-i18n="kpi-dividend">Cổ Tức Quý</span>
+                                <div class="text-3xl font-bold text-slate-900 dark:text-white mt-2" data-i18n="kpi-dividend-value">2.1 tỷ</div>
+                            </div>
+                            <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center">
+                                <i data-lucide="trending-up" class="w-6 h-6 text-purple-600 dark:text-purple-400"></i>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1">
+                                <i data-lucide="trending-up" class="w-3 h-3"></i>
+                                <span data-i18n="kpi-dividend-change">+12.4% so với quý trước</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Grid -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    <!-- Employee Distribution by Department -->
+                    <div class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <div>
+                                <h3 class="text-lg font-bold text-slate-900 dark:text-white" data-i18n="chart-dept-title">Phân Bổ Nhân Viên Theo Phòng Ban</h3>
+                                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1" data-i18n="chart-dept-subtitle">Tổng quan cơ cấu tổ chức</p>
+                            </div>
+                            <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                                <i data-lucide="pie-chart" class="w-5 h-5 text-blue-600 dark:text-blue-400"></i>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="departmentChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Employee Status Breakdown -->
+                    <div class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <div>
+                                <h3 class="text-lg font-bold text-slate-900 dark:text-white" data-i18n="chart-status-title">Trạng Thái Nhân Viên</h3>
+                                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1" data-i18n="chart-status-subtitle">Phân loại theo tình trạng làm việc</p>
+                            </div>
+                            <div class="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center">
+                                <i data-lucide="user-check" class="w-5 h-5 text-emerald-600 dark:text-emerald-400"></i>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="statusChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Salary Trends -->
+                <div class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-6 mb-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-900 dark:text-white" data-i18n="chart-salary-title">Xu Hướng Lương Theo Tháng</h3>
+                            <p class="text-sm text-slate-500 dark:text-slate-400 mt-1" data-i18n="chart-salary-subtitle">Tổng chi phí lương 12 tháng gần nhất</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center">
+                                <i data-lucide="trending-up" class="w-5 h-5 text-emerald-600 dark:text-emerald-400"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chart-container-large">
+                        <canvas id="salaryTrendChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Attendance & Leave Reports -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    <!-- Leave Types Distribution -->
+                    <div class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <div>
+                                <h3 class="text-lg font-bold text-slate-900 dark:text-white" data-i18n="chart-leave-title">Phân Loại Nghỉ Phép</h3>
+                                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1" data-i18n="chart-leave-subtitle">Theo loại hình nghỉ phép</p>
+                            </div>
+                            <div class="w-10 h-10 bg-amber-100 dark:bg-amber-900/30 rounded-lg flex items-center justify-center">
+                                <i data-lucide="calendar" class="w-5 h-5 text-amber-600 dark:text-amber-400"></i>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="leaveChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Monthly Attendance Rate -->
+                    <div class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <div>
+                                <h3 class="text-lg font-bold text-slate-900 dark:text-white" data-i18n="chart-attendance-title">Tỷ Lệ Chuyên Cần Theo Tháng</h3>
+                                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1" data-i18n="chart-attendance-subtitle">6 tháng gần nhất</p>
+                            </div>
+                            <div class="w-10 h-10 bg-cyan-100 dark:bg-cyan-900/30 rounded-lg flex items-center justify-center">
+                                <i data-lucide="activity" class="w-5 h-5 text-cyan-600 dark:text-cyan-400"></i>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="attendanceChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dividend Reports -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    <!-- Quarterly Dividend Trends -->
+                    <div class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <div>
+                                <h3 class="text-lg font-bold text-slate-900 dark:text-white" data-i18n="chart-dividend-title">Cổ Tức Theo Quý</h3>
+                                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1" data-i18n="chart-dividend-subtitle">4 quý gần nhất</p>
+                            </div>
+                            <div class="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
+                                <i data-lucide="dollar-sign" class="w-5 h-5 text-purple-600 dark:text-purple-400"></i>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="dividendChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Department Performance Comparison -->
+                    <div class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <div>
+                                <h3 class="text-lg font-bold text-slate-900 dark:text-white" data-i18n="chart-performance-title">So Sánh Hiệu Suất Phòng Ban</h3>
+                                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1" data-i18n="chart-performance-subtitle">Dựa trên KPI tháng này</p>
+                            </div>
+                            <div class="w-10 h-10 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg flex items-center justify-center">
+                                <i data-lucide="bar-chart-2" class="w-5 h-5 text-indigo-600 dark:text-indigo-400"></i>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="performanceChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detailed Reports Table -->
+                <div class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-900 dark:text-white" data-i18n="table-title">Báo Cáo Chi Tiết Theo Phòng Ban</h3>
+                            <p class="text-sm text-slate-500 dark:text-slate-400 mt-1" data-i18n="table-subtitle">Tổng hợp số liệu tháng này</p>
+                        </div>
+                        <button class="px-4 py-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white rounded-lg font-medium transition-colors flex items-center gap-2 text-sm">
+                            <i data-lucide="download" class="w-4 h-4"></i>
+                            <span data-i18n="btn-download">Tải Báo Cáo</span>
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="border-b border-slate-200 dark:border-slate-700">
+                                    <th class="text-left py-3 px-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider" data-i18n="table-dept">Phòng Ban</th>
+                                    <th class="text-right py-3 px-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider" data-i18n="table-employees">Nhân Viên</th>
+                                    <th class="text-right py-3 px-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider" data-i18n="table-total-salary">Tổng Lương</th>
+                                    <th class="text-right py-3 px-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider" data-i18n="table-avg-salary">TB Lương</th>
+                                    <th class="text-right py-3 px-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider" data-i18n="table-leave-days">Ngày Nghỉ</th>
+                                    <th class="text-right py-3 px-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider" data-i18n="table-performance">Hiệu Suất</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
+                                <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                                    <td class="py-3 px-4 text-sm font-medium text-slate-900 dark:text-white" data-i18n="dept-tech">Phòng Kỹ Thuật</td>
+                                    <td class="py-3 px-4 text-sm text-right text-slate-600 dark:text-slate-400">78</td>
+                                    <td class="py-3 px-4 text-sm text-right text-slate-600 dark:text-slate-400" data-i18n="value-234b">2.34 tỷ</td>
+                                    <td class="py-3 px-4 text-sm text-right text-slate-600 dark:text-slate-400" data-i18n="value-30m">30 triệu</td>
+                                    <td class="py-3 px-4 text-sm text-right text-slate-600 dark:text-slate-400">42</td>
+                                    <td class="py-3 px-4 text-sm text-right">
+                                        <span class="px-2 py-1 text-xs font-semibold rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">95%</span>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                                    <td class="py-3 px-4 text-sm font-medium text-slate-900 dark:text-white" data-i18n="dept-sales">Phòng Kinh Doanh</td>
+                                    <td class="py-3 px-4 text-sm text-right text-slate-600 dark:text-slate-400">52</td>
+                                    <td class="py-3 px-4 text-sm text-right text-slate-600 dark:text-slate-400" data-i18n="value-156b">1.56 tỷ</td>
+                                    <td class="py-3 px-4 text-sm text-right text-slate-600 dark:text-slate-400" data-i18n="value-28m">28 triệu</td>
+                                    <td class="py-3 px-4 text-sm text-right text-slate-600 dark:text-slate-400">38</td>
+                                    <td class="py-3 px-4 text-sm text-right">
+                                        <span class="px-2 py-1 text-xs font-semibold rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">92%</span>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                                    <td class="py-3 px-4 text-sm font-medium text-slate-900 dark:text-white" data-i18n="dept-marketing">Phòng Marketing</td>
+                                    <td class="py-3 px-4 text-sm text-right text-slate-600 dark:text-slate-400">34</td>
+                                    <td class="py-3 px-4 text-sm text-right text-slate-600 dark:text-slate-400" data-i18n="value-816m">816 triệu</td>
+                                    <td class="py-3 px-4 text-sm text-right text-slate-600 dark:text-slate-400" data-i18n="value-24m">24 triệu</td>
+                                    <td class="py-3 px-4 text-sm text-right text-slate-600 dark:text-slate-400">28</td>
+                                    <td class="py-3 px-4 text-sm text-right">
+                                        <span class="px-2 py-1 text-xs font-semibold rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400">88%</span>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                                    <td class="py-3 px-4 text-sm font-medium text-slate-900 dark:text-white" data-i18n="dept-hr">Phòng Nhân Sự</td>
+                                    <td class="py-3 px-4 text-sm text-right text-slate-600 dark:text-slate-400">24</td>
+                                    <td class="py-3 px-4 text-sm text-right text-slate-600 dark:text-slate-400" data-i18n="value-528m">528 triệu</td>
+                                    <td class="py-3 px-4 text-sm text-right text-slate-600 dark:text-slate-400" data-i18n="value-22m">22 triệu</td>
+                                    <td class="py-3 px-4 text-sm text-right text-slate-600 dark:text-slate-400">18</td>
+                                    <td class="py-3 px-4 text-sm text-right">
+                                        <span class="px-2 py-1 text-xs font-semibold rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">94%</span>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                                    <td class="py-3 px-4 text-sm font-medium text-slate-900 dark:text-white" data-i18n="dept-finance">Phòng Tài Chính</td>
+                                    <td class="py-3 px-4 text-sm text-right text-slate-600 dark:text-slate-400">28</td>
+                                    <td class="py-3 px-4 text-sm text-right text-slate-600 dark:text-slate-400" data-i18n="value-672m">672 triệu</td>
+                                    <td class="py-3 px-4 text-sm text-right text-slate-600 dark:text-slate-400" data-i18n="value-24m">24 triệu</td>
+                                    <td class="py-3 px-4 text-sm text-right text-slate-600 dark:text-slate-400">22</td>
+                                    <td class="py-3 px-4 text-sm text-right">
+                                        <span class="px-2 py-1 text-xs font-semibold rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">96%</span>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                                    <td class="py-3 px-4 text-sm font-medium text-slate-900 dark:text-white" data-i18n="dept-operations">Phòng Vận Hành</td>
+                                    <td class="py-3 px-4 text-sm text-right text-slate-600 dark:text-slate-400">41</td>
+                                    <td class="py-3 px-4 text-sm text-right text-slate-600 dark:text-slate-400" data-i18n="value-902m">902 triệu</td>
+                                    <td class="py-3 px-4 text-sm text-right text-slate-600 dark:text-slate-400" data-i18n="value-22m">22 triệu</td>
+                                    <td class="py-3 px-4 text-sm text-right text-slate-600 dark:text-slate-400">32</td>
+                                    <td class="py-3 px-4 text-sm text-right">
+                                        <span class="px-2 py-1 text-xs font-semibold rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">91%</span>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                                    <td class="py-3 px-4 text-sm font-medium text-slate-900 dark:text-white" data-i18n="dept-customer">Phòng Chăm Sóc KH</td>
+                                    <td class="py-3 px-4 text-sm text-right text-slate-600 dark:text-slate-400">32</td>
+                                    <td class="py-3 px-4 text-sm text-right text-slate-600 dark:text-slate-400" data-i18n="value-704m">704 triệu</td>
+                                    <td class="py-3 px-4 text-sm text-right text-slate-600 dark:text-slate-400" data-i18n="value-22m">22 triệu</td>
+                                    <td class="py-3 px-4 text-sm text-right text-slate-600 dark:text-slate-400">26</td>
+                                    <td class="py-3 px-4 text-sm text-right">
+                                        <span class="px-2 py-1 text-xs font-semibold rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">90%</span>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                                    <td class="py-3 px-4 text-sm font-medium text-slate-900 dark:text-white" data-i18n="dept-rd">Phòng Nghiên Cứu</td>
+                                    <td class="py-3 px-4 text-sm text-right text-slate-600 dark:text-slate-400">18</td>
+                                    <td class="py-3 px-4 text-sm text-right text-slate-600 dark:text-slate-400" data-i18n="value-612m">612 triệu</td>
+                                    <td class="py-3 px-4 text-sm text-right text-slate-600 dark:text-slate-400" data-i18n="value-34m">34 triệu</td>
+                                    <td class="py-3 px-4 text-sm text-right text-slate-600 dark:text-slate-400">14</td>
+                                    <td class="py-3 px-4 text-sm text-right">
+                                        <span class="px-2 py-1 text-xs font-semibold rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">97%</span>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                                    <td class="py-3 px-4 text-sm font-medium text-slate-900 dark:text-white" data-i18n="dept-legal">Phòng Pháp Chế</td>
+                                    <td class="py-3 px-4 text-sm text-right text-slate-600 dark:text-slate-400">12</td>
+                                    <td class="py-3 px-4 text-sm text-right text-slate-600 dark:text-slate-400" data-i18n="value-360m">360 triệu</td>
+                                    <td class="py-3 px-4 text-sm text-right text-slate-600 dark:text-slate-400" data-i18n="value-30m">30 triệu</td>
+                                    <td class="py-3 px-4 text-sm text-right text-slate-600 dark:text-slate-400">10</td>
+                                    <td class="py-3 px-4 text-sm text-right">
+                                        <span class="px-2 py-1 text-xs font-semibold rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">98%</span>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                                    <td class="py-3 px-4 text-sm font-medium text-slate-900 dark:text-white" data-i18n="dept-admin">Phòng Hành Chính</td>
+                                    <td class="py-3 px-4 text-sm text-right text-slate-600 dark:text-slate-400">23</td>
+                                    <td class="py-3 px-4 text-sm text-right text-slate-600 dark:text-slate-400" data-i18n="value-460m">460 triệu</td>
+                                    <td class="py-3 px-4 text-sm text-right text-slate-600 dark:text-slate-400" data-i18n="value-20m">20 triệu</td>
+                                    <td class="py-3 px-4 text-sm text-right text-slate-600 dark:text-slate-400">20</td>
+                                    <td class="py-3 px-4 text-sm text-right">
+                                        <span class="px-2 py-1 text-xs font-semibold rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">93%</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                            <tfoot class="border-t-2 border-slate-300 dark:border-slate-600">
+                                <tr class="bg-slate-50 dark:bg-slate-700/50">
+                                    <td class="py-3 px-4 text-sm font-bold text-slate-900 dark:text-white" data-i18n="table-total">Tổng Cộng</td>
+                                    <td class="py-3 px-4 text-sm text-right font-bold text-slate-900 dark:text-white">342</td>
+                                    <td class="py-3 px-4 text-sm text-right font-bold text-slate-900 dark:text-white" data-i18n="value-84b">8.4 tỷ</td>
+                                    <td class="py-3 px-4 text-sm text-right font-bold text-slate-900 dark:text-white" data-i18n="value-246m">24.6 triệu</td>
+                                    <td class="py-3 px-4 text-sm text-right font-bold text-slate-900 dark:text-white">248</td>
+                                    <td class="py-3 px-4 text-sm text-right">
+                                        <span class="px-2 py-1 text-xs font-semibold rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">93%</span>
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Language translations
+        const translations = {
+            vi: {
+                'app-name': 'HR Nexus',
+                'app-subtitle': 'Phiên Bản Doanh Nghiệp',
+                'menu-main': 'Menu Chính',
+                'menu-dashboard': 'Bảng Điều Khiển',
+                'menu-employees': 'Nhân Viên',
+                'menu-attendance': 'Chấm Công',
+                'menu-payroll': 'Bảng Lương',
+                'menu-organization': 'Tổ Chức',
+                'menu-leave': 'Đơn Xin Nghỉ',
+                'menu-reports': 'Báo Cáo & Phân Tích',
+                'menu-settings': 'Cài Đặt',
+                'menu-system': 'Cài Đặt Hệ Thống',
+                'page-title': 'Báo Cáo & Phân Tích',
+                'page-subtitle': 'Tổng quan dữ liệu và xu hướng kinh doanh',
+                'user-name': 'Nguyễn Thị Mai',
+                'user-role': 'Giám Đốc Nhân Sự',
+                'btn-refresh': 'Làm Mới',
+                'filter-label': 'Bộ Lọc:',
+                'filter-all-dept': 'Tất cả phòng ban',
+                'dept-tech': 'Phòng Kỹ Thuật',
+                'dept-sales': 'Phòng Kinh Doanh',
+                'dept-marketing': 'Phòng Marketing',
+                'dept-hr': 'Phòng Nhân Sự',
+                'dept-finance': 'Phòng Tài Chính',
+                'dept-operations': 'Phòng Vận Hành',
+                'dept-customer': 'Phòng Chăm Sóc KH',
+                'dept-rd': 'Phòng Nghiên Cứu',
+                'dept-legal': 'Phòng Pháp Chế',
+                'dept-admin': 'Phòng Hành Chính',
+                'period-month': 'Tháng này',
+                'period-quarter': 'Quý này',
+                'period-year': 'Năm này',
+                'period-custom': 'Tùy chỉnh',
+                'date-to': 'đến',
+                'btn-apply': 'Áp Dụng',
+                'btn-export-csv': 'Xuất CSV',
+                'btn-export-pdf': 'Xuất PDF',
+                'kpi-total-employees': 'Tổng Nhân Viên',
+                'kpi-growth': '+8.2% so với tháng trước',
+                'kpi-total-salary': 'Tổng Lương Tháng',
+                'kpi-salary-value': '8.4 tỷ',
+                'kpi-avg-salary': 'Trung bình: 24.6 triệu/người',
+                'kpi-total-leave': 'Tổng Ngày Nghỉ',
+                'kpi-leave-change': '-3.5% so với tháng trước',
+                'kpi-dividend': 'Cổ Tức Quý',
+                'kpi-dividend-value': '2.1 tỷ',
+                'kpi-dividend-change': '+12.4% so với quý trước',
+                'chart-dept-title': 'Phân Bổ Nhân Viên Theo Phòng Ban',
+                'chart-dept-subtitle': 'Tổng quan cơ cấu tổ chức',
+                'chart-status-title': 'Trạng Thái Nhân Viên',
+                'chart-status-subtitle': 'Phân loại theo tình trạng làm việc',
+                'chart-salary-title': 'Xu Hướng Lương Theo Tháng',
+                'chart-salary-subtitle': 'Tổng chi phí lương 12 tháng gần nhất',
+                'chart-leave-title': 'Phân Loại Nghỉ Phép',
+                'chart-leave-subtitle': 'Theo loại hình nghỉ phép',
+                'chart-attendance-title': 'Tỷ Lệ Chuyên Cần Theo Tháng',
+                'chart-attendance-subtitle': '6 tháng gần nhất',
+                'chart-dividend-title': 'Cổ Tức Theo Quý',
+                'chart-dividend-subtitle': '4 quý gần nhất',
+                'chart-performance-title': 'So Sánh Hiệu Suất Phòng Ban',
+                'chart-performance-subtitle': 'Dựa trên KPI tháng này',
+                'table-title': 'Báo Cáo Chi Tiết Theo Phòng Ban',
+                'table-subtitle': 'Tổng hợp số liệu tháng này',
+                'btn-download': 'Tải Báo Cáo',
+                'table-dept': 'Phòng Ban',
+                'table-employees': 'Nhân Viên',
+                'table-total-salary': 'Tổng Lương',
+                'table-avg-salary': 'TB Lương',
+                'table-leave-days': 'Ngày Nghỉ',
+                'table-performance': 'Hiệu Suất',
+                'table-total': 'Tổng Cộng',
+                'value-234b': '2.34 tỷ',
+                'value-30m': '30 triệu',
+                'value-156b': '1.56 tỷ',
+                'value-28m': '28 triệu',
+                'value-816m': '816 triệu',
+                'value-24m': '24 triệu',
+                'value-528m': '528 triệu',
+                'value-22m': '22 triệu',
+                'value-672m': '672 triệu',
+                'value-902m': '902 triệu',
+                'value-704m': '704 triệu',
+                'value-612m': '612 triệu',
+                'value-34m': '34 triệu',
+                'value-360m': '360 triệu',
+                'value-460m': '460 triệu',
+                'value-20m': '20 triệu',
+                'value-84b': '8.4 tỷ',
+                'value-246m': '24.6 triệu'
+            },
+            en: {
+                'app-name': 'HR Nexus',
+                'app-subtitle': 'Enterprise Edition',
+                'menu-main': 'Main Menu',
+                'menu-dashboard': 'Dashboard',
+                'menu-employees': 'Employees',
+                'menu-attendance': 'Attendance',
+                'menu-payroll': 'Payroll',
+                'menu-organization': 'Organization',
+                'menu-leave': 'Leave Requests',
+                'menu-reports': 'Reports & Analytics',
+                'menu-settings': 'Settings',
+                'menu-system': 'System Settings',
+                'page-title': 'Reports & Analytics',
+                'page-subtitle': 'Data overview and business trends',
+                'user-name': 'Mai Nguyen',
+                'user-role': 'HR Director',
+                'btn-refresh': 'Refresh',
+                'filter-label': 'Filters:',
+                'filter-all-dept': 'All departments',
+                'dept-tech': 'Engineering',
+                'dept-sales': 'Sales',
+                'dept-marketing': 'Marketing',
+                'dept-hr': 'Human Resources',
+                'dept-finance': 'Finance',
+                'dept-operations': 'Operations',
+                'dept-customer': 'Customer Service',
+                'dept-rd': 'Research & Development',
+                'dept-legal': 'Legal',
+                'dept-admin': 'Administration',
+                'period-month': 'This month',
+                'period-quarter': 'This quarter',
+                'period-year': 'This year',
+                'period-custom': 'Custom',
+                'date-to': 'to',
+                'btn-apply': 'Apply',
+                'btn-export-csv': 'Export CSV',
+                'btn-export-pdf': 'Export PDF',
+                'kpi-total-employees': 'Total Employees',
+                'kpi-growth': '+8.2% vs last month',
+                'kpi-total-salary': 'Monthly Payroll',
+                'kpi-salary-value': '$2.8M',
+                'kpi-avg-salary': 'Average: $8.2K/person',
+                'kpi-total-leave': 'Total Leave Days',
+                'kpi-leave-change': '-3.5% vs last month',
+                'kpi-dividend': 'Quarterly Dividend',
+                'kpi-dividend-value': '$700K',
+                'kpi-dividend-change': '+12.4% vs last quarter',
+                'chart-dept-title': 'Employee Distribution by Department',
+                'chart-dept-subtitle': 'Organizational structure overview',
+                'chart-status-title': 'Employee Status',
+                'chart-status-subtitle': 'Classification by work status',
+                'chart-salary-title': 'Monthly Salary Trends',
+                'chart-salary-subtitle': 'Total payroll costs for last 12 months',
+                'chart-leave-title': 'Leave Type Distribution',
+                'chart-leave-subtitle': 'By leave category',
+                'chart-attendance-title': 'Monthly Attendance Rate',
+                'chart-attendance-subtitle': 'Last 6 months',
+                'chart-dividend-title': 'Quarterly Dividends',
+                'chart-dividend-subtitle': 'Last 4 quarters',
+                'chart-performance-title': 'Department Performance Comparison',
+                'chart-performance-subtitle': 'Based on this month\'s KPIs',
+                'table-title': 'Detailed Department Reports',
+                'table-subtitle': 'Monthly data summary',
+                'btn-download': 'Download Report',
+                'table-dept': 'Department',
+                'table-employees': 'Employees',
+                'table-total-salary': 'Total Salary',
+                'table-avg-salary': 'Avg Salary',
+                'table-leave-days': 'Leave Days',
+                'table-performance': 'Performance',
+                'table-total': 'Total',
+                'value-234b': '$780K',
+                'value-30m': '$10K',
+                'value-156b': '$520K',
+                'value-28m': '$9.3K',
+                'value-816m': '$272K',
+                'value-24m': '$8K',
+                'value-528m': '$176K',
+                'value-22m': '$7.3K',
+                'value-672m': '$224K',
+                'value-902m': '$301K',
+                'value-704m': '$235K',
+                'value-612m': '$204K',
+                'value-34m': '$11.3K',
+                'value-360m': '$120K',
+                'value-460m': '$153K',
+                'value-20m': '$6.7K',
+                'value-84b': '$2.8M',
+                'value-246m': '$8.2K'
+            }
+        };
+
+        let currentLanguage = 'vi';
+        let charts = {};
+
+        lucide.createIcons();
+        
+        function toggleDarkMode() {
+            document.documentElement.classList.toggle('dark');
+            lucide.createIcons();
+        }
+
+        function toggleLanguage() {
+            currentLanguage = currentLanguage === 'vi' ? 'en' : 'vi';
+            document.getElementById('currentLang').textContent = currentLanguage.toUpperCase();
+            updateLanguage();
+            updateCharts();
+        }
+
+        function updateLanguage() {
+            const elements = document.querySelectorAll('[data-i18n]');
+            elements.forEach(element => {
+                const key = element.getAttribute('data-i18n');
+                if (translations[currentLanguage][key]) {
+                    if (element.tagName === 'INPUT' || element.tagName === 'SELECT') {
+                        element.placeholder = translations[currentLanguage][key];
+                    } else {
+                        element.textContent = translations[currentLanguage][key];
+                    }
+                }
+            });
+
+            // Update select options
+            const selectOptions = document.querySelectorAll('option[data-i18n]');
+            selectOptions.forEach(option => {
+                const key = option.getAttribute('data-i18n');
+                if (translations[currentLanguage][key]) {
+                    option.textContent = translations[currentLanguage][key];
+                }
+            });
+
+            lucide.createIcons();
+        }
+
+        function applyFilters() {
+            const department = document.getElementById('departmentFilter').value;
+            const period = document.getElementById('periodFilter').value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            
+            console.log('Applying filters:', { department, period, startDate, endDate });
+            const message = currentLanguage === 'vi' 
+                ? 'Bộ lọc đã được áp dụng! Dữ liệu sẽ được cập nhật.' 
+                : 'Filters applied! Data will be updated.';
+            alert(message);
+        }
+
+        function refreshData() {
+            console.log('Refreshing data...');
+            const message = currentLanguage === 'vi' 
+                ? 'Đang làm mới dữ liệu...' 
+                : 'Refreshing data...';
+            alert(message);
+        }
+
+        function exportCSV() {
+            console.log('Exporting to CSV...');
+            const message = currentLanguage === 'vi' 
+                ? 'Đang xuất file CSV...' 
+                : 'Exporting CSV file...';
+            alert(message);
+        }
+
+        function exportPDF() {
+            console.log('Exporting to PDF...');
+            const message = currentLanguage === 'vi' 
+                ? 'Đang xuất file PDF...' 
+                : 'Exporting PDF file...';
+            alert(message);
+        }
+
+        // Chart.js Configuration
+        const chartColors = {
+            blue: '#3b82f6',
+            emerald: '#10b981',
+            amber: '#f59e0b',
+            red: '#ef4444',
+            purple: '#8b5cf6',
+            cyan: '#06b6d4',
+            indigo: '#6366f1',
+            pink: '#ec4899',
+            slate: '#64748b',
+            orange: '#f97316'
+        };
+
+        function getChartLabels() {
+            if (currentLanguage === 'vi') {
+                return {
+                    departments: ['Kỹ Thuật', 'Kinh Doanh', 'Marketing', 'Nhân Sự', 'Tài Chính', 'Vận Hành', 'Chăm Sóc KH', 'Nghiên Cứu', 'Pháp Chế', 'Hành Chính'],
+                    status: ['Đang Làm Việc', 'Nghỉ Phép', 'Công Tác', 'Tạm Nghỉ'],
+                    months: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'],
+                    leave: ['Phép Năm', 'Ốm Đau', 'Thai Sản', 'Không Lương', 'Khác'],
+                    attendance: ['T7', 'T8', 'T9', 'T10', 'T11', 'T12'],
+                    quarters: ['Q1 2024', 'Q2 2024', 'Q3 2024', 'Q4 2024'],
+                    performance: ['Kỹ Thuật', 'Kinh Doanh', 'Marketing', 'Nhân Sự', 'Tài Chính', 'Vận Hành']
+                };
+            } else {
+                return {
+                    departments: ['Engineering', 'Sales', 'Marketing', 'HR', 'Finance', 'Operations', 'Customer Service', 'R&D', 'Legal', 'Admin'],
+                    status: ['Active', 'On Leave', 'Business Trip', 'Suspended'],
+                    months: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                    leave: ['Annual Leave', 'Sick Leave', 'Maternity', 'Unpaid', 'Other'],
+                    attendance: ['Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                    quarters: ['Q1 2024', 'Q2 2024', 'Q3 2024', 'Q4 2024'],
+                    performance: ['Engineering', 'Sales', 'Marketing', 'HR', 'Finance', 'Operations']
+                };
+            }
+        }
+
+        function updateCharts() {
+            const labels = getChartLabels();
+            
+            // Update Department Chart
+            charts.department.data.labels = labels.departments;
+            charts.department.update();
+
+            // Update Status Chart
+            charts.status.data.labels = labels.status;
+            charts.status.update();
+
+            // Update Salary Trend Chart
+            charts.salaryTrend.data.labels = labels.months;
+            charts.salaryTrend.data.datasets[0].label = currentLanguage === 'vi' ? 'Tổng Lương (tỷ VND)' : 'Total Salary ($M)';
+            charts.salaryTrend.update();
+
+            // Update Leave Chart
+            charts.leave.data.labels = labels.leave;
+            charts.leave.data.datasets[0].label = currentLanguage === 'vi' ? 'Số Ngày' : 'Days';
+            charts.leave.update();
+
+            // Update Attendance Chart
+            charts.attendance.data.labels = labels.attendance;
+            charts.attendance.data.datasets[0].label = currentLanguage === 'vi' ? 'Tỷ Lệ Chuyên Cần (%)' : 'Attendance Rate (%)';
+            charts.attendance.update();
+
+            // Update Dividend Chart
+            charts.dividend.data.labels = labels.quarters;
+            charts.dividend.data.datasets[0].label = currentLanguage === 'vi' ? 'Cổ Tức (tỷ VND)' : 'Dividend ($M)';
+            charts.dividend.update();
+
+            // Update Performance Chart
+            charts.performance.data.labels = labels.performance;
+            charts.performance.data.datasets[0].label = currentLanguage === 'vi' ? 'Hiệu Suất (%)' : 'Performance (%)';
+            charts.performance.update();
+        }
+
+        // Initialize Charts
+        function initCharts() {
+            const labels = getChartLabels();
+
+            // Department Distribution Chart
+            const departmentCtx = document.getElementById('departmentChart').getContext('2d');
+            charts.department = new Chart(departmentCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels.departments,
+                    datasets: [{
+                        data: [78, 52, 34, 24, 28, 41, 32, 18, 12, 23],
+                        backgroundColor: [
+                            chartColors.blue,
+                            chartColors.emerald,
+                            chartColors.amber,
+                            chartColors.purple,
+                            chartColors.cyan,
+                            chartColors.indigo,
+                            chartColors.pink,
+                            chartColors.orange,
+                            chartColors.slate,
+                            chartColors.red
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 15,
+                                font: { size: 11 }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Status Chart
+            const statusCtx = document.getElementById('statusChart').getContext('2d');
+            charts.status = new Chart(statusCtx, {
+                type: 'pie',
+                data: {
+                    labels: labels.status,
+                    datasets: [{
+                        data: [312, 18, 8, 4],
+                        backgroundColor: [
+                            chartColors.emerald,
+                            chartColors.amber,
+                            chartColors.blue,
+                            chartColors.red
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 15,
+                                font: { size: 12 }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Salary Trend Chart
+            const salaryCtx = document.getElementById('salaryTrendChart').getContext('2d');
+            charts.salaryTrend = new Chart(salaryCtx, {
+                type: 'line',
+                data: {
+                    labels: labels.months,
+                    datasets: [{
+                        label: currentLanguage === 'vi' ? 'Tổng Lương (tỷ VND)' : 'Total Salary ($M)',
+                        data: [7.2, 7.4, 7.6, 7.8, 8.0, 8.1, 8.2, 8.3, 8.1, 8.2, 8.3, 8.4],
+                        borderColor: chartColors.emerald,
+                        backgroundColor: chartColors.emerald + '20',
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            ticks: {
+                                callback: function(value) {
+                                    return currentLanguage === 'vi' ? value + ' tỷ' : '$' + (value * 0.33).toFixed(1) + 'M';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Leave Chart
+            const leaveCtx = document.getElementById('leaveChart').getContext('2d');
+            charts.leave = new Chart(leaveCtx, {
+                type: 'bar',
+                data: {
+                    labels: labels.leave,
+                    datasets: [{
+                        label: currentLanguage === 'vi' ? 'Số Ngày' : 'Days',
+                        data: [142, 58, 24, 16, 8],
+                        backgroundColor: [
+                            chartColors.blue,
+                            chartColors.amber,
+                            chartColors.purple,
+                            chartColors.red,
+                            chartColors.cyan
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // Attendance Chart
+            const attendanceCtx = document.getElementById('attendanceChart').getContext('2d');
+            charts.attendance = new Chart(attendanceCtx, {
+                type: 'line',
+                data: {
+                    labels: labels.attendance,
+                    datasets: [{
+                        label: currentLanguage === 'vi' ? 'Tỷ Lệ Chuyên Cần (%)' : 'Attendance Rate (%)',
+                        data: [94.2, 93.8, 95.1, 94.5, 95.3, 94.8],
+                        borderColor: chartColors.cyan,
+                        backgroundColor: chartColors.cyan + '20',
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: 90,
+                            max: 100,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Dividend Chart
+            const dividendCtx = document.getElementById('dividendChart').getContext('2d');
+            charts.dividend = new Chart(dividendCtx, {
+                type: 'bar',
+                data: {
+                    labels: labels.quarters,
+                    datasets: [{
+                        label: currentLanguage === 'vi' ? 'Cổ Tức (tỷ VND)' : 'Dividend ($M)',
+                        data: [1.8, 1.9, 2.0, 2.1],
+                        backgroundColor: chartColors.purple
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return currentLanguage === 'vi' ? value + ' tỷ' : '$' + (value * 0.33).toFixed(1) + 'M';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Performance Chart
+            const performanceCtx = document.getElementById('performanceChart').getContext('2d');
+            charts.performance = new Chart(performanceCtx, {
+                type: 'radar',
+                data: {
+                    labels: labels.performance,
+                    datasets: [{
+                        label: currentLanguage === 'vi' ? 'Hiệu Suất (%)' : 'Performance (%)',
+                        data: [95, 92, 88, 94, 96, 91],
+                        borderColor: chartColors.indigo,
+                        backgroundColor: chartColors.indigo + '40',
+                        pointBackgroundColor: chartColors.indigo,
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: chartColors.indigo
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                stepSize: 20
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            initCharts();
+        });
+    </script>
+</body>
+</html>

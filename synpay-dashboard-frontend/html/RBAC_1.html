@@ -1,0 +1,1394 @@
+<!DOCTYPE html>
+<html lang="vi" style="height: auto; min-height: 100%;">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security & User Management - HR Nexus RBAC Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link id="heading-font-link" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link id="body-font-link" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        heading: ['var(--font-heading-name)', 'sans-serif'],
+                        body: ['var(--font-body-name)', 'sans-serif'],
+                    },
+                    spacing: {
+                        base: 'var(--space-base)',
+                    },
+                    borderRadius: {
+                        small: 'var(--radius-small)',
+                        large: 'var(--radius-large)',
+                    },
+                    boxShadow: {
+                        custom: 'var(--shadow-custom)',
+                        'custom-hover': 'var(--shadow-custom-hover)',
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        :root {
+            --font-heading-name: 'Inter';
+            --font-body-name: 'Inter';
+            --font-heading: 'Inter', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --letter-spacing-heading: -0.02em;
+            --letter-spacing-body: 0em;
+            --space-base: 1rem;
+            --radius-small: 0.5rem;
+            --radius-large: 0.75rem;
+            --border-width: 1px;
+            --shadow-color: 0 0 0;
+            --shadow-offset-x: 0px;
+            --shadow-offset-y: 1px;
+            --shadow-blur: 3px;
+            --shadow-spread: 0px;
+            --shadow-opacity: 0.1;
+            --shadow-custom: 0px 1px 3px 0px rgba(0, 0, 0, 0.1);
+            --shadow-custom-hover: 0px 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #475569;
+        }
+        .dark ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .slide-in {
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        .dropdown-menu {
+            animation: slideDown 0.2s ease-out;
+        }
+        
+        .permission-matrix-cell {
+            transition: all 0.2s ease;
+        }
+        
+        .permission-matrix-cell:hover {
+            background-color: rgba(59, 130, 246, 0.05);
+        }
+        
+        .audit-timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 19px;
+            top: 40px;
+            bottom: -20px;
+            width: 2px;
+            background: linear-gradient(to bottom, #e2e8f0, transparent);
+        }
+        
+        .audit-timeline-item:last-child::before {
+            display: none;
+        }
+        
+        .dark .audit-timeline-item::before {
+            background: linear-gradient(to bottom, #475569, transparent);
+        }
+    </style>
+</head>
+<body style="height: auto; min-height: 100%;" class="font-body bg-slate-50 dark:bg-slate-900 transition-colors duration-300">
+
+    <!-- Main Application -->
+    <div id="mainApp" class="flex w-full min-h-screen">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex-col hidden lg:flex shrink-0 transition-colors duration-300">
+            <div class="p-6 border-b border-slate-100 dark:border-slate-700">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 dark:from-blue-500 dark:to-blue-600 rounded-large flex items-center justify-center text-white font-bold text-xl shadow-custom">H</div>
+                    <div>
+                        <span class="font-heading font-bold text-xl text-slate-800 dark:text-white block">HR Nexus</span>
+                        <span class="text-xs text-slate-500 dark:text-slate-400" data-lang-vi="Phiên Bản Doanh Nghiệp" data-lang-en="Enterprise Edition">Phiên Bản Doanh Nghiệp</span>
+                    </div>
+                </div>
+            </div>
+
+            <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
+                <div class="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-4 px-2" data-lang-vi="Menu Chính" data-lang-en="Main Menu">Menu Chính</div>
+                
+                <a href="#" class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white rounded-large font-medium transition-colors">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                    <span data-lang-vi="Bảng Điều Khiển" data-lang-en="Dashboard">Bảng Điều Khiển</span>
+                </a>
+                <a href="#" class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white rounded-large font-medium transition-colors">
+                    <i data-lucide="users" class="w-5 h-5"></i>
+                    <span data-lang-vi="Nhân Viên" data-lang-en="Employees">Nhân Viên</span>
+                    <span class="ml-auto px-2 py-0.5 text-xs font-semibold rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400">342</span>
+                </a>
+                <a href="#" class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white rounded-large font-medium transition-colors">
+                    <i data-lucide="calendar-check" class="w-5 h-5"></i>
+                    <span data-lang-vi="Chấm Công" data-lang-en="Attendance">Chấm Công</span>
+                </a>
+                <a href="#" class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white rounded-large font-medium transition-colors">
+                    <i data-lucide="banknote" class="w-5 h-5"></i>
+                    <span data-lang-vi="Bảng Lương" data-lang-en="Payroll">Bảng Lương</span>
+                </a>
+                <a href="#" class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white rounded-large font-medium transition-colors">
+                    <i data-lucide="bell" class="w-5 h-5"></i>
+                    <span data-lang-vi="Thông Báo & Cảnh Báo" data-lang-en="Notifications & Alerts">Thông Báo & Cảnh Báo</span>
+                    <span class="ml-auto px-2 py-0.5 text-xs font-semibold rounded-full bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400">24</span>
+                </a>
+                <a href="#" class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white rounded-large font-medium transition-colors">
+                    <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
+                    <span data-lang-vi="Báo Cáo & Phân Tích" data-lang-en="Reports & Analytics">Báo Cáo & Phân Tích</span>
+                </a>
+                
+                <div class="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-4 px-2 pt-6" data-lang-vi="Quản Lý Bảo Mật" data-lang-en="Security Management">Quản Lý Bảo Mật</div>
+                
+                <a href="#" onclick="showView('users')" id="nav-users" class="nav-item flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white rounded-large font-medium transition-colors">
+                    <i data-lucide="user-cog" class="w-5 h-5"></i>
+                    <span data-lang-vi="Quản Lý Người Dùng" data-lang-en="User Management">Quản Lý Người Dùng</span>
+                </a>
+                <a href="#" onclick="showView('roles')" id="nav-roles" class="nav-item flex items-center gap-3 px-3 py-2.5 bg-gradient-to-r from-blue-50 to-blue-100/50 dark:from-blue-900/30 dark:to-blue-900/20 text-blue-700 dark:text-blue-400 rounded-large font-semibold transition-colors shadow-custom">
+                    <i data-lucide="shield" class="w-5 h-5"></i>
+                    <span data-lang-vi="Quản Lý Vai Trò" data-lang-en="Role Management">Quản Lý Vai Trò</span>
+                </a>
+                <a href="#" onclick="showView('permissions')" id="nav-permissions" class="nav-item flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white rounded-large font-medium transition-colors">
+                    <i data-lucide="key" class="w-5 h-5"></i>
+                    <span data-lang-vi="Ma Trận Quyền" data-lang-en="Permission Matrix">Ma Trận Quyền</span>
+                </a>
+                <a href="#" onclick="showView('audit')" id="nav-audit" class="nav-item flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white rounded-large font-medium transition-colors">
+                    <i data-lucide="file-text" class="w-5 h-5"></i>
+                    <span data-lang-vi="Nhật Ký Kiểm Toán" data-lang-en="Audit Log">Nhật Ký Kiểm Toán</span>
+                </a>
+                
+                <div class="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-4 px-2 pt-6" data-lang-vi="Cài Đặt" data-lang-en="Settings">Cài Đặt</div>
+                
+                <a href="#" class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white rounded-large font-medium transition-colors">
+                    <i data-lucide="settings" class="w-5 h-5"></i>
+                    <span data-lang-vi="Cài Đặt Hệ Thống" data-lang-en="System Settings">Cài Đặt Hệ Thống</span>
+                </a>
+            </nav>
+            
+            <div class="p-4 border-t border-slate-100 dark:border-slate-700">
+                <div class="flex items-center gap-3 px-3 py-3 bg-slate-50 dark:bg-slate-900/50 rounded-large">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-600 flex items-center justify-center text-xs font-bold text-slate-600 dark:text-slate-300 shadow-inner">v2.1</div>
+                    <div class="text-xs text-slate-500 dark:text-slate-400">
+                        <p class="font-semibold text-slate-700 dark:text-slate-300">HR Nexus Pro</p>
+                        <p>© 2024 TechCorp Inc.</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col min-w-0">
+            <!-- Header -->
+            <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-20 transition-colors duration-300">
+                <div class="px-4 md:px-8 py-4 flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <button class="text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 lg:hidden">
+                            <i data-lucide="menu" class="w-6 h-6"></i>
+                        </button>
+                        <div>
+                            <h1 class="font-heading text-xl font-bold text-slate-900 dark:text-white" id="pageTitle" data-lang-vi="Quản Lý Vai Trò" data-lang-en="Role Management">Quản Lý Vai Trò</h1>
+                            <p class="text-sm text-slate-500 dark:text-slate-400 hidden sm:block" id="pageSubtitle" data-lang-vi="Tạo và quản lý vai trò với quyền tùy chỉnh" data-lang-en="Create and manage roles with custom permissions">Tạo và quản lý vai trò với quyền tùy chỉnh</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <!-- Language Toggle -->
+                        <div class="relative">
+                            <button onclick="toggleLanguageDropdown()" class="p-2 text-slate-400 dark:text-slate-300 hover:text-slate-600 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-700 rounded-large transition-colors flex items-center gap-2">
+                                <i data-lucide="languages" class="w-5 h-5"></i>
+                                <span class="text-sm font-medium hidden md:inline" id="currentLang">VI</span>
+                            </button>
+                            
+                            <!-- Language Dropdown -->
+                            <div id="languageDropdown" class="hidden dropdown-menu absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-large border border-slate-200 dark:border-slate-700 shadow-custom-hover overflow-hidden z-50">
+                                <button onclick="switchLanguage('vi')" class="w-full px-4 py-3 text-left hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors flex items-center gap-3">
+                                    <span class="text-2xl">🇻🇳</span>
+                                    <div>
+                                        <p class="text-sm font-semibold text-slate-900 dark:text-white">Tiếng Việt</p>
+                                        <p class="text-xs text-slate-500 dark:text-slate-400">Vietnamese</p>
+                                    </div>
+                                </button>
+                                <button onclick="switchLanguage('en')" class="w-full px-4 py-3 text-left hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors flex items-center gap-3 border-t border-slate-200 dark:border-slate-700">
+                                    <span class="text-2xl">🇬🇧</span>
+                                    <div>
+                                        <p class="text-sm font-semibold text-slate-900 dark:text-white">English</p>
+                                        <p class="text-xs text-slate-500 dark:text-slate-400">English</p>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Dark Mode Toggle -->
+                        <button onclick="toggleDarkMode()" class="p-2 text-slate-400 dark:text-slate-300 hover:text-slate-600 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-700 rounded-large transition-colors">
+                            <i data-lucide="moon" class="w-5 h-5 dark:hidden"></i>
+                            <i data-lucide="sun" class="w-5 h-5 hidden dark:block"></i>
+                        </button>
+                        
+                        <!-- User Profile Dropdown -->
+                        <div class="relative ml-2">
+                            <button onclick="toggleUserDropdown()" class="flex items-center gap-3 p-1.5 rounded-large hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+                                <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="Profile" class="w-10 h-10 rounded-full border-2 border-slate-200 dark:border-slate-600 shadow-custom">
+                                <div class="hidden md:block text-left">
+                                    <p class="text-sm font-semibold text-slate-900 dark:text-white">Nguyễn Thị Mai</p>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400" data-lang-vi="Quản Trị Viên" data-lang-en="Administrator">Quản Trị Viên</p>
+                                </div>
+                                <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 hidden md:block"></i>
+                            </button>
+                            
+                            <!-- User Dropdown Menu -->
+                            <div id="userDropdown" class="hidden dropdown-menu absolute right-0 mt-2 w-64 bg-white dark:bg-slate-800 rounded-large border border-slate-200 dark:border-slate-700 shadow-custom-hover overflow-hidden z-50">
+                                <div class="p-4 border-b border-slate-200 dark:border-slate-700">
+                                    <div class="flex items-center gap-3">
+                                        <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="Profile" class="w-12 h-12 rounded-full border-2 border-slate-200 dark:border-slate-600 shadow-custom">
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-sm font-semibold text-slate-900 dark:text-white truncate">Nguyễn Thị Mai</p>
+                                            <p class="text-xs text-slate-500 dark:text-slate-400 truncate">admin@hrnexus.com</p>
+                                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1" data-lang-vi="Quản Trị Viên" data-lang-en="Administrator">Quản Trị Viên</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="py-2">
+                                    <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                                        <i data-lucide="user" class="w-4 h-4"></i>
+                                        <span class="text-sm font-medium" data-lang-vi="Hồ Sơ Cá Nhân" data-lang-en="My Profile">Hồ Sơ Cá Nhân</span>
+                                    </a>
+                                    <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                                        <i data-lucide="settings" class="w-4 h-4"></i>
+                                        <span class="text-sm font-medium" data-lang-vi="Cài Đặt Tài Khoản" data-lang-en="Account Settings">Cài Đặt Tài Khoản</span>
+                                    </a>
+                                    <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                                        <i data-lucide="help-circle" class="w-4 h-4"></i>
+                                        <span class="text-sm font-medium" data-lang-vi="Trợ Giúp & Hỗ Trợ" data-lang-en="Help & Support">Trợ Giúp & Hỗ Trợ</span>
+                                    </a>
+                                </div>
+                                <div class="border-t border-slate-200 dark:border-slate-700">
+                                    <button onclick="handleLogout()" class="w-full flex items-center gap-3 px-4 py-3 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+                                        <i data-lucide="log-out" class="w-4 h-4"></i>
+                                        <span class="text-sm font-medium" data-lang-vi="Đăng Xuất" data-lang-en="Logout">Đăng Xuất</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <div class="flex-1 p-4 md:p-8 overflow-y-auto">
+                <!-- User Management View -->
+                <div id="usersView" class="view-content hidden">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center gap-3">
+                            <input type="text" id="userSearch" placeholder="Tìm kiếm người dùng..." data-lang-vi-placeholder="Tìm kiếm người dùng..." data-lang-en-placeholder="Search users..." class="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-large text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors w-64">
+                            <select id="userRoleFilter" onchange="filterUsers()" class="px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-large text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors">
+                                <option value="all" data-lang-vi="Tất cả vai trò" data-lang-en="All roles">Tất cả vai trò</option>
+                                <option value="admin" data-lang-vi="Quản trị viên" data-lang-en="Administrator">Quản trị viên</option>
+                                <option value="hr_manager" data-lang-vi="Quản lý nhân sự" data-lang-en="HR Manager">Quản lý nhân sự</option>
+                                <option value="payroll_manager" data-lang-vi="Quản lý lương" data-lang-en="Payroll Manager">Quản lý lương</option>
+                                <option value="employee" data-lang-vi="Nhân viên" data-lang-en="Employee">Nhân viên</option>
+                            </select>
+                        </div>
+                        <button onclick="openUserModal()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white rounded-large font-medium transition-colors flex items-center gap-2">
+                            <i data-lucide="user-plus" class="w-4 h-4"></i>
+                            <span data-lang-vi="Thêm Người Dùng" data-lang-en="Add User">Thêm Người Dùng</span>
+                        </button>
+                    </div>
+
+                    <div class="bg-white dark:bg-slate-800 rounded-large border border-slate-200 dark:border-slate-700 shadow-custom overflow-hidden max-h-[800px]">
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead class="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider" data-lang-vi="Người Dùng" data-lang-en="User">Người Dùng</th>
+                                        <th class="px-6 py-3 text-left text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Email</th>
+                                        <th class="px-6 py-3 text-left text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider" data-lang-vi="Vai Trò" data-lang-en="Roles">Vai Trò</th>
+                                        <th class="px-6 py-3 text-left text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider" data-lang-vi="Trạng Thái" data-lang-en="Status">Trạng Thái</th>
+                                        <th class="px-6 py-3 text-left text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider" data-lang-vi="Đăng Nhập Cuối" data-lang-en="Last Login">Đăng Nhập Cuối</th>
+                                        <th class="px-6 py-3 text-right text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider" data-lang-vi="Hành Động" data-lang-en="Actions">Hành Động</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="userTableBody" class="divide-y divide-slate-200 dark:divide-slate-700">
+                                    <!-- Users will be rendered here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Role Management View -->
+                <div id="rolesView" class="view-content">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center gap-3">
+                            <input type="text" id="roleSearch" placeholder="Tìm kiếm vai trò..." data-lang-vi-placeholder="Tìm kiếm vai trò..." data-lang-en-placeholder="Search roles..." class="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-large text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors w-64">
+                        </div>
+                        <button onclick="openRoleModal()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white rounded-large font-medium transition-colors flex items-center gap-2">
+                            <i data-lucide="shield-plus" class="w-4 h-4"></i>
+                            <span data-lang-vi="Tạo Vai Trò" data-lang-en="Create Role">Tạo Vai Trò</span>
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-h-[800px] overflow-y-auto" id="roleCardsContainer">
+                        <!-- Role cards will be rendered here -->
+                    </div>
+                </div>
+
+                <!-- Permission Matrix View -->
+                <div id="permissionsView" class="view-content hidden">
+                    <div class="mb-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <h2 class="font-heading text-lg font-bold text-slate-900 dark:text-white" data-lang-vi="Ma Trận Quyền Theo Vai Trò" data-lang-en="Role Permission Matrix">Ma Trận Quyền Theo Vai Trò</h2>
+                                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1" data-lang-vi="Bật/tắt quyền cho từng vai trò trên tất cả các miền" data-lang-en="Toggle permissions for each role across all domains">Bật/tắt quyền cho từng vai trò trên tất cả các miền</p>
+                            </div>
+                            <button onclick="savePermissionChanges()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white rounded-large font-medium transition-colors flex items-center gap-2">
+                                <i data-lucide="save" class="w-4 h-4"></i>
+                                <span data-lang-vi="Lưu Thay Đổi" data-lang-en="Save Changes">Lưu Thay Đổi</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="bg-white dark:bg-slate-800 rounded-large border border-slate-200 dark:border-slate-700 shadow-custom overflow-hidden max-h-[800px]">
+                        <div class="overflow-x-auto">
+                            <table class="w-full" id="permissionMatrixTable">
+                                <thead class="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-10">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider w-64" data-lang-vi="Quyền" data-lang-en="Permission">Quyền</th>
+                                        <th class="px-6 py-3 text-center text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider" data-lang-vi="Quản Trị Viên" data-lang-en="Administrator">Quản Trị Viên</th>
+                                        <th class="px-6 py-3 text-center text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider" data-lang-vi="Quản Lý NS" data-lang-en="HR Manager">Quản Lý NS</th>
+                                        <th class="px-6 py-3 text-center text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider" data-lang-vi="Quản Lý Lương" data-lang-en="Payroll Manager">Quản Lý Lương</th>
+                                        <th class="px-6 py-3 text-center text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider" data-lang-vi="Nhân Viên" data-lang-en="Employee">Nhân Viên</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="permissionMatrixBody" class="divide-y divide-slate-200 dark:divide-slate-700">
+                                    <!-- Permission matrix will be rendered here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Audit Log View -->
+                <div id="auditView" class="view-content hidden">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center gap-3">
+                            <select id="auditEventFilter" onchange="filterAuditLog()" class="px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-large text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors">
+                                <option value="all" data-lang-vi="Tất cả sự kiện" data-lang-en="All events">Tất cả sự kiện</option>
+                                <option value="login" data-lang-vi="Đăng nhập" data-lang-en="Login">Đăng nhập</option>
+                                <option value="role_change" data-lang-vi="Thay đổi vai trò" data-lang-en="Role change">Thay đổi vai trò</option>
+                                <option value="permission_change" data-lang-vi="Thay đổi quyền" data-lang-en="Permission change">Thay đổi quyền</option>
+                                <option value="user_assignment" data-lang-vi="Phân quyền người dùng" data-lang-en="User assignment">Phân quyền người dùng</option>
+                            </select>
+                            <select id="auditTimeFilter" onchange="filterAuditLog()" class="px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-large text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors">
+                                <option value="all" data-lang-vi="Tất cả thời gian" data-lang-en="All time">Tất cả thời gian</option>
+                                <option value="today" data-lang-vi="Hôm nay" data-lang-en="Today">Hôm nay</option>
+                                <option value="week" data-lang-vi="Tuần này" data-lang-en="This week">Tuần này</option>
+                                <option value="month" data-lang-vi="Tháng này" data-lang-en="This month">Tháng này</option>
+                            </select>
+                        </div>
+                        <button onclick="exportAuditLog()" class="px-4 py-2 bg-slate-600 hover:bg-slate-700 dark:bg-slate-700 dark:hover:bg-slate-600 text-white rounded-large font-medium transition-colors flex items-center gap-2">
+                            <i data-lucide="download" class="w-4 h-4"></i>
+                            <span data-lang-vi="Xuất Dữ Liệu" data-lang-en="Export Data">Xuất Dữ Liệu</span>
+                        </button>
+                    </div>
+
+                    <div class="bg-white dark:bg-slate-800 rounded-large border border-slate-200 dark:border-slate-700 shadow-custom p-6 max-h-[800px] overflow-y-auto">
+                        <div class="space-y-6" id="auditTimelineContainer">
+                            <!-- Audit timeline will be rendered here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- User Modal -->
+    <div id="userModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-800 rounded-large border border-slate-200 dark:border-slate-700 shadow-custom-hover max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="p-6 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between sticky top-0 bg-white dark:bg-slate-800 z-10">
+                <h2 class="font-heading text-xl font-bold text-slate-900 dark:text-white" id="userModalTitle" data-lang-vi="Thêm Người Dùng" data-lang-en="Add User">Thêm Người Dùng</h2>
+                <button onclick="closeUserModal()" class="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-large transition-colors">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <form onsubmit="handleUserSubmit(event)" class="p-6 space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2" data-lang-vi="Họ" data-lang-en="First Name">Họ</label>
+                        <input type="text" id="userFirstName" required class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-large text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2" data-lang-vi="Tên" data-lang-en="Last Name">Tên</label>
+                        <input type="text" id="userLastName" required class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-large text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2" data-lang-vi="Địa Chỉ Email" data-lang-en="Email Address">Địa Chỉ Email</label>
+                    <input type="email" id="userEmail" required class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-large text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2" data-lang-vi="Phân Quyền Vai Trò (Nhiều vai trò)" data-lang-en="Assign Roles (Multiple)">Phân Quyền Vai Trò (Nhiều vai trò)</label>
+                    <div class="space-y-2 p-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-large">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" value="admin" class="user-role-checkbox w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500">
+                            <span class="text-sm text-slate-700 dark:text-slate-300" data-lang-vi="Quản trị viên" data-lang-en="Administrator">Quản trị viên</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" value="hr_manager" class="user-role-checkbox w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500">
+                            <span class="text-sm text-slate-700 dark:text-slate-300" data-lang-vi="Quản lý nhân sự" data-lang-en="HR Manager">Quản lý nhân sự</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" value="payroll_manager" class="user-role-checkbox w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500">
+                            <span class="text-sm text-slate-700 dark:text-slate-300" data-lang-vi="Quản lý lương" data-lang-en="Payroll Manager">Quản lý lương</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" value="employee" class="user-role-checkbox w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500">
+                            <span class="text-sm text-slate-700 dark:text-slate-300" data-lang-vi="Nhân viên" data-lang-en="Employee">Nhân viên</span>
+                        </label>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2" data-lang-vi="Trạng Thái" data-lang-en="Status">Trạng Thái</label>
+                    <select id="userStatus" class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-large text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors">
+                        <option value="active" data-lang-vi="Hoạt động" data-lang-en="Active">Hoạt động</option>
+                        <option value="inactive" data-lang-vi="Không hoạt động" data-lang-en="Inactive">Không hoạt động</option>
+                    </select>
+                </div>
+                <div class="flex items-center gap-3 pt-4">
+                    <button type="submit" class="flex-1 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white rounded-large font-medium transition-colors" data-lang-vi="Lưu Người Dùng" data-lang-en="Save User">
+                        Lưu Người Dùng
+                    </button>
+                    <button type="button" onclick="closeUserModal()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-large font-medium transition-colors" data-lang-vi="Hủy" data-lang-en="Cancel">
+                        Hủy
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Role Modal -->
+    <div id="roleModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-800 rounded-large border border-slate-200 dark:border-slate-700 shadow-custom-hover max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="p-6 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between sticky top-0 bg-white dark:bg-slate-800 z-10">
+                <h2 class="font-heading text-xl font-bold text-slate-900 dark:text-white" id="roleModalTitle" data-lang-vi="Tạo Vai Trò" data-lang-en="Create Role">Tạo Vai Trò</h2>
+                <button onclick="closeRoleModal()" class="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-large transition-colors">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <form onsubmit="handleRoleSubmit(event)" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2" data-lang-vi="Tên Vai Trò" data-lang-en="Role Name">Tên Vai Trò</label>
+                    <input type="text" id="roleName" required class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-large text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2" data-lang-vi="Mô Tả" data-lang-en="Description">Mô Tả</label>
+                    <textarea id="roleDescription" rows="3" required class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-large text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors"></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2" data-lang-vi="Trách Nhiệm" data-lang-en="Responsibilities">Trách Nhiệm</label>
+                    <textarea id="roleResponsibilities" rows="4" placeholder="Nhập trách nhiệm (mỗi dòng một mục)" data-lang-vi-placeholder="Nhập trách nhiệm (mỗi dòng một mục)" data-lang-en-placeholder="Enter responsibilities (one per line)" class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-large text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors"></textarea>
+                </div>
+                <div class="flex items-center gap-3 pt-4">
+                    <button type="submit" class="flex-1 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white rounded-large font-medium transition-colors" data-lang-vi="Lưu Vai Trò" data-lang-en="Save Role">
+                        Lưu Vai Trò
+                    </button>
+                    <button type="button" onclick="closeRoleModal()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-large font-medium transition-colors" data-lang-vi="Hủy" data-lang-en="Cancel">
+                        Hủy
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirmModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-800 rounded-large border border-slate-200 dark:border-slate-700 shadow-custom-hover max-w-md w-full">
+            <div class="p-6">
+                <div class="flex items-start gap-4 mb-4">
+                    <div class="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-large flex items-center justify-center flex-shrink-0">
+                        <i data-lucide="alert-triangle" class="w-6 h-6 text-amber-600 dark:text-amber-400"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="font-heading text-lg font-bold text-slate-900 dark:text-white mb-2" id="confirmTitle" data-lang-vi="Xác Nhận Hành Động" data-lang-en="Confirm Action">Xác Nhận Hành Động</h3>
+                        <p class="text-sm text-slate-600 dark:text-slate-400" id="confirmMessage" data-lang-vi="Bạn có chắc chắn muốn tiếp tục?" data-lang-en="Are you sure you want to continue?">Bạn có chắc chắn muốn tiếp tục?</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button onclick="confirmAction()" class="flex-1 px-4 py-2.5 bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 text-white rounded-large font-medium transition-colors" data-lang-vi="Xác Nhận" data-lang-en="Confirm">
+                        Xác Nhận
+                    </button>
+                    <button onclick="closeConfirmModal()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-large font-medium transition-colors" data-lang-vi="Hủy" data-lang-en="Cancel">
+                        Hủy
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== RBAC DATA MODELS =====
+        
+        const MOCK_PERMISSIONS = [
+            { id: 'user.read', name: { vi: 'Xem Người Dùng', en: 'View Users' }, domain: { vi: 'Quản Lý Người Dùng', en: 'User Management' }, description: { vi: 'Xem thông tin người dùng', en: 'View user information' }, dependencies: [] },
+            { id: 'user.write', name: { vi: 'Chỉnh Sửa Người Dùng', en: 'Edit Users' }, domain: { vi: 'Quản Lý Người Dùng', en: 'User Management' }, description: { vi: 'Tạo và chỉnh sửa người dùng', en: 'Create and edit users' }, dependencies: ['user.read'] },
+            { id: 'role.read', name: { vi: 'Xem Vai Trò', en: 'View Roles' }, domain: { vi: 'Quản Lý Vai Trò', en: 'Role Management' }, description: { vi: 'Xem thông tin vai trò', en: 'View role information' }, dependencies: [] },
+            { id: 'role.write', name: { vi: 'Chỉnh Sửa Vai Trò', en: 'Edit Roles' }, domain: { vi: 'Quản Lý Vai Trò', en: 'Role Management' }, description: { vi: 'Tạo và chỉnh sửa vai trò', en: 'Create and edit roles' }, dependencies: ['role.read'] },
+            { id: 'permission.write', name: { vi: 'Chỉnh Sửa Quyền', en: 'Edit Permissions' }, domain: { vi: 'Quản Lý Quyền', en: 'Permission Management' }, description: { vi: 'Chỉnh sửa phân quyền', en: 'Edit permissions' }, dependencies: ['role.read'] },
+            { id: 'employee.read', name: { vi: 'Xem Nhân Viên', en: 'View Employees' }, domain: { vi: 'Quản Lý Nhân Viên', en: 'Employee Management' }, description: { vi: 'Xem dữ liệu nhân viên', en: 'View employee data' }, dependencies: [] },
+            { id: 'employee.write', name: { vi: 'Chỉnh Sửa Nhân Viên', en: 'Edit Employees' }, domain: { vi: 'Quản Lý Nhân Viên', en: 'Employee Management' }, description: { vi: 'Tạo và chỉnh sửa nhân viên', en: 'Create and edit employees' }, dependencies: ['employee.read'] },
+            { id: 'payroll.read', name: { vi: 'Xem Bảng Lương', en: 'View Payroll' }, domain: { vi: 'Quản Lý Lương', en: 'Payroll Management' }, description: { vi: 'Xem dữ liệu lương', en: 'View payroll data' }, dependencies: [] },
+            { id: 'payroll.write', name: { vi: 'Chỉnh Sửa Bảng Lương', en: 'Edit Payroll' }, domain: { vi: 'Quản Lý Lương', en: 'Payroll Management' }, description: { vi: 'Chỉnh sửa dữ liệu lương', en: 'Edit payroll data' }, dependencies: ['payroll.read'] },
+            { id: 'attendance.read', name: { vi: 'Xem Chấm Công', en: 'View Attendance' }, domain: { vi: 'Quản Lý Chấm Công', en: 'Attendance Management' }, description: { vi: 'Xem bản ghi chấm công', en: 'View attendance records' }, dependencies: [] },
+            { id: 'report.read', name: { vi: 'Xem Báo Cáo', en: 'View Reports' }, domain: { vi: 'Báo Cáo', en: 'Reports' }, description: { vi: 'Xem báo cáo hệ thống', en: 'View system reports' }, dependencies: [] },
+            { id: 'alert.read', name: { vi: 'Xem Cảnh Báo', en: 'View Alerts' }, domain: { vi: 'Quản Lý Cảnh Báo', en: 'Alert Management' }, description: { vi: 'Xem cảnh báo hệ thống', en: 'View system alerts' }, dependencies: [] },
+            { id: 'audit.read', name: { vi: 'Xem Nhật Ký Kiểm Toán', en: 'View Audit Log' }, domain: { vi: 'Quản Lý Kiểm Toán', en: 'Audit Management' }, description: { vi: 'Xem nhật ký kiểm toán', en: 'View audit logs' }, dependencies: [] },
+            { id: 'system.config', name: { vi: 'Cấu Hình Hệ Thống', en: 'System Configuration' }, domain: { vi: 'Quản Lý Hệ Thống', en: 'System Management' }, description: { vi: 'Cấu hình cài đặt hệ thống', en: 'Configure system settings' }, dependencies: [] }
+        ];
+
+        const MOCK_ROLES = [
+            {
+                id: 'admin',
+                name: { vi: 'Quản Trị Viên', en: 'Administrator' },
+                description: { vi: 'Toàn quyền truy cập hệ thống với tất cả đặc quyền quản trị', en: 'Full system access with all administrative privileges' },
+                responsibilities: [
+                    { vi: 'Quản lý người dùng, vai trò và quyền', en: 'Manage users, roles, and permissions' },
+                    { vi: 'Xem tất cả báo cáo và nhật ký kiểm toán', en: 'View all reports and audit logs' },
+                    { vi: 'Cấu hình hệ thống', en: 'System configuration' },
+                    { vi: 'Quản lý chính sách bảo mật', en: 'Manage security policies' }
+                ],
+                permissionIds: ['user.read', 'user.write', 'role.read', 'role.write', 'permission.write', 'employee.read', 'employee.write', 'payroll.read', 'payroll.write', 'attendance.read', 'report.read', 'alert.read', 'audit.read', 'system.config'],
+                userCount: 3
+            },
+            {
+                id: 'hr_manager',
+                name: { vi: 'Quản Lý Nhân Sự', en: 'HR Manager' },
+                description: { vi: 'Quản lý nhân sự với quyền truy cập dữ liệu nhân viên', en: 'HR management with employee data access' },
+                responsibilities: [
+                    { vi: 'Quản lý nhân viên và phòng ban', en: 'Manage employees and departments' },
+                    { vi: 'Xem báo cáo nhân sự', en: 'View HR reports' },
+                    { vi: 'Xem bản ghi chấm công', en: 'View attendance records' },
+                    { vi: 'Tuyển dụng và sa thải nhân viên', en: 'Hire and terminate employees' }
+                ],
+                permissionIds: ['employee.read', 'employee.write', 'attendance.read', 'report.read', 'alert.read'],
+                userCount: 5
+            },
+            {
+                id: 'payroll_manager',
+                name: { vi: 'Quản Lý Lương', en: 'Payroll Manager' },
+                description: { vi: 'Quyền truy cập xử lý và báo cáo lương', en: 'Payroll processing and reporting access' },
+                responsibilities: [
+                    { vi: 'Xem và cập nhật dữ liệu lương', en: 'View and update payroll data' },
+                    { vi: 'Tạo báo cáo lương', en: 'Generate payroll reports' },
+                    { vi: 'Xử lý tính toán lương', en: 'Process payroll calculations' },
+                    { vi: 'Quản lý thuế và phúc lợi', en: 'Manage taxes and benefits' }
+                ],
+                permissionIds: ['payroll.read', 'payroll.write', 'report.read', 'employee.read'],
+                userCount: 2
+            },
+            {
+                id: 'employee',
+                name: { vi: 'Nhân Viên', en: 'Employee' },
+                description: { vi: 'Quyền truy cập tự phục vụ cơ bản cho nhân viên', en: 'Basic self-service access for employees' },
+                responsibilities: [
+                    { vi: 'Xem hồ sơ cá nhân', en: 'View own profile' },
+                    { vi: 'Xem thông tin lương của mình', en: 'View own payroll information' },
+                    { vi: 'Xem bản ghi chấm công của mình', en: 'View own attendance records' },
+                    { vi: 'Gửi yêu cầu nghỉ phép', en: 'Submit leave requests' }
+                ],
+                permissionIds: ['employee.read', 'payroll.read', 'attendance.read'],
+                userCount: 342
+            }
+        ];
+
+        const MOCK_USERS = [
+            { id: 'u1', firstName: 'Nguyễn', lastName: 'Thị Mai', email: 'admin@hrnexus.com', roleIds: ['admin'], status: 'active', lastLogin: '2024-12-15 09:30', createdAt: '2024-01-15' },
+            { id: 'u2', firstName: 'Trần', lastName: 'Văn Hùng', email: 'hr@hrnexus.com', roleIds: ['hr_manager'], status: 'active', lastLogin: '2024-12-15 08:45', createdAt: '2024-02-20' },
+            { id: 'u3', firstName: 'Lê', lastName: 'Thị Lan', email: 'payroll@hrnexus.com', roleIds: ['payroll_manager'], status: 'active', lastLogin: '2024-12-14 16:20', createdAt: '2024-03-10' },
+            { id: 'u4', firstName: 'Phạm', lastName: 'Văn Nam', email: 'employee@hrnexus.com', roleIds: ['employee'], status: 'active', lastLogin: '2024-12-15 07:15', createdAt: '2024-04-05' },
+            { id: 'u5', firstName: 'Hoàng', lastName: 'Thị Hoa', email: 'hoa.hoang@hrnexus.com', roleIds: ['hr_manager', 'payroll_manager'], status: 'active', lastLogin: '2024-12-13 14:30', createdAt: '2024-05-12' },
+            { id: 'u6', firstName: 'Vũ', lastName: 'Văn Đức', email: 'duc.vu@hrnexus.com', roleIds: ['employee'], status: 'inactive', lastLogin: '2024-11-28 10:00', createdAt: '2024-06-18' },
+            { id: 'u7', firstName: 'Đặng', lastName: 'Thị Linh', email: 'linh.dang@hrnexus.com', roleIds: ['hr_manager'], status: 'active', lastLogin: '2024-12-14 11:20', createdAt: '2024-07-22' },
+            { id: 'u8', firstName: 'Bùi', lastName: 'Văn Tuấn', email: 'tuan.bui@hrnexus.com', roleIds: ['employee'], status: 'active', lastLogin: '2024-12-15 08:00', createdAt: '2024-08-15' }
+        ];
+
+        const MOCK_AUDIT_LOGS = [
+            { id: 'a1', eventType: 'login', userId: 'u1', userName: 'Nguyễn Thị Mai', action: { vi: 'Người dùng đã đăng nhập', en: 'User logged in' }, details: { ip: '192.168.1.100', device: 'Chrome on Windows' }, timestamp: '2024-12-15 09:30:00' },
+            { id: 'a2', eventType: 'permission_change', userId: 'u1', userName: 'Nguyễn Thị Mai', action: { vi: 'Đã chỉnh sửa quyền cho vai trò Quản lý nhân sự', en: 'Modified permissions for HR Manager role' }, details: { role: 'HR Manager', changes: ['Added: report.read', 'Removed: system.config'] }, timestamp: '2024-12-15 09:15:00' },
+            { id: 'a3', eventType: 'user_assignment', userId: 'u1', userName: 'Nguyễn Thị Mai', action: { vi: 'Đã gán vai trò Quản lý lương cho Hoàng Thị Hoa', en: 'Assigned Payroll Manager role to Hoàng Thị Hoa' }, details: { targetUser: 'Hoàng Thị Hoa', role: 'Payroll Manager' }, timestamp: '2024-12-15 08:45:00' },
+            { id: 'a4', eventType: 'role_change', userId: 'u1', userName: 'Nguyễn Thị Mai', action: { vi: 'Đã tạo vai trò mới: Quản lý phòng ban', en: 'Created new role: Department Manager' }, details: { roleName: 'Department Manager', permissions: 5 }, timestamp: '2024-12-14 16:30:00' },
+            { id: 'a5', eventType: 'login', userId: 'u2', userName: 'Trần Văn Hùng', action: { vi: 'Người dùng đã đăng nhập', en: 'User logged in' }, details: { ip: '192.168.1.105', device: 'Safari on MacOS' }, timestamp: '2024-12-14 08:45:00' },
+            { id: 'a6', eventType: 'user_assignment', userId: 'u1', userName: 'Nguyễn Thị Mai', action: { vi: 'Đã vô hiệu hóa tài khoản: Vũ Văn Đức', en: 'Disabled account: Vũ Văn Đức' }, details: { targetUser: 'Vũ Văn Đức', reason: 'Employee resigned' }, timestamp: '2024-12-13 15:20:00' },
+            { id: 'a7', eventType: 'permission_change', userId: 'u1', userName: 'Nguyễn Thị Mai', action: { vi: 'Đã cập nhật quyền vai trò Nhân viên', en: 'Updated Employee role permissions' }, details: { role: 'Employee', changes: ['Added: attendance.read'] }, timestamp: '2024-12-13 10:15:00' },
+            { id: 'a8', eventType: 'login', userId: 'u3', userName: 'Lê Thị Lan', action: { vi: 'Người dùng đã đăng nhập', en: 'User logged in' }, details: { ip: '192.168.1.110', device: 'Firefox on Windows' }, timestamp: '2024-12-14 16:20:00' }
+        ];
+
+        // ===== STATE MANAGEMENT =====
+        
+        let currentUser = { id: 'u1', firstName: 'Nguyễn', lastName: 'Thị Mai', roleIds: ['admin'] };
+        let users = [...MOCK_USERS];
+        let roles = [...MOCK_ROLES];
+        let permissions = [...MOCK_PERMISSIONS];
+        let auditLogs = [...MOCK_AUDIT_LOGS];
+        let currentView = 'roles';
+        let editingUserId = null;
+        let editingRoleId = null;
+        let confirmCallback = null;
+        let currentLanguage = 'vi';
+
+        // ===== LANGUAGE MANAGEMENT =====
+        
+        function switchLanguage(lang) {
+            currentLanguage = lang;
+            document.documentElement.lang = lang;
+            document.getElementById('currentLang').textContent = lang.toUpperCase();
+            
+            // Update all elements with data-lang attributes
+            document.querySelectorAll('[data-lang-vi]').forEach(el => {
+                if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+                    const placeholder = el.getAttribute(`data-lang-${lang}-placeholder`);
+                    if (placeholder) el.placeholder = placeholder;
+                } else if (el.tagName === 'OPTION') {
+                    const text = el.getAttribute(`data-lang-${lang}`);
+                    if (text) el.textContent = text;
+                } else {
+                    const text = el.getAttribute(`data-lang-${lang}`);
+                    if (text) el.textContent = text;
+                }
+            });
+            
+            // Re-render views with translated content
+            if (currentView === 'users') renderUsers();
+            if (currentView === 'roles') renderRoles();
+            if (currentView === 'permissions') renderPermissionMatrix();
+            if (currentView === 'audit') renderAuditLog();
+            
+            toggleLanguageDropdown();
+            lucide.createIcons();
+        }
+
+        function toggleLanguageDropdown() {
+            const dropdown = document.getElementById('languageDropdown');
+            dropdown.classList.toggle('hidden');
+        }
+
+        function toggleUserDropdown() {
+            const dropdown = document.getElementById('userDropdown');
+            dropdown.classList.toggle('hidden');
+        }
+
+        function handleLogout() {
+            if (confirm(currentLanguage === 'vi' ? 'Bạn có chắc chắn muốn đăng xuất?' : 'Are you sure you want to logout?')) {
+                alert(currentLanguage === 'vi' ? 'Đã đăng xuất thành công!' : 'Logged out successfully!');
+                toggleUserDropdown();
+            }
+        }
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function(event) {
+            const langDropdown = document.getElementById('languageDropdown');
+            const userDropdown = document.getElementById('userDropdown');
+            
+            if (!event.target.closest('#languageDropdown') && !event.target.closest('button[onclick="toggleLanguageDropdown()"]')) {
+                langDropdown.classList.add('hidden');
+            }
+            
+            if (!event.target.closest('#userDropdown') && !event.target.closest('button[onclick="toggleUserDropdown()"]')) {
+                userDropdown.classList.add('hidden');
+            }
+        });
+
+        // ===== PERMISSION RESOLVER UTILITY =====
+        
+        class PermissionResolver {
+            constructor(roles, permissions) {
+                this.roles = roles;
+                this.permissions = permissions;
+            }
+
+            hasPermission(userRoleIds, permissionId) {
+                for (const roleId of userRoleIds) {
+                    const role = this.roles.find(r => r.id === roleId);
+                    if (role && role.permissionIds.includes(permissionId)) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            getUserPermissions(userRoleIds) {
+                const permissionSet = new Set();
+                for (const roleId of userRoleIds) {
+                    const role = this.roles.find(r => r.id === roleId);
+                    if (role) {
+                        role.permissionIds.forEach(p => permissionSet.add(p));
+                    }
+                }
+                return Array.from(permissionSet);
+            }
+
+            validatePermissionDependencies(permissionIds) {
+                const warnings = [];
+                for (const permId of permissionIds) {
+                    const perm = this.permissions.find(p => p.id === permId);
+                    if (perm && perm.dependencies.length > 0) {
+                        for (const dep of perm.dependencies) {
+                            if (!permissionIds.includes(dep)) {
+                                const depPerm = this.permissions.find(p => p.id === dep);
+                                warnings.push(`${perm.name[currentLanguage]} ${currentLanguage === 'vi' ? 'yêu cầu' : 'requires'} ${depPerm.name[currentLanguage]}`);
+                            }
+                        }
+                    }
+                }
+                return warnings;
+            }
+        }
+
+        const permissionResolver = new PermissionResolver(roles, permissions);
+
+        // ===== VIEW MANAGEMENT =====
+        
+        function showView(viewName) {
+            currentView = viewName;
+            
+            document.querySelectorAll('.view-content').forEach(v => v.classList.add('hidden'));
+            document.getElementById(`${viewName}View`).classList.remove('hidden');
+            
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('bg-gradient-to-r', 'from-blue-50', 'to-blue-100/50', 'dark:from-blue-900/30', 'dark:to-blue-900/20', 'text-blue-700', 'dark:text-blue-400', 'font-semibold', 'shadow-custom');
+                item.classList.add('text-slate-600', 'dark:text-slate-300', 'hover:bg-slate-50', 'dark:hover:bg-slate-700/50', 'hover:text-slate-900', 'dark:hover:text-white', 'font-medium');
+            });
+            const activeNav = document.getElementById(`nav-${viewName}`);
+            activeNav.classList.remove('text-slate-600', 'dark:text-slate-300', 'hover:bg-slate-50', 'dark:hover:bg-slate-700/50', 'hover:text-slate-900', 'dark:hover:text-white', 'font-medium');
+            activeNav.classList.add('bg-gradient-to-r', 'from-blue-50', 'to-blue-100/50', 'dark:from-blue-900/30', 'dark:to-blue-900/20', 'text-blue-700', 'dark:text-blue-400', 'font-semibold', 'shadow-custom');
+            
+            const titles = {
+                users: { 
+                    vi: { title: 'Quản Lý Người Dùng', subtitle: 'Quản lý người dùng và phân quyền vai trò' },
+                    en: { title: 'User Management', subtitle: 'Manage users and assign roles' }
+                },
+                roles: { 
+                    vi: { title: 'Quản Lý Vai Trò', subtitle: 'Tạo và quản lý vai trò với quyền tùy chỉnh' },
+                    en: { title: 'Role Management', subtitle: 'Create and manage roles with custom permissions' }
+                },
+                permissions: { 
+                    vi: { title: 'Ma Trận Quyền', subtitle: 'Cấu hình quyền vai trò trên tất cả các miền' },
+                    en: { title: 'Permission Matrix', subtitle: 'Configure role permissions across all domains' }
+                },
+                audit: { 
+                    vi: { title: 'Nhật Ký Kiểm Toán', subtitle: 'Theo dõi tất cả thay đổi bảo mật và truy cập' },
+                    en: { title: 'Audit Log', subtitle: 'Track all security changes and access' }
+                }
+            };
+            document.getElementById('pageTitle').textContent = titles[viewName][currentLanguage].title;
+            document.getElementById('pageSubtitle').textContent = titles[viewName][currentLanguage].subtitle;
+            
+            if (viewName === 'users') renderUsers();
+            if (viewName === 'roles') renderRoles();
+            if (viewName === 'permissions') renderPermissionMatrix();
+            if (viewName === 'audit') renderAuditLog();
+            
+            lucide.createIcons();
+        }
+
+        // ===== USER MANAGEMENT =====
+        
+        function renderUsers() {
+            const tbody = document.getElementById('userTableBody');
+            tbody.innerHTML = users.map(user => {
+                const roleNames = user.roleIds.map(rid => {
+                    const role = roles.find(r => r.id === rid);
+                    return role ? `<span class="px-2 py-0.5 text-xs font-medium rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400">${role.name[currentLanguage]}</span>` : '';
+                }).join(' ');
+                
+                const statusText = user.status === 'active' 
+                    ? (currentLanguage === 'vi' ? 'Hoạt động' : 'Active')
+                    : (currentLanguage === 'vi' ? 'Không hoạt động' : 'Inactive');
+                
+                const statusBadge = user.status === 'active' 
+                    ? `<span class="px-2 py-1 text-xs font-semibold rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">${statusText}</span>`
+                    : `<span class="px-2 py-1 text-xs font-semibold rounded-full bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300">${statusText}</span>`;
+                
+                return `
+                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-semibold text-sm">
+                                    ${user.firstName[0]}${user.lastName[0]}
+                                </div>
+                                <div>
+                                    <p class="text-sm font-semibold text-slate-900 dark:text-white">${user.firstName} ${user.lastName}</p>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400">ID: ${user.id}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">${user.email}</td>
+                        <td class="px-6 py-4">
+                            <div class="flex flex-wrap gap-1">${roleNames}</div>
+                        </td>
+                        <td class="px-6 py-4">${statusBadge}</td>
+                        <td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">${user.lastLogin}</td>
+                        <td class="px-6 py-4 text-right">
+                            <div class="flex items-center justify-end gap-2">
+                                <button onclick="editUser('${user.id}')" class="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-small transition-colors">
+                                    <i data-lucide="edit-2" class="w-4 h-4"></i>
+                                </button>
+                                <button onclick="toggleUserStatus('${user.id}')" class="p-1.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-small transition-colors">
+                                    <i data-lucide="${user.status === 'active' ? 'user-x' : 'user-check'}" class="w-4 h-4"></i>
+                                </button>
+                                <button onclick="resetUserPassword('${user.id}')" class="p-1.5 text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/30 rounded-small transition-colors">
+                                    <i data-lucide="key" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+            lucide.createIcons();
+        }
+
+        function openUserModal(userId = null) {
+            editingUserId = userId;
+            const modal = document.getElementById('userModal');
+            const title = document.getElementById('userModalTitle');
+            
+            if (userId) {
+                const user = users.find(u => u.id === userId);
+                title.textContent = currentLanguage === 'vi' ? 'Chỉnh Sửa Người Dùng' : 'Edit User';
+                document.getElementById('userFirstName').value = user.firstName;
+                document.getElementById('userLastName').value = user.lastName;
+                document.getElementById('userEmail').value = user.email;
+                document.getElementById('userStatus').value = user.status;
+                
+                document.querySelectorAll('.user-role-checkbox').forEach(cb => {
+                    cb.checked = user.roleIds.includes(cb.value);
+                });
+            } else {
+                title.textContent = currentLanguage === 'vi' ? 'Thêm Người Dùng' : 'Add User';
+                document.getElementById('userFirstName').value = '';
+                document.getElementById('userLastName').value = '';
+                document.getElementById('userEmail').value = '';
+                document.getElementById('userStatus').value = 'active';
+                document.querySelectorAll('.user-role-checkbox').forEach(cb => cb.checked = false);
+            }
+            
+            modal.classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function closeUserModal() {
+            document.getElementById('userModal').classList.add('hidden');
+            editingUserId = null;
+        }
+
+        function handleUserSubmit(event) {
+            event.preventDefault();
+            
+            const firstName = document.getElementById('userFirstName').value;
+            const lastName = document.getElementById('userLastName').value;
+            const email = document.getElementById('userEmail').value;
+            const status = document.getElementById('userStatus').value;
+            const roleIds = Array.from(document.querySelectorAll('.user-role-checkbox:checked')).map(cb => cb.value);
+            
+            if (editingUserId) {
+                const user = users.find(u => u.id === editingUserId);
+                user.firstName = firstName;
+                user.lastName = lastName;
+                user.email = email;
+                user.status = status;
+                user.roleIds = roleIds;
+                
+                addAuditLog('user_assignment', currentUser.id, `${currentUser.firstName} ${currentUser.lastName}`, 
+                    { vi: `Đã cập nhật người dùng: ${firstName} ${lastName}`, en: `Updated user: ${firstName} ${lastName}` }, {
+                    targetUser: `${firstName} ${lastName}`,
+                    roles: roleIds.map(rid => roles.find(r => r.id === rid)?.name[currentLanguage]).join(', ')
+                });
+            } else {
+                const newUser = {
+                    id: `u${users.length + 1}`,
+                    firstName,
+                    lastName,
+                    email,
+                    roleIds,
+                    status,
+                    lastLogin: currentLanguage === 'vi' ? 'Chưa bao giờ' : 'Never',
+                    createdAt: new Date().toISOString().slice(0, 10)
+                };
+                users.push(newUser);
+                
+                addAuditLog('user_assignment', currentUser.id, `${currentUser.firstName} ${currentUser.lastName}`, 
+                    { vi: `Đã tạo người dùng mới: ${firstName} ${lastName}`, en: `Created new user: ${firstName} ${lastName}` }, {
+                    targetUser: `${firstName} ${lastName}`,
+                    roles: roleIds.map(rid => roles.find(r => r.id === rid)?.name[currentLanguage]).join(', ')
+                });
+            }
+            
+            closeUserModal();
+            renderUsers();
+        }
+
+        function editUser(userId) {
+            openUserModal(userId);
+        }
+
+        function toggleUserStatus(userId) {
+            const user = users.find(u => u.id === userId);
+            const newStatus = user.status === 'active' ? 'inactive' : 'active';
+            const actionText = newStatus === 'active' 
+                ? (currentLanguage === 'vi' ? 'kích hoạt' : 'activate')
+                : (currentLanguage === 'vi' ? 'vô hiệu hóa' : 'disable');
+            
+            showConfirmModal(
+                currentLanguage === 'vi' ? 'Thay Đổi Trạng Thái Người Dùng' : 'Change User Status',
+                `${currentLanguage === 'vi' ? 'Bạn có chắc chắn muốn' : 'Are you sure you want to'} ${actionText} ${user.firstName} ${user.lastName}?`,
+                () => {
+                    user.status = newStatus;
+                    addAuditLog('user_assignment', currentUser.id, `${currentUser.firstName} ${currentUser.lastName}`, 
+                        { vi: `Đã ${actionText} người dùng: ${user.firstName} ${user.lastName}`, en: `${actionText === 'activate' ? 'Activated' : 'Disabled'} user: ${user.firstName} ${user.lastName}` }, {
+                        targetUser: `${user.firstName} ${user.lastName}`,
+                        status: newStatus
+                    });
+                    renderUsers();
+                }
+            );
+        }
+
+        function resetUserPassword(userId) {
+            const user = users.find(u => u.id === userId);
+            showConfirmModal(
+                currentLanguage === 'vi' ? 'Đặt Lại Mật Khẩu' : 'Reset Password',
+                `${currentLanguage === 'vi' ? 'Gửi liên kết đặt lại mật khẩu đến' : 'Send password reset link to'} ${user.email}?`,
+                () => {
+                    alert(`${currentLanguage === 'vi' ? 'Đã gửi liên kết đặt lại mật khẩu đến' : 'Password reset link sent to'} ${user.email} (${currentLanguage === 'vi' ? 'Giả lập' : 'Mock'})`);
+                    addAuditLog('user_assignment', currentUser.id, `${currentUser.firstName} ${currentUser.lastName}`, 
+                        { vi: `Đã đặt lại mật khẩu cho: ${user.firstName} ${user.lastName}`, en: `Reset password for: ${user.firstName} ${user.lastName}` }, {
+                        targetUser: `${user.firstName} ${user.lastName}`
+                    });
+                }
+            );
+        }
+
+        function filterUsers() {
+            renderUsers();
+        }
+
+        // ===== ROLE MANAGEMENT =====
+        
+        function renderRoles() {
+            const container = document.getElementById('roleCardsContainer');
+            container.innerHTML = roles.map(role => {
+                const permissionCount = role.permissionIds.length;
+                const permissionList = role.permissionIds.slice(0, 5).map(pid => {
+                    const perm = permissions.find(p => p.id === pid);
+                    return perm ? `<span class="px-2 py-0.5 text-xs font-medium rounded-small bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300">${perm.name[currentLanguage]}</span>` : '';
+                }).join(' ');
+                
+                const userCountText = currentLanguage === 'vi' ? 'người dùng được gán' : 'users assigned';
+                const responsibilitiesTitle = currentLanguage === 'vi' ? 'Trách Nhiệm' : 'Responsibilities';
+                const permissionsTitle = currentLanguage === 'vi' ? 'Quyền' : 'Permissions';
+                const totalText = currentLanguage === 'vi' ? 'tổng' : 'total';
+                const moreText = currentLanguage === 'vi' ? 'thêm' : 'more';
+                
+                return `
+                    <div class="bg-white dark:bg-slate-800 rounded-large border border-slate-200 dark:border-slate-700 shadow-custom p-6">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-large flex items-center justify-center">
+                                    <i data-lucide="shield" class="w-6 h-6 text-white"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-heading text-lg font-bold text-slate-900 dark:text-white">${role.name[currentLanguage]}</h3>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400">${role.userCount} ${userCountText}</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <button onclick="editRole('${role.id}')" class="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-small transition-colors">
+                                    <i data-lucide="edit-2" class="w-4 h-4"></i>
+                                </button>
+                                <button onclick="cloneRole('${role.id}')" class="p-1.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-small transition-colors">
+                                    <i data-lucide="copy" class="w-4 h-4"></i>
+                                </button>
+                                ${role.id !== 'admin' ? `<button onclick="deleteRole('${role.id}')" class="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-small transition-colors">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </button>` : ''}
+                            </div>
+                        </div>
+                        
+                        <p class="text-sm text-slate-600 dark:text-slate-400 mb-4">${role.description[currentLanguage]}</p>
+                        
+                        <div class="mb-4">
+                            <h4 class="text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">${responsibilitiesTitle}</h4>
+                            <ul class="space-y-1">
+                                ${role.responsibilities.map(r => `<li class="flex items-start gap-2 text-sm text-slate-600 dark:text-slate-400">
+                                    <i data-lucide="check" class="w-4 h-4 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0"></i>
+                                    <span>${r[currentLanguage]}</span>
+                                </li>`).join('')}
+                            </ul>
+                        </div>
+                        
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <h4 class="text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">${permissionsTitle}</h4>
+                                <span class="text-xs font-semibold text-blue-600 dark:text-blue-400">${permissionCount} ${totalText}</span>
+                            </div>
+                            <div class="flex flex-wrap gap-1">
+                                ${permissionList}
+                                ${permissionCount > 5 ? `<span class="px-2 py-0.5 text-xs font-medium rounded-small bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300">+${permissionCount - 5} ${moreText}</span>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            lucide.createIcons();
+        }
+
+        function openRoleModal(roleId = null) {
+            editingRoleId = roleId;
+            const modal = document.getElementById('roleModal');
+            const title = document.getElementById('roleModalTitle');
+            
+            if (roleId) {
+                const role = roles.find(r => r.id === roleId);
+                title.textContent = currentLanguage === 'vi' ? 'Chỉnh Sửa Vai Trò' : 'Edit Role';
+                document.getElementById('roleName').value = role.name[currentLanguage];
+                document.getElementById('roleDescription').value = role.description[currentLanguage];
+                document.getElementById('roleResponsibilities').value = role.responsibilities.map(r => r[currentLanguage]).join('\n');
+            } else {
+                title.textContent = currentLanguage === 'vi' ? 'Tạo Vai Trò' : 'Create Role';
+                document.getElementById('roleName').value = '';
+                document.getElementById('roleDescription').value = '';
+                document.getElementById('roleResponsibilities').value = '';
+            }
+            
+            modal.classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function closeRoleModal() {
+            document.getElementById('roleModal').classList.add('hidden');
+            editingRoleId = null;
+        }
+
+        function handleRoleSubmit(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById('roleName').value;
+            const description = document.getElementById('roleDescription').value;
+            const responsibilities = document.getElementById('roleResponsibilities').value.split('\n').filter(r => r.trim());
+            
+            if (editingRoleId) {
+                const role = roles.find(r => r.id === editingRoleId);
+                role.name[currentLanguage] = name;
+                role.description[currentLanguage] = description;
+                role.responsibilities = responsibilities.map(r => ({ vi: r, en: r }));
+                
+                addAuditLog('role_change', currentUser.id, `${currentUser.firstName} ${currentUser.lastName}`, 
+                    { vi: `Đã cập nhật vai trò: ${name}`, en: `Updated role: ${name}` }, {
+                    roleName: name,
+                    permissions: role.permissionIds.length
+                });
+            } else {
+                const newRole = {
+                    id: name.toLowerCase().replace(/\s+/g, '_'),
+                    name: { vi: name, en: name },
+                    description: { vi: description, en: description },
+                    responsibilities: responsibilities.map(r => ({ vi: r, en: r })),
+                    permissionIds: [],
+                    userCount: 0
+                };
+                roles.push(newRole);
+                
+                addAuditLog('role_change', currentUser.id, `${currentUser.firstName} ${currentUser.lastName}`, 
+                    { vi: `Đã tạo vai trò mới: ${name}`, en: `Created new role: ${name}` }, {
+                    roleName: name,
+                    permissions: 0
+                });
+            }
+            
+            closeRoleModal();
+            renderRoles();
+        }
+
+        function editRole(roleId) {
+            openRoleModal(roleId);
+        }
+
+        function cloneRole(roleId) {
+            const role = roles.find(r => r.id === roleId);
+            const copyText = currentLanguage === 'vi' ? '(Bản sao)' : '(Copy)';
+            const newRole = {
+                ...role,
+                id: `${role.id}_copy_${Date.now()}`,
+                name: { vi: `${role.name.vi} ${copyText}`, en: `${role.name.en} ${copyText}` },
+                userCount: 0
+            };
+            roles.push(newRole);
+            
+            addAuditLog('role_change', currentUser.id, `${currentUser.firstName} ${currentUser.lastName}`, 
+                { vi: `Đã sao chép vai trò: ${role.name[currentLanguage]}`, en: `Cloned role: ${role.name[currentLanguage]}` }, {
+                roleName: newRole.name[currentLanguage],
+                permissions: newRole.permissionIds.length
+            });
+            
+            renderRoles();
+        }
+
+        function deleteRole(roleId) {
+            const role = roles.find(r => r.id === roleId);
+            const deleteText = currentLanguage === 'vi' ? 'Xóa Vai Trò' : 'Delete Role';
+            const confirmText = currentLanguage === 'vi' 
+                ? `Bạn có chắc chắn muốn xóa vai trò "${role.name[currentLanguage]}"? Hành động này không thể hoàn tác.`
+                : `Are you sure you want to delete role "${role.name[currentLanguage]}"? This action cannot be undone.`;
+            
+            showConfirmModal(deleteText, confirmText, () => {
+                roles = roles.filter(r => r.id !== roleId);
+                addAuditLog('role_change', currentUser.id, `${currentUser.firstName} ${currentUser.lastName}`, 
+                    { vi: `Đã xóa vai trò: ${role.name[currentLanguage]}`, en: `Deleted role: ${role.name[currentLanguage]}` }, {
+                    roleName: role.name[currentLanguage]
+                });
+                renderRoles();
+            });
+        }
+
+        // ===== PERMISSION MATRIX =====
+        
+        function renderPermissionMatrix() {
+            const tbody = document.getElementById('permissionMatrixBody');
+            
+            const domains = [...new Set(permissions.map(p => p.domain[currentLanguage]))];
+            
+            let html = '';
+            domains.forEach(domain => {
+                const domainPerms = permissions.filter(p => p.domain[currentLanguage] === domain);
+                
+                html += `
+                    <tr class="bg-slate-50 dark:bg-slate-900/50">
+                        <td colspan="5" class="px-6 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">${domain}</td>
+                    </tr>
+                `;
+                
+                domainPerms.forEach(perm => {
+                    const requiresText = currentLanguage === 'vi' ? 'Yêu cầu:' : 'Requires:';
+                    html += `
+                        <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
+                            <td class="px-6 py-3">
+                                <div>
+                                    <p class="text-sm font-semibold text-slate-900 dark:text-white">${perm.name[currentLanguage]}</p>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400">${perm.description[currentLanguage]}</p>
+                                    ${perm.dependencies.length > 0 ? `<p class="text-xs text-amber-600 dark:text-amber-400 mt-1">${requiresText} ${perm.dependencies.join(', ')}</p>` : ''}
+                                </div>
+                            </td>
+                            ${roles.map(role => {
+                                const hasPermission = role.permissionIds.includes(perm.id);
+                                return `
+                                    <td class="px-6 py-3 text-center permission-matrix-cell">
+                                        <label class="relative inline-flex items-center cursor-pointer">
+                                            <input type="checkbox" ${hasPermission ? 'checked' : ''} onchange="togglePermission('${role.id}', '${perm.id}')" class="sr-only peer">
+                                            <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-slate-600 peer-checked:bg-blue-600"></div>
+                                        </label>
+                                    </td>
+                                `;
+                            }).join('')}
+                        </tr>
+                    `;
+                });
+            });
+            
+            tbody.innerHTML = html;
+            lucide.createIcons();
+        }
+
+        function togglePermission(roleId, permissionId) {
+            const role = roles.find(r => r.id === roleId);
+            const perm = permissions.find(p => p.id === permissionId);
+            
+            if (role.permissionIds.includes(permissionId)) {
+                role.permissionIds = role.permissionIds.filter(p => p !== permissionId);
+                
+                const removedText = currentLanguage === 'vi' ? 'Đã xóa:' : 'Removed:';
+                addAuditLog('permission_change', currentUser.id, `${currentUser.firstName} ${currentUser.lastName}`, 
+                    { vi: `Đã xóa quyền khỏi ${role.name[currentLanguage]}`, en: `Removed permission from ${role.name[currentLanguage]}` }, {
+                    role: role.name[currentLanguage],
+                    changes: [`${removedText} ${perm.name[currentLanguage]}`]
+                });
+            } else {
+                role.permissionIds.push(permissionId);
+                
+                const warnings = permissionResolver.validatePermissionDependencies(role.permissionIds);
+                if (warnings.length > 0) {
+                    const warningText = currentLanguage === 'vi' ? 'Cảnh báo:' : 'Warning:';
+                    alert(`${warningText} ${warnings.join(', ')}`);
+                }
+                
+                const addedText = currentLanguage === 'vi' ? 'Đã thêm:' : 'Added:';
+                addAuditLog('permission_change', currentUser.id, `${currentUser.firstName} ${currentUser.lastName}`, 
+                    { vi: `Đã thêm quyền vào ${role.name[currentLanguage]}`, en: `Added permission to ${role.name[currentLanguage]}` }, {
+                    role: role.name[currentLanguage],
+                    changes: [`${addedText} ${perm.name[currentLanguage]}`]
+                });
+            }
+        }
+
+        function savePermissionChanges() {
+            const successText = currentLanguage === 'vi' 
+                ? 'Đã lưu thay đổi quyền thành công! (Giả lập)'
+                : 'Permission changes saved successfully! (Mock)';
+            alert(successText);
+            addAuditLog('permission_change', currentUser.id, `${currentUser.firstName} ${currentUser.lastName}`, 
+                { vi: 'Đã lưu thay đổi ma trận quyền', en: 'Saved permission matrix changes' }, {
+                changes: currentLanguage === 'vi' ? 'Nhiều cập nhật quyền' : 'Multiple permission updates'
+            });
+        }
+
+        // ===== AUDIT LOG =====
+        
+        function renderAuditLog() {
+            const container = document.getElementById('auditTimelineContainer');
+            
+            const eventIcons = {
+                login: 'log-in',
+                permission_change: 'key',
+                user_assignment: 'user-check',
+                role_change: 'shield'
+            };
+            
+            const eventColors = {
+                login: 'blue',
+                permission_change: 'amber',
+                user_assignment: 'emerald',
+                role_change: 'purple'
+            };
+            
+            const byText = currentLanguage === 'vi' ? 'bởi' : 'by';
+            
+            container.innerHTML = auditLogs.map(log => {
+                const icon = eventIcons[log.eventType] || 'file-text';
+                const color = eventColors[log.eventType] || 'slate';
+                
+                return `
+                    <div class="audit-timeline-item relative pl-12">
+                        <div class="absolute left-0 top-0 w-10 h-10 bg-${color}-100 dark:bg-${color}-900/30 rounded-full flex items-center justify-center">
+                            <i data-lucide="${icon}" class="w-5 h-5 text-${color}-600 dark:text-${color}-400"></i>
+                        </div>
+                        <div class="bg-slate-50 dark:bg-slate-900/50 rounded-large p-4 border border-slate-200 dark:border-slate-700">
+                            <div class="flex items-start justify-between mb-2">
+                                <div>
+                                    <h4 class="font-heading text-sm font-semibold text-slate-900 dark:text-white">${log.action[currentLanguage]}</h4>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">${byText} ${log.userName}</p>
+                                </div>
+                                <span class="text-xs text-slate-400 dark:text-slate-500">${log.timestamp}</span>
+                            </div>
+                            ${log.details ? `
+                                <div class="mt-3 p-3 bg-white dark:bg-slate-800 rounded-small border border-slate-200 dark:border-slate-700">
+                                    <pre class="text-xs text-slate-600 dark:text-slate-400 whitespace-pre-wrap">${JSON.stringify(log.details, null, 2)}</pre>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            lucide.createIcons();
+        }
+
+        function addAuditLog(eventType, userId, userName, action, details) {
+            const newLog = {
+                id: `a${auditLogs.length + 1}`,
+                eventType,
+                userId,
+                userName,
+                action,
+                details,
+                timestamp: new Date().toISOString().slice(0, 19).replace('T', ' ')
+            };
+            auditLogs.unshift(newLog);
+        }
+
+        function filterAuditLog() {
+            renderAuditLog();
+        }
+
+        function exportAuditLog() {
+            const exportText = currentLanguage === 'vi' 
+                ? 'Đã xuất nhật ký kiểm toán! (Giả lập)'
+                : 'Audit log exported! (Mock)';
+            alert(exportText);
+        }
+
+        // ===== CONFIRMATION MODAL =====
+        
+        function showConfirmModal(title, message, callback) {
+            document.getElementById('confirmTitle').textContent = title;
+            document.getElementById('confirmMessage').textContent = message;
+            confirmCallback = callback;
+            document.getElementById('confirmModal').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function closeConfirmModal() {
+            document.getElementById('confirmModal').classList.add('hidden');
+            confirmCallback = null;
+        }
+
+        function confirmAction() {
+            if (confirmCallback) {
+                confirmCallback();
+            }
+            closeConfirmModal();
+        }
+
+        // ===== UTILITIES =====
+        
+        function toggleDarkMode() {
+            document.documentElement.classList.toggle('dark');
+            lucide.createIcons();
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            showView('roles');
+            lucide.createIcons();
+        });
+
+        lucide.createIcons();
+    </script>
+</body>
+</html>

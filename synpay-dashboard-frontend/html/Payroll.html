@@ -1,0 +1,1305 @@
+<!DOCTYPE html>
+<html lang="vi" style="height: auto; min-height: 100%;">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payroll & Attendance - HR Nexus</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #475569;
+        }
+        .dark ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+        .modal-backdrop {
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+        }
+        .modal-enter {
+            animation: modalEnter 0.3s ease-out forwards;
+        }
+        @keyframes modalEnter {
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+        .drawer-enter {
+            animation: drawerEnter 0.3s ease-out forwards;
+        }
+        @keyframes drawerEnter {
+            from {
+                transform: translateX(100%);
+            }
+            to {
+                transform: translateX(0);
+            }
+        }
+        .fade-in {
+            animation: fadeIn 0.2s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .table-row-hover:hover {
+            background-color: rgba(59, 130, 246, 0.05);
+        }
+        .dark .table-row-hover:hover {
+            background-color: rgba(59, 130, 246, 0.1);
+        }
+        .anomaly-pulse {
+            animation: anomalyPulse 2s ease-in-out infinite;
+        }
+        @keyframes anomalyPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+        .rotate-refresh {
+            animation: rotateRefresh 0.6s ease-in-out;
+        }
+        @keyframes rotateRefresh {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3b82f6',
+                        secondary: '#64748b',
+                        success: '#10b981',
+                        warning: '#f59e0b',
+                        critical: '#ef4444',
+                        info: '#06b6d4',
+                        purple: '#8b5cf6'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body style="height: auto; min-height: 100%;" class="bg-slate-50 dark:bg-slate-900 transition-colors duration-300">
+
+    <div class="flex min-h-screen w-full">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex-col hidden lg:flex transition-colors duration-300 shrink-0">
+            <div class="p-6 border-b border-slate-100 dark:border-slate-700">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 bg-blue-600 dark:bg-blue-500 rounded-lg flex items-center justify-center text-white font-bold text-lg">H</div>
+                    <span class="font-bold text-xl text-slate-800 dark:text-white">HR Nexus</span>
+                </div>
+            </div>
+
+            <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
+                <div class="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-4 px-2" data-i18n="nav.main">Menu Chính</div>
+                
+                <a href="#" class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white rounded-md font-medium transition-colors">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                    <span data-i18n="nav.dashboard">Bảng Điều Khiển</span>
+                </a>
+                <a href="#" class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white rounded-md font-medium transition-colors">
+                    <i data-lucide="users" class="w-5 h-5"></i>
+                    <span data-i18n="nav.employees">Nhân Viên</span>
+                </a>
+                <a href="#" class="flex items-center gap-3 px-3 py-2.5 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-md font-medium transition-colors">
+                    <i data-lucide="banknote" class="w-5 h-5"></i>
+                    <span data-i18n="nav.payroll">Bảng Lương</span>
+                </a>
+                <a href="#" class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white rounded-md font-medium transition-colors">
+                    <i data-lucide="calendar-check" class="w-5 h-5"></i>
+                    <span data-i18n="nav.attendance">Chấm Công</span>
+                </a>
+                <a href="#" class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white rounded-md font-medium transition-colors">
+                    <i data-lucide="pie-chart" class="w-5 h-5"></i>
+                    <span data-i18n="nav.reports">Báo Cáo</span>
+                </a>
+            </nav>
+            
+            <div class="p-4 border-t border-slate-100 dark:border-slate-700">
+                <div class="flex items-center gap-3 px-3 py-2">
+                    <div class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-xs font-medium text-slate-600 dark:text-slate-300">v1.0</div>
+                    <div class="text-xs text-slate-500 dark:text-slate-400">
+                        <p>HR Nexus System</p>
+                        <p>© 2024</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col min-w-0">
+            <!-- Header -->
+            <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-20 transition-colors duration-300">
+                <div class="px-4 md:px-8 py-4 flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <button class="text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 lg:hidden">
+                            <i data-lucide="menu" class="w-6 h-6"></i>
+                        </button>
+                        <div>
+                            <h1 class="text-xl font-bold text-slate-900 dark:text-white" data-i18n="header.title">Bảng Lương & Chấm Công</h1>
+                            <p class="text-sm text-slate-500 dark:text-slate-400 hidden sm:block" data-i18n="header.subtitle">Quản lý lương và theo dõi chuyên cần</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <!-- Language Toggle -->
+                        <button onclick="toggleLanguage()" class="p-2 text-slate-400 dark:text-slate-300 hover:text-slate-600 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg transition-colors" title="Chuyển đổi ngôn ngữ">
+                            <i data-lucide="languages" class="w-5 h-5"></i>
+                        </button>
+
+                        <!-- Refresh Button -->
+                        <button onclick="refreshPage()" id="refreshBtn" class="p-2 text-slate-400 dark:text-slate-300 hover:text-slate-600 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg transition-colors" title="Làm mới trang">
+                            <i data-lucide="refresh-cw" class="w-5 h-5"></i>
+                        </button>
+
+                        <!-- Theme Toggle -->
+                        <button onclick="toggleTheme()" class="p-2 text-slate-400 dark:text-slate-300 hover:text-slate-600 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg transition-colors" title="Chuyển đổi chế độ">
+                            <i data-lucide="sun" class="w-5 h-5 hidden dark:block"></i>
+                            <i data-lucide="moon" class="w-5 h-5 block dark:hidden"></i>
+                        </button>
+                        
+                        <div class="relative ml-2">
+                            <button class="flex items-center gap-3 p-1.5 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+                                <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="Profile" class="w-9 h-9 rounded-full border-2 border-slate-200 dark:border-slate-600">
+                                <div class="hidden md:block text-left">
+                                    <p class="text-sm font-semibold text-slate-900 dark:text-white">Alex Morgan</p>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400" data-i18n="header.role">Giám Đốc Nhân Sự</p>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content -->
+            <div class="flex-1 p-4 md:p-8 overflow-y-auto">
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    <div class="bg-white dark:bg-slate-800 p-5 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm">
+                        <div class="flex justify-between items-start mb-3">
+                            <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide" data-i18n="stats.totalPayroll">Tổng Lương Tháng Này</span>
+                            <i data-lucide="dollar-sign" class="w-4 h-4 text-blue-500 dark:text-blue-400"></i>
+                        </div>
+                        <div class="text-2xl font-bold text-slate-900 dark:text-white mb-1">₫42.5B</div>
+                        <div class="text-xs text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1">
+                            <i data-lucide="trending-up" class="w-3 h-3"></i>
+                            <span data-i18n="stats.increase">+8.2% so với tháng trước</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-white dark:bg-slate-800 p-5 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm">
+                        <div class="flex justify-between items-start mb-3">
+                            <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide" data-i18n="stats.avgSalary">Trung Bình Lương</span>
+                            <i data-lucide="trending-up" class="w-4 h-4 text-emerald-500 dark:text-emerald-400"></i>
+                        </div>
+                        <div class="text-2xl font-bold text-slate-900 dark:text-white mb-1">₫36.2M</div>
+                        <div class="text-xs text-slate-500 dark:text-slate-400" data-i18n="stats.perEmployee">Per employee</div>
+                    </div>
+
+                    <div class="bg-white dark:bg-slate-800 p-5 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm">
+                        <div class="flex justify-between items-start mb-3">
+                            <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide" data-i18n="stats.attendanceRate">Tỷ Lệ Chuyên Cần</span>
+                            <i data-lucide="calendar-check" class="w-4 h-4 text-cyan-500 dark:text-cyan-400"></i>
+                        </div>
+                        <div class="text-2xl font-bold text-slate-900 dark:text-white mb-1">96.8%</div>
+                        <div class="text-xs text-emerald-600 dark:text-emerald-400 font-medium" data-i18n="stats.excellent">Xuất sắc</div>
+                    </div>
+
+                    <div class="bg-white dark:bg-slate-800 p-5 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm">
+                        <div class="flex justify-between items-start mb-3">
+                            <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide" data-i18n="stats.anomalies">Bất Thường</span>
+                            <i data-lucide="alert-triangle" class="w-4 h-4 text-amber-500 dark:text-amber-400"></i>
+                        </div>
+                        <div class="text-2xl font-bold text-slate-900 dark:text-white mb-1">3</div>
+                        <div class="text-xs text-amber-600 dark:text-amber-400 font-medium" data-i18n="stats.needsReview">Cần xem xét</div>
+                    </div>
+                </div>
+
+                <!-- Filters -->
+                <div class="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm mb-6 transition-colors duration-300">
+                    <div class="p-4 md:p-6">
+                        <div class="flex flex-col lg:flex-row gap-4">
+                            <div class="flex-1">
+                                <div class="relative">
+                                    <i data-lucide="search" class="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"></i>
+                                    <input 
+                                        type="text" 
+                                        id="searchInput"
+                                        data-i18n-placeholder="filter.searchPlaceholder"
+                                        placeholder="Tìm kiếm nhân viên..."
+                                        class="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-colors"
+                                        oninput="handleSearch()"
+                                    >
+                                </div>
+                            </div>
+
+                            <div class="flex flex-wrap gap-3">
+                                <select id="monthFilter" onchange="handleFilter()" class="px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors">
+                                    <option value="2024-01" data-i18n="filter.jan2024">Tháng 1/2024</option>
+                                    <option value="2023-12" data-i18n="filter.dec2023">Tháng 12/2023</option>
+                                    <option value="2023-11" data-i18n="filter.nov2023">Tháng 11/2023</option>
+                                    <option value="2023-10" data-i18n="filter.oct2023">Tháng 10/2023</option>
+                                </select>
+
+                                <select id="departmentFilter" onchange="handleFilter()" class="px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors">
+                                    <option value="" data-i18n="filter.allDepts">Tất cả phòng ban</option>
+                                    <option value="Engineering">Engineering</option>
+                                    <option value="Sales">Sales</option>
+                                    <option value="Marketing">Marketing</option>
+                                    <option value="HR">HR</option>
+                                    <option value="Finance">Finance</option>
+                                </select>
+
+                                <button onclick="exportPayroll()" class="px-4 py-2.5 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-lg font-medium transition-colors flex items-center gap-2">
+                                    <i data-lucide="download" class="w-4 h-4"></i>
+                                    <span class="hidden sm:inline" data-i18n="filter.export">Xuất Excel</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payroll Table -->
+                <div class="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm mb-6 transition-colors duration-300">
+                    <div class="p-6 border-b border-slate-200 dark:border-slate-700">
+                        <h2 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                            <i data-lucide="receipt" class="w-5 h-5 text-blue-500"></i>
+                            <span data-i18n="table.title">Bảng Lương Nhân Viên</span>
+                        </h2>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700">
+                                <tr>
+                                    <th class="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider" data-i18n="table.employee">Nhân Viên</th>
+                                    <th class="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider" data-i18n="table.department">Phòng Ban</th>
+                                    <th class="px-6 py-4 text-right text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider" data-i18n="table.baseSalary">Lương CB</th>
+                                    <th class="px-6 py-4 text-right text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider" data-i18n="table.bonus">Thưởng</th>
+                                    <th class="px-6 py-4 text-right text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider" data-i18n="table.deductions">Khấu Trừ</th>
+                                    <th class="px-6 py-4 text-right text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider" data-i18n="table.netSalary">Thực Lĩnh</th>
+                                    <th class="px-6 py-4 text-center text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider" data-i18n="table.attendance">Chuyên Cần</th>
+                                    <th class="px-6 py-4 text-right text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider" data-i18n="table.actions">Thao Tác</th>
+                                </tr>
+                            </thead>
+                            <tbody id="payrollTableBody" class="divide-y divide-slate-200 dark:divide-slate-700">
+                                <!-- Populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Payroll Detail Drawer -->
+    <div id="payrollDrawer" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 modal-backdrop" onclick="closePayrollDrawer()"></div>
+        <div class="absolute right-0 top-0 h-full w-full md:w-[800px] bg-white dark:bg-slate-800 shadow-2xl drawer-enter overflow-y-auto">
+            <div class="sticky top-0 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 px-6 py-4 flex items-center justify-between z-10">
+                <h2 class="text-xl font-bold text-slate-900 dark:text-white" data-i18n="drawer.title">Chi Tiết Lương & Chấm Công</h2>
+                <button onclick="closePayrollDrawer()" class="p-2 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <div id="payrollContent" class="p-6 space-y-6">
+                <!-- Populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Salary Adjustment Modal -->
+    <div id="adjustmentModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+        <div class="absolute inset-0 modal-backdrop" onclick="closeAdjustmentModal()"></div>
+        <div class="relative bg-white dark:bg-slate-800 rounded-lg shadow-2xl w-full max-w-2xl modal-enter">
+            <div class="sticky top-0 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 px-6 py-4 flex items-center justify-between z-10">
+                <h2 class="text-xl font-bold text-slate-900 dark:text-white" data-i18n="modal.title">Điều Chỉnh Lương</h2>
+                <button onclick="closeAdjustmentModal()" class="p-2 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <form id="adjustmentForm" onsubmit="handleAdjustmentSubmit(event)" class="p-6 space-y-6">
+                <div id="adjustmentEmployeeInfo" class="bg-slate-50 dark:bg-slate-900 rounded-lg p-4 mb-4">
+                    <!-- Populated by JavaScript -->
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2" data-i18n="modal.baseSalary">Lương Cơ Bản (VNĐ)</label>
+                        <input type="number" id="adjustBaseSalary" required class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors">
+                        <p id="baseSalaryError" class="hidden text-xs text-red-500 mt-1"></p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2" data-i18n="modal.bonus">Thưởng (VNĐ)</label>
+                        <input type="number" id="adjustBonus" value="0" class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2" data-i18n="modal.deductions">Khấu Trừ (VNĐ)</label>
+                        <input type="number" id="adjustDeductions" value="0" class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2" data-i18n="modal.netSalary">Thực Lĩnh (VNĐ)</label>
+                        <input type="number" id="adjustNetSalary" readonly class="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white font-bold">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2" data-i18n="modal.reason">Lý Do Điều Chỉnh</label>
+                    <textarea id="adjustmentReason" rows="3" required class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors"></textarea>
+                </div>
+
+                <div id="adjustmentWarning" class="hidden bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
+                    <div class="flex items-start gap-3">
+                        <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5"></i>
+                        <div>
+                            <p class="text-sm font-semibold text-amber-800 dark:text-amber-300 mb-1" data-i18n="modal.warningTitle">Cảnh Báo Bất Thường</p>
+                            <p id="adjustmentWarningText" class="text-sm text-amber-700 dark:text-amber-400"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-700">
+                    <button type="button" onclick="closeAdjustmentModal()" class="px-6 py-2.5 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 rounded-lg font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors" data-i18n="modal.cancel">
+                        Hủy
+                    </button>
+                    <button type="submit" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white rounded-lg font-medium transition-colors shadow-sm" data-i18n="modal.save">
+                        Lưu Điều Chỉnh
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        // ============================================================================
+        // INTERNATIONALIZATION (i18n)
+        // ============================================================================
+        
+        const translations = {
+            vi: {
+                'nav.main': 'Menu Chính',
+                'nav.dashboard': 'Bảng Điều Khiển',
+                'nav.employees': 'Nhân Viên',
+                'nav.payroll': 'Bảng Lương',
+                'nav.attendance': 'Chấm Công',
+                'nav.reports': 'Báo Cáo',
+                'header.title': 'Bảng Lương & Chấm Công',
+                'header.subtitle': 'Quản lý lương và theo dõi chuyên cần',
+                'header.role': 'Giám Đốc Nhân Sự',
+                'stats.totalPayroll': 'Tổng Lương Tháng Này',
+                'stats.increase': '+8.2% so với tháng trước',
+                'stats.avgSalary': 'Trung Bình Lương',
+                'stats.perEmployee': 'Per employee',
+                'stats.attendanceRate': 'Tỷ Lệ Chuyên Cần',
+                'stats.excellent': 'Xuất sắc',
+                'stats.anomalies': 'Bất Thường',
+                'stats.needsReview': 'Cần xem xét',
+                'filter.searchPlaceholder': 'Tìm kiếm nhân viên...',
+                'filter.jan2024': 'Tháng 1/2024',
+                'filter.dec2023': 'Tháng 12/2023',
+                'filter.nov2023': 'Tháng 11/2023',
+                'filter.oct2023': 'Tháng 10/2023',
+                'filter.allDepts': 'Tất cả phòng ban',
+                'filter.export': 'Xuất Excel',
+                'table.title': 'Bảng Lương Nhân Viên',
+                'table.employee': 'Nhân Viên',
+                'table.department': 'Phòng Ban',
+                'table.baseSalary': 'Lương CB',
+                'table.bonus': 'Thưởng',
+                'table.deductions': 'Khấu Trừ',
+                'table.netSalary': 'Thực Lĩnh',
+                'table.attendance': 'Chuyên Cần',
+                'table.actions': 'Thao Tác',
+                'drawer.title': 'Chi Tiết Lương & Chấm Công',
+                'modal.title': 'Điều Chỉnh Lương',
+                'modal.baseSalary': 'Lương Cơ Bản (VNĐ)',
+                'modal.bonus': 'Thưởng (VNĐ)',
+                'modal.deductions': 'Khấu Trừ (VNĐ)',
+                'modal.netSalary': 'Thực Lĩnh (VNĐ)',
+                'modal.reason': 'Lý Do Điều Chỉnh',
+                'modal.warningTitle': 'Cảnh Báo Bất Thường',
+                'modal.cancel': 'Hủy',
+                'modal.save': 'Lưu Điều Chỉnh'
+            },
+            en: {
+                'nav.main': 'Main Menu',
+                'nav.dashboard': 'Dashboard',
+                'nav.employees': 'Employees',
+                'nav.payroll': 'Payroll',
+                'nav.attendance': 'Attendance',
+                'nav.reports': 'Reports',
+                'header.title': 'Payroll & Attendance',
+                'header.subtitle': 'Manage payroll and track attendance',
+                'header.role': 'HR Director',
+                'stats.totalPayroll': 'Total Payroll This Month',
+                'stats.increase': '+8.2% vs last month',
+                'stats.avgSalary': 'Average Salary',
+                'stats.perEmployee': 'Per employee',
+                'stats.attendanceRate': 'Attendance Rate',
+                'stats.excellent': 'Excellent',
+                'stats.anomalies': 'Anomalies',
+                'stats.needsReview': 'Needs review',
+                'filter.searchPlaceholder': 'Search employees...',
+                'filter.jan2024': 'January 2024',
+                'filter.dec2023': 'December 2023',
+                'filter.nov2023': 'November 2023',
+                'filter.oct2023': 'October 2023',
+                'filter.allDepts': 'All departments',
+                'filter.export': 'Export Excel',
+                'table.title': 'Employee Payroll',
+                'table.employee': 'Employee',
+                'table.department': 'Department',
+                'table.baseSalary': 'Base Salary',
+                'table.bonus': 'Bonus',
+                'table.deductions': 'Deductions',
+                'table.netSalary': 'Net Salary',
+                'table.attendance': 'Attendance',
+                'table.actions': 'Actions',
+                'drawer.title': 'Payroll & Attendance Details',
+                'modal.title': 'Adjust Salary',
+                'modal.baseSalary': 'Base Salary (VNĐ)',
+                'modal.bonus': 'Bonus (VNĐ)',
+                'modal.deductions': 'Deductions (VNĐ)',
+                'modal.netSalary': 'Net Salary (VNĐ)',
+                'modal.reason': 'Adjustment Reason',
+                'modal.warningTitle': 'Anomaly Warning',
+                'modal.cancel': 'Cancel',
+                'modal.save': 'Save Adjustment'
+            }
+        };
+
+        let currentLanguage = 'vi';
+
+        function toggleLanguage() {
+            currentLanguage = currentLanguage === 'vi' ? 'en' : 'vi';
+            localStorage.setItem('language', currentLanguage);
+            applyTranslations();
+            showNotification(currentLanguage === 'vi' ? 'Đã chuyển sang Tiếng Việt' : 'Switched to English', 'success');
+        }
+
+        function applyTranslations() {
+            const lang = translations[currentLanguage];
+            
+            document.querySelectorAll('[data-i18n]').forEach(element => {
+                const key = element.getAttribute('data-i18n');
+                if (lang[key]) {
+                    element.textContent = lang[key];
+                }
+            });
+
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
+                const key = element.getAttribute('data-i18n-placeholder');
+                if (lang[key]) {
+                    element.placeholder = lang[key];
+                }
+            });
+
+            document.documentElement.lang = currentLanguage;
+        }
+
+        function initLanguage() {
+            const savedLang = localStorage.getItem('language');
+            if (savedLang && translations[savedLang]) {
+                currentLanguage = savedLang;
+                applyTranslations();
+            }
+        }
+
+        // ============================================================================
+        // REFRESH FUNCTIONALITY
+        // ============================================================================
+        
+        function refreshPage() {
+            const btn = document.getElementById('refreshBtn');
+            const icon = btn.querySelector('i');
+            
+            icon.classList.add('rotate-refresh');
+            
+            setTimeout(() => {
+                icon.classList.remove('rotate-refresh');
+                
+                document.getElementById('searchInput').value = '';
+                document.getElementById('monthFilter').value = '2024-01';
+                document.getElementById('departmentFilter').value = '';
+                
+                state.filters = {
+                    search: '',
+                    month: '2024-01',
+                    department: ''
+                };
+                
+                renderPayrollTable();
+                showNotification(currentLanguage === 'vi' ? 'Đã làm mới dữ liệu' : 'Data refreshed', 'success');
+            }, 600);
+        }
+
+        // ============================================================================
+        // DOMAIN MODELS & TYPES
+        // ============================================================================
+        
+        const mockEmployees = [
+            { id: 'EMP001', fullName: 'Nguyễn Văn An', email: 'an.nguyen@company.com', department: 'Engineering', position: 'Senior Developer', baseSalary: 45000000 },
+            { id: 'EMP002', fullName: 'Trần Thị Bình', email: 'binh.tran@company.com', department: 'Sales', position: 'Sales Manager', baseSalary: 40000000 },
+            { id: 'EMP003', fullName: 'Lê Minh Châu', email: 'chau.le@company.com', department: 'Marketing', position: 'Marketing Specialist', baseSalary: 30000000 },
+            { id: 'EMP004', fullName: 'Phạm Hoàng Dũng', email: 'dung.pham@company.com', department: 'Engineering', position: 'Tech Lead', baseSalary: 55000000 },
+            { id: 'EMP005', fullName: 'Võ Thị Hương', email: 'huong.vo@company.com', department: 'HR', position: 'HR Manager', baseSalary: 38000000 },
+            { id: 'EMP006', fullName: 'Đỗ Văn Khoa', email: 'khoa.do@company.com', department: 'Finance', position: 'Accountant', baseSalary: 35000000 },
+            { id: 'EMP007', fullName: 'Bùi Thị Lan', email: 'lan.bui@company.com', department: 'Engineering', position: 'Backend Developer', baseSalary: 42000000 },
+            { id: 'EMP008', fullName: 'Hoàng Văn Minh', email: 'minh.hoang@company.com', department: 'Engineering', position: 'DevOps Engineer', baseSalary: 48000000 },
+            { id: 'EMP009', fullName: 'Ngô Thị Nga', email: 'nga.ngo@company.com', department: 'Marketing', position: 'Content Writer', baseSalary: 25000000 },
+            { id: 'EMP010', fullName: 'Trương Văn Phúc', email: 'phuc.truong@company.com', department: 'Sales', position: 'Sales Director', baseSalary: 60000000 }
+        ];
+
+        function generatePayrollData() {
+            const months = ['2024-01', '2023-12', '2023-11', '2023-10', '2023-09', '2023-08'];
+            const payrollData = [];
+
+            mockEmployees.forEach(emp => {
+                months.forEach((month, idx) => {
+                    const baseVariation = Math.random() * 0.1 - 0.05;
+                    const baseSalary = Math.round(emp.baseSalary * (1 + baseVariation));
+                    
+                    let bonus = 0;
+                    if (Math.random() > 0.6) {
+                        bonus = Math.round(baseSalary * (0.1 + Math.random() * 0.3));
+                    }
+                    
+                    const deductions = Math.round(baseSalary * (0.08 + Math.random() * 0.04));
+                    const netSalary = baseSalary + bonus - deductions;
+                    
+                    const hasAnomaly = Math.random() > 0.95;
+                    let anomalyReason = '';
+                    if (hasAnomaly) {
+                        const reasons = [
+                            'Lương vượt ngưỡng bình thường +40%',
+                            'Khấu trừ cao bất thường',
+                            'Thưởng vượt mức quy định'
+                        ];
+                        anomalyReason = reasons[Math.floor(Math.random() * reasons.length)];
+                    }
+
+                    payrollData.push({
+                        employeeId: emp.id,
+                        month,
+                        baseSalary,
+                        bonus,
+                        deductions,
+                        netSalary,
+                        hasAnomaly,
+                        anomalyReason
+                    });
+                });
+            });
+
+            return payrollData;
+        }
+
+        function generateAttendanceData() {
+            const months = ['2024-01', '2023-12', '2023-11', '2023-10', '2023-09', '2023-08'];
+            const attendanceData = [];
+
+            mockEmployees.forEach(emp => {
+                months.forEach(month => {
+                    const totalDays = 22;
+                    const leaveDays = Math.floor(Math.random() * 3);
+                    const absentDays = Math.random() > 0.9 ? Math.floor(Math.random() * 2) : 0;
+                    const workDays = totalDays - leaveDays - absentDays;
+                    const attendanceRate = (workDays / totalDays) * 100;
+
+                    attendanceData.push({
+                        employeeId: emp.id,
+                        month,
+                        workDays,
+                        leaveDays,
+                        absentDays,
+                        attendanceRate
+                    });
+                });
+            });
+
+            return attendanceData;
+        }
+
+        // ============================================================================
+        // STATE MANAGEMENT
+        // ============================================================================
+        
+        let state = {
+            employees: mockEmployees,
+            payrollRecords: generatePayrollData(),
+            attendanceRecords: generateAttendanceData(),
+            filters: {
+                search: '',
+                month: '2024-01',
+                department: ''
+            },
+            selectedEmployee: null,
+            charts: {}
+        };
+
+        // ============================================================================
+        // THEME MANAGEMENT
+        // ============================================================================
+        
+        function toggleTheme() {
+            const html = document.documentElement;
+            const isDark = html.classList.contains('dark');
+            
+            if (isDark) {
+                html.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+            
+            updateChartTheme();
+            lucide.createIcons();
+        }
+
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            
+            if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+                document.documentElement.classList.add('dark');
+            }
+        }
+
+        function updateChartTheme() {
+            Object.values(state.charts).forEach(chart => {
+                if (chart) {
+                    const isDark = document.documentElement.classList.contains('dark');
+                    chart.options.scales.x.ticks.color = isDark ? '#94a3b8' : '#64748b';
+                    chart.options.scales.y.ticks.color = isDark ? '#94a3b8' : '#64748b';
+                    chart.options.scales.x.grid.color = isDark ? '#334155' : '#e2e8f0';
+                    chart.options.scales.y.grid.color = isDark ? '#334155' : '#e2e8f0';
+                    chart.options.plugins.legend.labels.color = isDark ? '#e2e8f0' : '#1e293b';
+                    chart.update();
+                }
+            });
+        }
+
+        // ============================================================================
+        // SEARCH & FILTER
+        // ============================================================================
+        
+        function handleSearch() {
+            state.filters.search = document.getElementById('searchInput').value.toLowerCase();
+            renderPayrollTable();
+        }
+
+        function handleFilter() {
+            state.filters.month = document.getElementById('monthFilter').value;
+            state.filters.department = document.getElementById('departmentFilter').value;
+            renderPayrollTable();
+        }
+
+        function getFilteredData() {
+            let filtered = state.employees;
+
+            if (state.filters.search) {
+                filtered = filtered.filter(emp => 
+                    emp.fullName.toLowerCase().includes(state.filters.search) ||
+                    emp.email.toLowerCase().includes(state.filters.search) ||
+                    emp.id.toLowerCase().includes(state.filters.search)
+                );
+            }
+
+            if (state.filters.department) {
+                filtered = filtered.filter(emp => emp.department === state.filters.department);
+            }
+
+            return filtered.map(emp => {
+                const payroll = state.payrollRecords.find(p => 
+                    p.employeeId === emp.id && p.month === state.filters.month
+                );
+                const attendance = state.attendanceRecords.find(a => 
+                    a.employeeId === emp.id && a.month === state.filters.month
+                );
+
+                return { ...emp, payroll, attendance };
+            });
+        }
+
+        // ============================================================================
+        // TABLE RENDERING
+        // ============================================================================
+        
+        function renderPayrollTable() {
+            const tbody = document.getElementById('payrollTableBody');
+            const data = getFilteredData();
+
+            tbody.innerHTML = data.map(item => {
+                const { payroll, attendance } = item;
+                if (!payroll || !attendance) return '';
+
+                const anomalyClass = payroll.hasAnomaly ? 'bg-amber-50 dark:bg-amber-900/10' : '';
+                const anomalyIndicator = payroll.hasAnomaly ? '<i data-lucide="alert-circle" class="w-4 h-4 text-amber-500 anomaly-pulse"></i>' : '';
+
+                return `
+                    <tr class="table-row-hover cursor-pointer transition-colors ${anomalyClass}" onclick="openPayrollDrawer('${item.id}')">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-white font-semibold text-sm">
+                                    ${item.fullName.split(' ').map(n => n[0]).join('').substring(0, 2)}
+                                </div>
+                                <div>
+                                    <div class="text-sm font-medium text-slate-900 dark:text-white flex items-center gap-2">
+                                        ${item.fullName}
+                                        ${anomalyIndicator}
+                                    </div>
+                                    <div class="text-xs text-slate-500 dark:text-slate-400">${item.id}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="text-sm text-slate-600 dark:text-slate-300">${item.department}</span>
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <span class="text-sm font-medium text-slate-900 dark:text-white">${formatCurrency(payroll.baseSalary)}</span>
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <span class="text-sm font-medium text-emerald-600 dark:text-emerald-400">${formatCurrency(payroll.bonus)}</span>
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <span class="text-sm font-medium text-red-600 dark:text-red-400">${formatCurrency(payroll.deductions)}</span>
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <span class="text-sm font-bold text-blue-600 dark:text-blue-400">${formatCurrency(payroll.netSalary)}</span>
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            <div class="flex items-center justify-center gap-2">
+                                <div class="text-sm font-semibold ${getAttendanceColor(attendance.attendanceRate)}">${attendance.attendanceRate.toFixed(1)}%</div>
+                                <div class="text-xs text-slate-500 dark:text-slate-400">(${attendance.workDays}/${attendance.workDays + attendance.leaveDays + attendance.absentDays})</div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <button onclick="event.stopPropagation(); openAdjustmentModal('${item.id}')" class="p-2 text-slate-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors" title="Điều chỉnh lương">
+                                <i data-lucide="edit-2" class="w-4 h-4"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            lucide.createIcons();
+        }
+
+        function getAttendanceColor(rate) {
+            if (rate >= 95) return 'text-emerald-600 dark:text-emerald-400';
+            if (rate >= 85) return 'text-blue-600 dark:text-blue-400';
+            if (rate >= 75) return 'text-amber-600 dark:text-amber-400';
+            return 'text-red-600 dark:text-red-400';
+        }
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+        }
+
+        // ============================================================================
+        // PAYROLL DETAIL DRAWER
+        // ============================================================================
+        
+        function openPayrollDrawer(employeeId) {
+            const employee = state.employees.find(e => e.id === employeeId);
+            if (!employee) return;
+
+            state.selectedEmployee = employee;
+            
+            const payrollHistory = state.payrollRecords
+                .filter(p => p.employeeId === employeeId)
+                .sort((a, b) => b.month.localeCompare(a.month))
+                .slice(0, 6);
+
+            const attendanceHistory = state.attendanceRecords
+                .filter(a => a.employeeId === employeeId)
+                .sort((a, b) => b.month.localeCompare(a.month))
+                .slice(0, 6);
+
+            const currentPayroll = payrollHistory[0];
+            const currentAttendance = attendanceHistory[0];
+
+            const content = document.getElementById('payrollContent');
+            content.innerHTML = `
+                <div class="flex items-start gap-4 pb-6 border-b border-slate-200 dark:border-slate-700">
+                    <div class="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-white font-bold text-2xl flex-shrink-0">
+                        ${employee.fullName.split(' ').map(n => n[0]).join('').substring(0, 2)}
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-1">${employee.fullName}</h3>
+                        <p class="text-slate-600 dark:text-slate-400 mb-2">${employee.position} • ${employee.department}</p>
+                        <p class="text-sm text-slate-500 dark:text-slate-400">${employee.email}</p>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                        <i data-lucide="calendar" class="w-5 h-5 text-blue-500"></i>
+                        <span>Tháng ${formatMonth(currentPayroll.month)}</span>
+                    </h4>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <div class="bg-slate-50 dark:bg-slate-900 rounded-lg p-4">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-sm font-medium text-slate-600 dark:text-slate-400">Lương Cơ Bản</span>
+                                <i data-lucide="dollar-sign" class="w-4 h-4 text-slate-400"></i>
+                            </div>
+                            <div class="text-2xl font-bold text-slate-900 dark:text-white">${formatCurrency(currentPayroll.baseSalary)}</div>
+                        </div>
+
+                        <div class="bg-emerald-50 dark:bg-emerald-900/20 rounded-lg p-4">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-sm font-medium text-emerald-700 dark:text-emerald-400">Thưởng</span>
+                                <i data-lucide="gift" class="w-4 h-4 text-emerald-500"></i>
+                            </div>
+                            <div class="text-2xl font-bold text-emerald-600 dark:text-emerald-400">${formatCurrency(currentPayroll.bonus)}</div>
+                        </div>
+
+                        <div class="bg-red-50 dark:bg-red-900/20 rounded-lg p-4">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-sm font-medium text-red-700 dark:text-red-400">Khấu Trừ</span>
+                                <i data-lucide="minus-circle" class="w-4 h-4 text-red-500"></i>
+                            </div>
+                            <div class="text-2xl font-bold text-red-600 dark:text-red-400">${formatCurrency(currentPayroll.deductions)}</div>
+                        </div>
+
+                        <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-sm font-medium text-blue-700 dark:text-blue-400">Thực Lĩnh</span>
+                                <i data-lucide="check-circle" class="w-4 h-4 text-blue-500"></i>
+                            </div>
+                            <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">${formatCurrency(currentPayroll.netSalary)}</div>
+                        </div>
+                    </div>
+
+                    ${currentPayroll.hasAnomaly ? `
+                        <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4 mb-6">
+                            <div class="flex items-start gap-3">
+                                <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5"></i>
+                                <div>
+                                    <p class="text-sm font-semibold text-amber-800 dark:text-amber-300 mb-1">Phát Hiện Bất Thường</p>
+                                    <p class="text-sm text-amber-700 dark:text-amber-400">${currentPayroll.anomalyReason}</p>
+                                </div>
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+
+                <div>
+                    <h4 class="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                        <i data-lucide="calendar-check" class="w-5 h-5 text-emerald-500"></i>
+                        <span>Chấm Công Tháng ${formatMonth(currentAttendance.month)}</span>
+                    </h4>
+
+                    <div class="grid grid-cols-3 gap-4 mb-6">
+                        <div class="bg-emerald-50 dark:bg-emerald-900/20 rounded-lg p-4 text-center">
+                            <div class="text-3xl font-bold text-emerald-600 dark:text-emerald-400 mb-1">${currentAttendance.workDays}</div>
+                            <div class="text-sm text-slate-600 dark:text-slate-400">Ngày Làm Việc</div>
+                        </div>
+                        <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 text-center">
+                            <div class="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-1">${currentAttendance.leaveDays}</div>
+                            <div class="text-sm text-slate-600 dark:text-slate-400">Ngày Nghỉ Phép</div>
+                        </div>
+                        <div class="bg-red-50 dark:bg-red-900/20 rounded-lg p-4 text-center">
+                            <div class="text-3xl font-bold text-red-600 dark:text-red-400 mb-1">${currentAttendance.absentDays}</div>
+                            <div class="text-sm text-slate-600 dark:text-slate-400">Ngày Vắng</div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-50 dark:bg-slate-900 rounded-lg p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-sm font-medium text-slate-600 dark:text-slate-400">Tỷ Lệ Chuyên Cần</span>
+                            <span class="text-lg font-bold ${getAttendanceColor(currentAttendance.attendanceRate)}">${currentAttendance.attendanceRate.toFixed(1)}%</span>
+                        </div>
+                        <div class="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-3 overflow-hidden">
+                            <div class="h-full ${getAttendanceBarColor(currentAttendance.attendanceRate)} transition-all duration-500" style="width: ${currentAttendance.attendanceRate}%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                        <i data-lucide="trending-up" class="w-5 h-5 text-purple-500"></i>
+                        <span>Lịch Sử Lương 6 Tháng</span>
+                    </h4>
+                    <div class="bg-white dark:bg-slate-900 rounded-lg p-4 border border-slate-200 dark:border-slate-700">
+                        <canvas id="salaryHistoryChart" class="w-full" style="height: 300px;"></canvas>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                        <i data-lucide="list" class="w-5 h-5 text-cyan-500"></i>
+                        <span>Chi Tiết Lịch Sử</span>
+                    </h4>
+                    <div class="overflow-x-auto border border-slate-200 dark:border-slate-700 rounded-lg">
+                        <table class="w-full">
+                            <thead class="bg-slate-50 dark:bg-slate-900">
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase">Tháng</th>
+                                    <th class="px-4 py-3 text-right text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase">Lương CB</th>
+                                    <th class="px-4 py-3 text-right text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase">Thưởng</th>
+                                    <th class="px-4 py-3 text-right text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase">Khấu Trừ</th>
+                                    <th class="px-4 py-3 text-right text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase">Thực Lĩnh</th>
+                                    <th class="px-4 py-3 text-center text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase">Chuyên Cần</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
+                                ${payrollHistory.map((p, idx) => {
+                                    const att = attendanceHistory[idx];
+                                    return `
+                                        <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                                            <td class="px-4 py-3 text-sm font-medium text-slate-900 dark:text-white">${formatMonth(p.month)}</td>
+                                            <td class="px-4 py-3 text-sm text-right text-slate-600 dark:text-slate-300">${formatCurrency(p.baseSalary)}</td>
+                                            <td class="px-4 py-3 text-sm text-right text-emerald-600 dark:text-emerald-400">${formatCurrency(p.bonus)}</td>
+                                            <td class="px-4 py-3 text-sm text-right text-red-600 dark:text-red-400">${formatCurrency(p.deductions)}</td>
+                                            <td class="px-4 py-3 text-sm text-right font-semibold text-blue-600 dark:text-blue-400">${formatCurrency(p.netSalary)}</td>
+                                            <td class="px-4 py-3 text-sm text-center ${getAttendanceColor(att.attendanceRate)}">${att.attendanceRate.toFixed(1)}%</td>
+                                        </tr>
+                                    `;
+                                }).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('payrollDrawer').classList.remove('hidden');
+            lucide.createIcons();
+
+            setTimeout(() => {
+                renderSalaryHistoryChart(payrollHistory);
+            }, 100);
+        }
+
+        function closePayrollDrawer() {
+            document.getElementById('payrollDrawer').classList.add('hidden');
+            state.selectedEmployee = null;
+            
+            if (state.charts.salaryHistory) {
+                state.charts.salaryHistory.destroy();
+                delete state.charts.salaryHistory;
+            }
+        }
+
+        function getAttendanceBarColor(rate) {
+            if (rate >= 95) return 'bg-emerald-500';
+            if (rate >= 85) return 'bg-blue-500';
+            if (rate >= 75) return 'bg-amber-500';
+            return 'bg-red-500';
+        }
+
+        function formatMonth(monthStr) {
+            const [year, month] = monthStr.split('-');
+            return `${month}/${year}`;
+        }
+
+        // ============================================================================
+        // CHART RENDERING
+        // ============================================================================
+        
+        function renderSalaryHistoryChart(payrollHistory) {
+            const ctx = document.getElementById('salaryHistoryChart');
+            if (!ctx) return;
+
+            const isDark = document.documentElement.classList.contains('dark');
+            const textColor = isDark ? '#94a3b8' : '#64748b';
+            const gridColor = isDark ? '#334155' : '#e2e8f0';
+
+            const data = payrollHistory.reverse();
+
+            if (state.charts.salaryHistory) {
+                state.charts.salaryHistory.destroy();
+            }
+
+            state.charts.salaryHistory = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.map(p => formatMonth(p.month)),
+                    datasets: [
+                        {
+                            label: 'Lương Cơ Bản',
+                            data: data.map(p => p.baseSalary / 1000000),
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: 'Thưởng',
+                            data: data.map(p => p.bonus / 1000000),
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: 'Thực Lĩnh',
+                            data: data.map(p => p.netSalary / 1000000),
+                            borderColor: '#8b5cf6',
+                            backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                            tension: 0.4,
+                            fill: true,
+                            borderWidth: 3
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                color: textColor,
+                                usePointStyle: true,
+                                padding: 15
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + formatCurrency(context.parsed.y * 1000000);
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: textColor },
+                            grid: { color: gridColor }
+                        },
+                        y: {
+                            ticks: { 
+                                color: textColor,
+                                callback: function(value) {
+                                    return value + 'M';
+                                }
+                            },
+                            grid: { color: gridColor }
+                        }
+                    }
+                }
+            });
+        }
+
+        // ============================================================================
+        // SALARY ADJUSTMENT MODAL
+        // ============================================================================
+        
+        function openAdjustmentModal(employeeId) {
+            const employee = state.employees.find(e => e.id === employeeId);
+            if (!employee) return;
+
+            const currentPayroll = state.payrollRecords.find(p => 
+                p.employeeId === employeeId && p.month === state.filters.month
+            );
+
+            state.selectedEmployee = employee;
+
+            document.getElementById('adjustmentEmployeeInfo').innerHTML = `
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-white font-semibold">
+                        ${employee.fullName.split(' ').map(n => n[0]).join('').substring(0, 2)}
+                    </div>
+                    <div>
+                        <div class="font-semibold text-slate-900 dark:text-white">${employee.fullName}</div>
+                        <div class="text-sm text-slate-500 dark:text-slate-400">${employee.position} • ${employee.department}</div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('adjustBaseSalary').value = currentPayroll.baseSalary;
+            document.getElementById('adjustBonus').value = currentPayroll.bonus;
+            document.getElementById('adjustDeductions').value = currentPayroll.deductions;
+            document.getElementById('adjustmentReason').value = '';
+            
+            calculateNetSalary();
+            
+            document.getElementById('adjustmentModal').classList.remove('hidden');
+            lucide.createIcons();
+
+            document.getElementById('adjustBaseSalary').addEventListener('input', calculateNetSalary);
+            document.getElementById('adjustBonus').addEventListener('input', calculateNetSalary);
+            document.getElementById('adjustDeductions').addEventListener('input', calculateNetSalary);
+        }
+
+        function closeAdjustmentModal() {
+            document.getElementById('adjustmentModal').classList.add('hidden');
+            document.getElementById('adjustmentForm').reset();
+            document.getElementById('adjustmentWarning').classList.add('hidden');
+            state.selectedEmployee = null;
+        }
+
+        function calculateNetSalary() {
+            const baseSalary = parseFloat(document.getElementById('adjustBaseSalary').value) || 0;
+            const bonus = parseFloat(document.getElementById('adjustBonus').value) || 0;
+            const deductions = parseFloat(document.getElementById('adjustDeductions').value) || 0;
+            
+            const netSalary = baseSalary + bonus - deductions;
+            document.getElementById('adjustNetSalary').value = netSalary;
+
+            validateAdjustment(baseSalary, bonus, deductions, netSalary);
+        }
+
+        function validateAdjustment(baseSalary, bonus, deductions, netSalary) {
+            const employee = state.selectedEmployee;
+            if (!employee) return;
+
+            const warnings = [];
+            const warningDiv = document.getElementById('adjustmentWarning');
+            const warningText = document.getElementById('adjustmentWarningText');
+            const baseSalaryError = document.getElementById('baseSalaryError');
+
+            baseSalaryError.classList.add('hidden');
+
+            if (baseSalary < 5000000) {
+                baseSalaryError.textContent = 'Lương cơ bản không được thấp hơn 5,000,000 VNĐ';
+                baseSalaryError.classList.remove('hidden');
+            }
+
+            const avgBaseSalary = employee.baseSalary;
+            const baseSalaryChange = ((baseSalary - avgBaseSalary) / avgBaseSalary) * 100;
+
+            if (Math.abs(baseSalaryChange) > 30) {
+                warnings.push(`Lương cơ bản thay đổi ${baseSalaryChange > 0 ? '+' : ''}${baseSalaryChange.toFixed(1)}% so với mức trung bình`);
+            }
+
+            if (bonus > baseSalary * 0.5) {
+                warnings.push(`Thưởng vượt quá 50% lương cơ bản (${((bonus / baseSalary) * 100).toFixed(1)}%)`);
+            }
+
+            if (deductions > baseSalary * 0.2) {
+                warnings.push(`Khấu trừ cao bất thường (${((deductions / baseSalary) * 100).toFixed(1)}% lương cơ bản)`);
+            }
+
+            if (warnings.length > 0) {
+                warningText.innerHTML = warnings.map(w => `• ${w}`).join('<br>');
+                warningDiv.classList.remove('hidden');
+            } else {
+                warningDiv.classList.add('hidden');
+            }
+        }
+
+        function handleAdjustmentSubmit(event) {
+            event.preventDefault();
+
+            const baseSalary = parseFloat(document.getElementById('adjustBaseSalary').value);
+            const bonus = parseFloat(document.getElementById('adjustBonus').value);
+            const deductions = parseFloat(document.getElementById('adjustDeductions').value);
+            const netSalary = parseFloat(document.getElementById('adjustNetSalary').value);
+            const reason = document.getElementById('adjustmentReason').value;
+
+            if (baseSalary < 5000000) {
+                showNotification('Lương cơ bản không hợp lệ', 'error');
+                return;
+            }
+
+            const payrollIndex = state.payrollRecords.findIndex(p => 
+                p.employeeId === state.selectedEmployee.id && p.month === state.filters.month
+            );
+
+            if (payrollIndex !== -1) {
+                state.payrollRecords[payrollIndex] = {
+                    ...state.payrollRecords[payrollIndex],
+                    baseSalary,
+                    bonus,
+                    deductions,
+                    netSalary
+                };
+
+                showNotification(currentLanguage === 'vi' ? 'Điều chỉnh lương thành công!' : 'Salary adjusted successfully!', 'success');
+                closeAdjustmentModal();
+                renderPayrollTable();
+
+                if (document.getElementById('payrollDrawer').classList.contains('hidden') === false) {
+                    openPayrollDrawer(state.selectedEmployee.id);
+                }
+            }
+        }
+
+        // ============================================================================
+        // EXPORT FUNCTIONALITY
+        // ============================================================================
+        
+        function exportPayroll() {
+            showNotification(currentLanguage === 'vi' ? 'Đang xuất dữ liệu...' : 'Exporting data...', 'info');
+            
+            setTimeout(() => {
+                showNotification(currentLanguage === 'vi' ? 'Xuất Excel thành công!' : 'Excel exported successfully!', 'success');
+            }, 1500);
+        }
+
+        // ============================================================================
+        // NOTIFICATIONS
+        // ============================================================================
+        
+        function showNotification(message, type = 'info') {
+            const colors = {
+                success: 'bg-emerald-500',
+                error: 'bg-red-500',
+                info: 'bg-blue-500'
+            };
+
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 ${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg z-50 fade-in`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        // ============================================================================
+        // INITIALIZATION
+        // ============================================================================
+        
+        function init() {
+            initTheme();
+            initLanguage();
+            renderPayrollTable();
+            lucide.createIcons();
+        }
+
+        init();
+    </script>
+</body>
+</html>

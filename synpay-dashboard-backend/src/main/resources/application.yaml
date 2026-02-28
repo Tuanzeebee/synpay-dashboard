@@ -1,0 +1,43 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: synpay-dashboard
+  main:
+    banner-mode: off
+
+  jpa:
+    open-in-view: false
+    show-sql: true
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        format_sql: true
+
+  datasource:
+    hr:
+      jdbc-url: jdbc:sqlserver://localhost:1433;databaseName=HUMAN;encrypt=true;trustServerCertificate=true
+      username: sa
+      password: Ilovedu20@
+      driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+
+    payroll:
+      jdbc-url: jdbc:mysql://localhost:3306/payroll?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      username: root
+      password: Ilovedu20@
+      driver-class-name: com.mysql.cj.jdbc.Driver
+
+    auth:
+      jdbc-url: jdbc:mysql://localhost:3306/auth_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      username: root
+      password: Ilovedu20@
+      driver-class-name: com.mysql.cj.jdbc.Driver
+
+logging:
+  level:
+    root: WARN
+    org.springframework.security: WARN
+    org.hibernate.SQL: DEBUG
+    com.companyx.synpay_dashboard: INFO

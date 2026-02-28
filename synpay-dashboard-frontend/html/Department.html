@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="vi" style="height: auto; min-height: 100%;">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Department & Position Management - HR Nexus</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #475569;
+        }
+        .dark ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+        .item-hover:hover {
+            background-color: rgba(59, 130, 246, 0.05);
+        }
+        .dark .item-hover:hover {
+            background-color: rgba(59, 130, 246, 0.1);
+        }
+        .sync-pulse {
+            animation: syncPulse 2s ease-in-out infinite;
+        }
+        @keyframes syncPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3b82f6',
+                        secondary: '#64748b',
+                        success: '#10b981',
+                        warning: '#f59e0b',
+                        critical: '#ef4444',
+                        info: '#06b6d4',
+                        purple: '#8b5cf6'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body style="height: auto; min-height: 100%;" class="bg-slate-50 dark:bg-slate-900 transition-colors duration-300">
+
+    <div class="flex w-full">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex-col hidden lg:flex shrink-0 transition-colors duration-300">
+            <div class="p-6 border-b border-slate-100 dark:border-slate-700">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 bg-blue-600 dark:bg-blue-500 rounded-lg flex items-center justify-center text-white font-bold text-lg">H</div>
+                    <span class="font-bold text-xl text-slate-800 dark:text-white">HR Nexus</span>
+                </div>
+            </div>
+
+            <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
+                <div class="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-4 px-2">Menu Chính</div>
+                
+                <a href="#" class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white rounded-md font-medium transition-colors">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                    <span>Bảng Điều Khiển</span>
+                </a>
+                <a href="#" class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white rounded-md font-medium transition-colors">
+                    <i data-lucide="users" class="w-5 h-5"></i>
+                    <span>Nhân Viên</span>
+                </a>
+                <a href="#" class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white rounded-md font-medium transition-colors">
+                    <i data-lucide="banknote" class="w-5 h-5"></i>
+                    <span>Bảng Lương</span>
+                </a>
+                <a href="#" class="flex items-center gap-3 px-3 py-2.5 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-md font-medium transition-colors">
+                    <i data-lucide="building-2" class="w-5 h-5"></i>
+                    <span>Phòng Ban & Chức Vụ</span>
+                </a>
+                <a href="#" class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white rounded-md font-medium transition-colors">
+                    <i data-lucide="pie-chart" class="w-5 h-5"></i>
+                    <span>Báo Cáo</span>
+                </a>
+            </nav>
+            
+            <div class="p-4 border-t border-slate-100 dark:border-slate-700">
+                <div class="flex items-center gap-3 px-3 py-2">
+                    <div class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-xs font-medium text-slate-600 dark:text-slate-300">v1.0</div>
+                    <div class="text-xs text-slate-500 dark:text-slate-400">
+                        <p>HR Nexus System</p>
+                        <p>© 2024</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col min-w-0">
+            <!-- Header -->
+            <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-20 transition-colors duration-300">
+                <div class="px-4 md:px-8 py-4 flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <button class="text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 lg:hidden">
+                            <i data-lucide="menu" class="w-6 h-6"></i>
+                        </button>
+                        <div>
+                            <h1 class="text-xl font-bold text-slate-900 dark:text-white">Quản Lý Phòng Ban & Chức Vụ</h1>
+                            <p class="text-sm text-slate-500 dark:text-slate-400 hidden sm:block">Cấu trúc tổ chức và vị trí công việc</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <!-- Language Toggle -->
+                        <button class="p-2 text-slate-400 dark:text-slate-300 hover:text-slate-600 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg transition-colors" title="Chuyển đổi ngôn ngữ">
+                            <i data-lucide="languages" class="w-5 h-5"></i>
+                        </button>
+
+                        <!-- Refresh Button -->
+                        <button class="p-2 text-slate-400 dark:text-slate-300 hover:text-slate-600 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg transition-colors" title="Làm mới">
+                            <i data-lucide="refresh-cw" class="w-5 h-5"></i>
+                        </button>
+
+                        <!-- Theme Toggle -->
+                        <button class="p-2 text-slate-400 dark:text-slate-300 hover:text-slate-600 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg transition-colors" title="Chuyển đổi chế độ">
+                            <i data-lucide="moon" class="w-5 h-5"></i>
+                        </button>
+
+                        <!-- Sync Button -->
+                        <button class="px-4 py-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg font-medium transition-colors flex items-center gap-2">
+                            <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                            <span class="hidden sm:inline">Đồng Bộ</span>
+                        </button>
+                        
+                        <div class="relative ml-2">
+                            <button class="flex items-center gap-3 p-1.5 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+                                <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="Profile" class="w-9 h-9 rounded-full border-2 border-slate-200 dark:border-slate-600">
+                                <div class="hidden md:block text-left">
+                                    <p class="text-sm font-semibold text-slate-900 dark:text-white">Alex Morgan</p>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400">Giám Đốc Nhân Sự</p>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content -->
+            <div class="flex-1 p-4 md:p-8 overflow-y-auto">
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    <div class="bg-white dark:bg-slate-800 p-5 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm transition-colors duration-300">
+                        <div class="flex justify-between items-start mb-3">
+                            <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Tổng Phòng Ban</span>
+                            <i data-lucide="building-2" class="w-4 h-4 text-blue-500 dark:text-blue-400"></i>
+                        </div>
+                        <div class="text-2xl font-bold text-slate-900 dark:text-white mb-1">8</div>
+                        <div class="text-xs text-slate-500 dark:text-slate-400">Đang hoạt động</div>
+                    </div>
+
+                    <div class="bg-white dark:bg-slate-800 p-5 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm transition-colors duration-300">
+                        <div class="flex justify-between items-start mb-3">
+                            <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Tổng Chức Vụ</span>
+                            <i data-lucide="briefcase" class="w-4 h-4 text-emerald-500 dark:text-emerald-400"></i>
+                        </div>
+                        <div class="text-2xl font-bold text-slate-900 dark:text-white mb-1">24</div>
+                        <div class="text-xs text-slate-500 dark:text-slate-400">Vị trí công việc</div>
+                    </div>
+
+                    <div class="bg-white dark:bg-slate-800 p-5 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm transition-colors duration-300">
+                        <div class="flex justify-between items-start mb-3">
+                            <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Nhân Viên</span>
+                            <i data-lucide="users" class="w-4 h-4 text-cyan-500 dark:text-cyan-400"></i>
+                        </div>
+                        <div class="text-2xl font-bold text-slate-900 dark:text-white mb-1">156</div>
+                        <div class="text-xs text-emerald-600 dark:text-emerald-400 font-medium">Đã phân bổ</div>
+                    </div>
+
+                    <div class="bg-white dark:bg-slate-800 p-5 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm transition-colors duration-300">
+                        <div class="flex justify-between items-start mb-3">
+                            <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Đồng Bộ</span>
+                            <i data-lucide="check-circle" class="w-4 h-4 text-emerald-500 dark:text-emerald-400"></i>
+                        </div>
+                        <div class="text-2xl font-bold text-slate-900 dark:text-white mb-1">100%</div>
+                        <div class="text-xs text-emerald-600 dark:text-emerald-400 font-medium">Cập nhật 5 phút trước</div>
+                    </div>
+                </div>
+
+                <!-- Split Panel Layout -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Departments Panel -->
+                    <div class="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm transition-colors duration-300">
+                        <div class="p-6 border-b border-slate-200 dark:border-slate-700">
+                            <div class="flex items-center justify-between mb-4">
+                                <h2 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                    <i data-lucide="building-2" class="w-5 h-5 text-blue-500 dark:text-blue-400"></i>
+                                    <span>Phòng Ban</span>
+                                </h2>
+                                <button class="px-4 py-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white rounded-lg font-medium transition-colors flex items-center gap-2 text-sm">
+                                    <i data-lucide="plus" class="w-4 h-4"></i>
+                                    <span>Thêm Mới</span>
+                                </button>
+                            </div>
+                            <div class="relative">
+                                <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"></i>
+                                <input 
+                                    type="text" 
+                                    placeholder="Tìm kiếm phòng ban..."
+                                    class="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-colors"
+                                >
+                            </div>
+                        </div>
+                        <div class="divide-y divide-slate-200 dark:divide-slate-700 max-h-[600px] overflow-y-auto">
+                            <!-- Department 1 -->
+                            <div class="p-4 item-hover transition-colors">
+                                <div class="flex items-start justify-between gap-3">
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <h3 class="text-sm font-semibold text-slate-900 dark:text-white">Phòng Kỹ Thuật</h3>
+                                            <span class="px-2 py-0.5 text-xs font-medium rounded bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">Hoạt động</span>
+                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400">
+                                                <i data-lucide="check-circle" class="w-3 h-3"></i>
+                                                Synced
+                                            </span>
+                                        </div>
+                                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-2">Mã: ENG</p>
+                                        <p class="text-xs text-slate-600 dark:text-slate-400 mb-2">Phát triển sản phẩm và công nghệ</p>
+                                        <div class="flex items-center gap-4 text-xs text-slate-500 dark:text-slate-400">
+                                            <div class="flex items-center gap-1">
+                                                <i data-lucide="users" class="w-3 h-3"></i>
+                                                <span>45 nhân viên</span>
+                                            </div>
+                                            <div class="flex items-center gap-1">
+                                                <i data-lucide="briefcase" class="w-3 h-3"></i>
+                                                <span>4 chức vụ</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-1">
+                                        <button class="p-2 text-slate-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors">
+                                            <i data-lucide="edit-2" class="w-4 h-4"></i>
+                                        </button>
+                                        <button class="p-2 text-slate-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors">
+                                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Department 2 -->
+                            <div class="p-4 item-hover transition-colors">
+                                <div class="flex items-start justify-between gap-3">
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <h3 class="text-sm font-semibold text-slate-900 dark:text-white">Phòng Kinh Doanh</h3>
+                                            <span class="px-2 py-0.5 text-xs font-medium rounded bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">Hoạt động</span>
+                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400">
+                                                <i data-lucide="check-circle" class="w-3 h-3"></i>
+                                                Synced
+                                            </span>
+                                        </div>
+                                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-2">Mã: SALES</p>
+                                        <p class="text-xs text-slate-600 dark:text-slate-400 mb-2">Bán hàng và phát triển thị trường</p>
+                                        <div class="flex items-center gap-4 text-xs text-slate-500 dark:text-slate-400">
+                                            <div class="flex items-center gap-1">
+                                                <i data-lucide="users" class="w-3 h-3"></i>
+                                                <span>32 nhân viên</span>
+                                            </div>
+                                            <div class="flex items-center gap-1">
+                                                <i data-lucide="briefcase" class="w-3 h-3"></i>
+                                                <span>3 chức vụ</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-1">
+                                        <button class="p-2 text-slate-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors">
+                                            <i data-lucide="edit-2" class="w-4 h-4"></i>
+                                        </button>
+                                        <button class="p-2 text-slate-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors">
+                                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Department 3 -->
+                            <div class="p-4 item-hover transition-colors">
+                                <div class="flex items-start justify-between gap-3">
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <h3 class="text-sm font-semibold text-slate-900 dark:text-white">Phòng Marketing</h3>
+                                            <span class="px-2 py-0.5 text-xs font-medium rounded bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">Hoạt động</span>
+                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400">
+                                                <i data-lucide="check-circle" class="w-3 h-3"></i>
+                                                Synced
+                                            </span>
+                                        </div>
+                                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-2">Mã: MKT</p>
+                                        <p class="text-xs text-slate-600 dark:text-slate-400 mb-2">Truyền thông và tiếp thị</p>
+                                        <div class="flex items-center gap-4 text-xs text-slate-500 dark:text-slate-400">
+                                            <div class="flex items-center gap-1">
+                                                <i data-lucide="users" class="w-3 h-3"></i>
+                                                <span>18 nhân viên</span>
+                                            </div>
+                                            <div class="flex items-center gap-1">
+                                                <i data-lucide="briefcase" class="w-3 h-3"></i>
+                                                <span>4 chức vụ</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-1">
+                                        <button class="p-2 text-slate-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors">
+                                            <i data-lucide="edit-2" class="w-4 h-4"></i>
+                                        </button>
+                                        <button class="p-2 text-slate-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors">
+                                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Department 4 -->
+                            <div class="p-4 item-hover transition-colors">
+                                <div class="flex items-start justify-between gap-3">
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <h3 class="text-sm font-semibold text-slate-900 dark:text-white">Phòng Nhân Sự</h3>
+                                            <span class="px-2 py-0.5 text-xs font-medium rounded bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">Hoạt động</span>
+                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400">
+                                                <i data-lucide="check-circle" class="w-3 h-3"></i>
+                                                Synced
+                                            </span>
+                                        </div>
+                                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-2">Mã: HR</p>
+                                        <p class="text-xs text-slate-600 dark:text-slate-400 mb-2">Quản lý nguồn nhân lực</p>
+                                        <div class="flex items-center gap-4 text-xs text-slate-500 dark:text-slate-400">
+                                            <div class="flex items-center gap-1">
+                                                <i data-lucide="users" class="w-3 h-3"></i>
+                                                <span>12 nhân viên</span>
+                                            </div>
+                                            <div class="flex items-center gap-1">
+                                                <i data-lucide="briefcase" class="w-3 h-3"></i>
+                                                <span>3 chức vụ</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-1">
+                                        <button class="p-2 text-slate-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors">
+                                            <i data-lucide="edit-2" class="w-4 h-4"></i>
+                                        </button>
+                                        <button class="p-2 text-slate-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors">
+                                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Department 5 -->
+                            <div class="p-4 item-hover transition-colors">
+                                <div class="flex items-start justify-between gap-3">
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <h3 class="text-sm font-semibold text-slate-900 dark:text-white">Phòng Tài Chính</h3>
+                                            <span class="px-2 py-0.5 text-xs font-medium rounded bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">Hoạt động</span>
+                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400">
+                                                <i data-lucide="check-circle" class="w-3 h-3"></i>
+                                                Synced
+                                            </span>
+                                        </div>
+                                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-2">Mã: FIN</p>
+                                        <p class="text-xs text-slate-600 dark:text-slate-400 mb-2">Kế toán và tài chính</p>
+                                        <div class="flex items-center gap-4 text-xs text-slate-500 dark:text-slate-400">
+                                            <div class="flex items-center gap-1">
+                                                <i data-lucide="users" class="w-3 h-3"></i>
+                                                <span>15 nhân viên</span>
+                                            </div>
+                                            <div class="flex items-center gap-1">
+                                                <i data-lucide="briefcase" class="w-3 h-3"></i>
+                                                <span>3 chức vụ</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-1">
+                                        <button class="p-2 text-slate-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors">
+                                            <i data-lucide="edit-2" class="w-4 h-4"></i>
+                                        </button>
+                                        <button class="p-2 text-slate-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors">
+                                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Department 6 -->
+                            <div class="p-4 item-hover transition-colors">
+                                <div class="flex items-start justify-between gap-3">
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <h3 class="text-sm font-semibold text-slate-900 dark:text-white">Phòng Vận Hành</h3>
+                                            <span class="px-2 py-0.5 text-xs font-medium rounded bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">Hoạt động</span>
+                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400">
+                                                <i data-lucide="check-circle" class="w-3 h-3"></i>
+                                                Synced
+                                            </span>
+                                        </div>
+                                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-2">Mã: OPS</p>
+                                        <p class="text-xs text-slate-600 dark:text-slate-400 mb-2">Quản lý hoạt động và quy trình</p>
+                                        <div class="flex items-center gap-4 text-xs text-slate-500 dark:text-slate-400">
+                                            <div class="flex items-center gap-1">
+                                                <i data-lucide="users" class="w-3 h-3"></i>
+                                                <span>22 nhân viên</span>
+                                            </div>
+                                            <div class="flex items-center gap-1">
+                                                <i data-lucide="briefcase" class="w-3 h-3"></i>
+                                                <span>3 chức vụ</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-1">
+                                        <button class="p-2 text-slate-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors">
+                                            <i data-lucide="edit-2" class="w-4 h-4"></i>
+                                        </button>
+                                        <button class="p-2 text-slate-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors">
+                                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Department 7 - With Pending Sync -->
+                            <div class="p-4 item-hover transition-colors">
+                                <div class="flex items-start justify-between gap-3">
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <h3 class="text-sm font-semibold text-slate-900 dark:text-white">Phòng Chăm Sóc Khách Hàng</h3>
+                                            <span class="px-2 py-0.5 text-xs font-medium rounded bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">Hoạt động</span>
+                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 sync-pulse">
+                                                <i data-lucide="clock" class="w-3 h-3"></i>
+                                                Pending
+                                            </span>
+                                        </div>
+                                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-2">Mã: CS</p>
+                                        <p class="text-xs text-slate-600 dark:text-slate-400 mb-2">Hỗ trợ và dịch vụ khách hàng</p>
+                                        <div class="flex items-center gap-4 text-xs text-slate-500 dark:text-slate-400">
+                                            <div class="flex items-center gap-1">
+                                                <i data-lucide="users" class="w-3 h-3"></i>
+                                                <span>10 nhân viên</span>
+                                            </div>
+                                            <div class="flex items-center gap-1">
+                                                <i data-lucide="briefcase" class="w-3 h-3"></i>
+                                                <span>2 chức vụ</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-1">
+                                        <button class="p-2 text-slate-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors">
+                                            <i data-lucide="edit-2" class="w-4 h-4"></i>
+                                        </button>
+                                        <button class="p-2 text-slate-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors">
+                                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Department 8 -->
+                            <div class="p-4 item-hover transition-colors">
+                                <div class="flex items-start justify-between gap-3">
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <h3 class="text-sm font-semibold text-slate-900 dark:text-white">Phòng Nghiên Cứu</h3>
+                                            <span class="px-2 py-0.5 text-xs font-medium rounded bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">Hoạt động</span>
+                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400">
+                                                <i data-lucide="check-circle" class="w-3 h-3"></i>
+                                                Synced
+                                            </span>
+                                        </div>
+                                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-2">Mã: RD</p>
+                                        <p class="text-xs text-slate-600 dark:text-slate-400 mb-2">Nghiên cứu và phát triển</p>
+                                        <div class="flex items-center gap-4 text-xs text-slate-500 dark:text-slate-400">
+                                            <div class="flex items-center gap-1">
+                                                <i data-lucide="users" class="w-3 h-3"></i>
+                                                <span>2 nhân viên</span>
+                                            </div>
+                                            <div class="flex items-center gap-1">
+                                                <i data-lucide="briefcase" class="w-3 h-3"></i>
+                                                <span>2 chức vụ</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-1">
+                                        <button class="p-2 text-slate-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors">
+                                            <i data-lucide="edit-2" class="w-4 h-4"></i>
+                                        </button>
+                                        <button class="p-2 text-slate-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors">
+                                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Positions Panel -->
+                    <div class="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm transition-colors duration-300">
+                        <div class="p-6 border-b border-slate-200 dark:border-slate-700">
+                            <div class="flex items-center justify-between mb-4">
+                                <h2 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                    <i data-lucide="briefcase" class="w-5 h-5 text-emerald-500 dark:text-emerald-400"></i>
+                                    <span>Chức Vụ</span>
+                                </h2>
+                                <button class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white rounded-lg font-medium transition-colors flex items-center gap-2 text-sm">
+                                    <i data-lucide="plus" class="w-4 h-4"></i>
+                                    <span>Thêm Mới</span>
+                                </button>
+                            </div>
+                            <div class="flex gap-2 mb-4">
+                                <div class="relative flex-1">
+                                    <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"></i>
+                                    <input 
+                                        type="text" 
+                                        placeholder="Tìm kiếm chức vụ..."
+                                        class="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:focus:ring-emerald-400 focus:border-transparent transition-colors"
+                                    >
+                                </div>
+                                <select class="px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:focus:ring-emerald-400 transition-colors">
+                                    <option value="">Tất cả phòng ban</option>
+                                    <option value="ENG">Phòng Kỹ Thuật</option>
+                                    <option value="SALES">Phòng Kinh Doanh</option>
+                                    <option value="MKT">Phòng Marketing</option>
+                                    <option value="HR">Phòng Nhân Sự</option>
+                                    <option value="FIN">Phòng Tài Chính</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="divide-y divide-slate-200 dark:divide-slate-700 max-h-[600px] overflow-y-auto">
+                            <!-- Position 1 -->
+                            <div class="p-4 item-hover transition-colors">
+                                <div class="flex items-start justify-between gap-3">
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <h3 class="text-sm font-semibold text-slate-900 dark:text-white">Senior Developer</h3>
+                                            <span class="px-2 py-0.5 text-xs font-medium rounded bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">Hoạt động</span>
+                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400">
+                                                <i data-lucide="check-circle" class="w-3 h-3"></i>
+                                                Synced
+                                            </span>
+                                        </div>
+                                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-2">Mã: DEV01 • Senior</p>
+                                        <p class="text-xs text-blue-600 dark:text-blue-400 mb-2">Phòng Kỹ Thuật</p>
+                                        <p class="text-xs text-slate-600 dark:text-slate-400 mb-2">Phát triển phần mềm cấp cao</p>
+                                        <div class="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
+                                            <i data-lucide="users" class="w-3 h-3"></i>
+                                            <span>12 nhân viên</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-1">
+                                        <button class="p-2 text-slate-400 dark:text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-lg transition-colors">
+                                            <i data-lucide="edit-2" class="w-4 h-4"></i>
+                                        </button>
+                                        <button class="p-2 text-slate-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors">
+                                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Position 2 -->
+                            <div class="p-4 item-hover transition-colors">
+                                <div class="flex items-start justify-between gap-3">
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <h3 class="text-sm font-semibold text-slate-900 dark:text-white">Junior Developer</h3>
+                                            <span class="px-2 py-0.5 text-xs font-medium rounded bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">Hoạt động</span>
+                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400">
+                                                <i data-lucide="check-circle" class="w-3 h-3"></i>
+                                                Synced
+                                            </span>
+                                        </div>
+                                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-2">Mã: DEV02 • Junior</p>
+                                        <p class="text-xs text-blue-600 dark:text-blue-400 mb-2">Phòng Kỹ Thuật</p>
+                                        <p class="text-xs text-slate-600 dark:text-slate-400 mb-2">Phát triển phần mềm cơ bản</p>
+                                        <div class="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
+                                            <i data-lucide="users" class="w-3 h-3"></i>
+                                            <span>18 nhân viên</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-1">
+                                        <button class="p-2 text-slate-400 dark:text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-lg transition-colors">
+                                            <i data-lucide="edit-2" class="w-4 h-4"></i>
+                                        </button>
+                                        <button class="p-2 text-slate-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors">
+                                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Position 3 -->
+                            <div class="p-4 item-hover transition-colors">
+                                <div class="flex items-start justify-between gap-3">
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <h3 class="text-sm font-semibold text-slate-900 dark:text-white">Tech Lead</h3>
+                                            <span class="px-2 py-0.5 text-xs font-medium rounded bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">Hoạt động</span>
+                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400">
+                                                <i data-lucide="check-circle" class="w-3 h-3"></i>
+                                                Synced
+                                            </span>
+                                        </div>
+                                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-2">Mã: DEV03 • Lead</p>
+                                        <p class="text-xs text-blue-600 dark:text-blue-400 mb-2">Phòng Kỹ Thuật</p>
+                                        <p class="text-xs text-slate-600 dark:text-slate-400 mb-2">Dẫn dắt nhóm kỹ thuật</p>
+                                        <div class="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
+                                            <i data-lucide="users" class="w-3 h-3"></i>
+                                            <span>8 nhân viên</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-1">
+                                        <button class="p-2 text-slate-400 dark:text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-lg transition-colors">
+                                            <i data-lucide="edit-2" class="w-4 h-4"></i>
+                                        </button>
+                                        <button class="p-2 text-slate-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors">
+                                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Position 4 -->
+                            <div class="p-4 item-hover transition-colors">
+                                <div class="flex items-start justify-between gap-3">
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <h3 class="text-sm font-semibold text-slate-900 dark:text-white">DevOps Engineer</h3>
+                                            <span class="px-2 py-0.5 text-xs font-medium rounded bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">Hoạt động</span>
+                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400">
+                                                <i data-lucide="check-circle" class="w-3 h-3"></i>
+                                                Synced
+                                            </span>
+                                        </div>
+                                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-2">Mã: DEV04 • Mid Level</p>
+                                        <p class="text-xs text-blue-600 dark:text-blue-400 mb-2">Phòng Kỹ Thuật</p>
+                                        <p class="text-xs text-slate-600 dark:text-slate-400 mb-2">Quản lý hạ tầng và triển khai</p>
+                                        <div class="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
+                                            <i data-lucide="users" class="w-3 h-3"></i>
+                                            <span>7 nhân viên</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-1">
+                                        <button class="p-2 text-slate-400 dark:text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-lg transition-colors">
+                                            <i data-lucide="edit-2" class="w-4 h-4"></i>
+                                        </button>
+                                        <button class="p-2 text-slate-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors">
+                                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Position 5 -->
+                            <div class="p-4 item-hover transition-colors">
+                                <div class="flex items-start justify-between gap-3">
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <h3 class="text-sm font-semibold text-slate-900 dark:text-white">Sales Manager</h3>
+                                            <span class="px-2 py-0.5 text-xs font-medium rounded bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">Hoạt động</span>
+                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400">
+                                                <i data-lucide="check-circle" class="w-3 h-3"></i>
+                                                Synced
+                                            </span>
+                                        </div>
+                                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-2">Mã: SALES01 • Manager</p>
+                                        <p class="text-xs text-blue-600 dark:text-blue-400 mb-2">Phòng Kinh Doanh</p>
+                                        <p class="text-xs text-slate-600 dark:text-slate-400 mb-2">Quản lý đội ngũ bán hàng</p>
+                                        <div class="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
+                                            <i data-lucide="users" class="w-3 h-3"></i>
+                                            <span>5 nhân viên</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-1">
+                                        <button class="p-2 text-slate-400 dark:text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-lg transition-colors">
+                                            <i data-lucide="edit-2" class="w-4 h-4"></i>
+                                        </button>
+                                        <button class="p-2 text-slate-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors">
+                                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Position 6 -->
+                            <div class="p-4 item-hover transition-colors">
+                                <div class="flex items-start justify-between gap-3">
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <h3 class="text-sm font-semibold text-slate-900 dark:text-white">Sales Executive</h3>
+                                            <span class="px-2 py-0.5 text-xs font-medium rounded bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">Hoạt động</span>
+                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400">
+                                                <i data-lucide="check-circle" class="w-3 h-3"></i>
+                                                Synced
+                                            </span>
+                                        </div>
+                                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-2">Mã: SALES02 • Mid Level</p>
+                                        <p class="text-xs text-blue-600 dark:text-blue-400 mb-2">Phòng Kinh Doanh</p>
+                                        <p class="text-xs text-slate-600 dark:text-slate-400 mb-2">Nhân viên kinh doanh</p>
+                                        <div class="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
+                                            <i data-lucide="users" class="w-3 h-3"></i>
+                                            <span>20 nhân viên</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-1">
+                                        <button class="p-2 text-slate-400 dark:text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-lg transition-colors">
+                                            <i data-lucide="edit-2" class="w-4 h-4"></i>
+                                        </button>
+                                        <button class="p-2 text-slate-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors">
+                                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Position 7 -->
+                            <div class="p-4 item-hover transition-colors">
+                                <div class="flex items-start justify-between gap-3">
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <h3 class="text-sm font-semibold text-slate-900 dark:text-white">Marketing Manager</h3>
+                                            <span class="px-2 py-0.5 text-xs font-medium rounded bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">Hoạt động</span>
+                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400">
+                                                <i data-lucide="check-circle" class="w-3 h-3"></i>
+                                                Synced
+                                            </span>
+                                        </div>
+                                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-2">Mã: MKT01 • Manager</p>
+                                        <p class="text-xs text-blue-600 dark:text-blue-400 mb-2">Phòng Marketing</p>
+                                        <p class="text-xs text-slate-600 dark:text-slate-400 mb-2">Quản lý marketing</p>
+                                        <div class="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
+                                            <i data-lucide="users" class="w-3 h-3"></i>
+                                            <span>3 nhân viên</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-1">
+                                        <button class="p-2 text-slate-400 dark:text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-lg transition-colors">
+                                            <i data-lucide="edit-2" class="w-4 h-4"></i>
+                                        </button>
+                                        <button class="p-2 text-slate-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors">
+                                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Position 8 -->
+                            <div class="p-4 item-hover transition-colors">
+                                <div class="flex items-start justify-between gap-3">
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <h3 class="text-sm font-semibold text-slate-900 dark:text-white">Content Writer</h3>
+                                            <span class="px-2 py-0.5 text-xs font-medium rounded bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">Hoạt động</span>
+                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400">
+                                                <i data-lucide="check-circle" class="w-3 h-3"></i>
+                                                Synced
+                                            </span>
+                                        </div>
+                                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-2">Mã: MKT02 • Mid Level</p>
+                                        <p class="text-xs text-blue-600 dark:text-blue-400 mb-2">Phòng Marketing</p>
+                                        <p class="text-xs text-slate-600 dark:text-slate-400 mb-2">Viết nội dung</p>
+                                        <div class="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
+                                            <i data-lucide="users" class="w-3 h-3"></i>
+                                            <span>8 nhân viên</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-1">
+                                        <button class="p-2 text-slate-400 dark:text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-lg transition-colors">
+                                            <i data-lucide="edit-2" class="w-4 h-4"></i>
+                                        </button>
+                                        <button class="p-2 text-slate-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors">
+                                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Position 9 -->
+                            <div class="p-4 item-hover transition-colors">
+                                <div class="flex items-start justify-between gap-3">
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <h3 class="text-sm font-semibold text-slate-900 dark:text-white">HR Manager</h3>
+                                            <span class="px-2 py-0.5 text-xs font-medium rounded bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">Hoạt động</span>
+                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400">
+                                                <i data-lucide="check-circle" class="w-3 h-3"></i>
+                                                Synced
+                                            </span>
+                                        </div>
+                                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-2">Mã: HR01 • Manager</p>
+                                        <p class="text-xs text-blue-600 dark:text-blue-400 mb-2">Phòng Nhân Sự</p>
+                                        <p class="text-xs text-slate-600 dark:text-slate-400 mb-2">Quản lý nhân sự</p>
+                                        <div class="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
+                                            <i data-lucide="users" class="w-3 h-3"></i>
+                                            <span>2 nhân viên</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-1">
+                                        <button class="p-2 text-slate-400 dark:text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-lg transition-colors">
+                                            <i data-lucide="edit-2" class="w-4 h-4"></i>
+                                        </button>
+                                        <button class="p-2 text-slate-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors">
+                                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Position 10 - With Pending Sync -->
+                            <div class="p-4 item-hover transition-colors">
+                                <div class="flex items-start justify-between gap-3">
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <h3 class="text-sm font-semibold text-slate-900 dark:text-white">Customer Support Agent</h3>
+                                            <span class="px-2 py-0.5 text-xs font-medium rounded bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">Hoạt động</span>
+                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 sync-pulse">
+                                                <i data-lucide="clock" class="w-3 h-3"></i>
+                                                Pending
+                                            </span>
+                                        </div>
+                                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-2">Mã: CS02 • Mid Level</p>
+                                        <p class="text-xs text-blue-600 dark:text-blue-400 mb-2">Phòng Chăm Sóc Khách Hàng</p>
+                                        <p class="text-xs text-slate-600 dark:text-slate-400 mb-2">Nhân viên hỗ trợ</p>
+                                        <div class="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
+                                            <i data-lucide="users" class="w-3 h-3"></i>
+                                            <span>8 nhân viên</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-1">
+                                        <button class="p-2 text-slate-400 dark:text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-lg transition-colors">
+                                            <i data-lucide="edit-2" class="w-4 h-4"></i>
+                                        </button>
+                                        <button class="p-2 text-slate-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors">
+                                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>

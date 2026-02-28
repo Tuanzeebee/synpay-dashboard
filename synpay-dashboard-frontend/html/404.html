@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="vi" style="height: auto; min-height: 100%;">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Không Tìm Thấy Trang - HR Nexus</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link id="heading-font-link" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link id="body-font-link" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        heading: ['var(--font-heading-name)', 'sans-serif'],
+                        body: ['var(--font-body-name)', 'sans-serif'],
+                    },
+                    spacing: {
+                        base: 'var(--space-base)',
+                    },
+                    borderRadius: {
+                        small: 'var(--radius-small)',
+                        large: 'var(--radius-large)',
+                    },
+                    boxShadow: {
+                        custom: 'var(--shadow-custom)',
+                        'custom-hover': 'var(--shadow-custom-hover)',
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        :root {
+            --font-heading-name: 'Inter';
+            --font-body-name: 'Inter';
+            --font-heading: 'Inter', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --letter-spacing-heading: -0.02em;
+            --letter-spacing-body: 0em;
+            
+            --space-base: 1rem;
+            
+            --radius-small: 0.5rem;
+            --radius-large: 0.75rem;
+            --border-width: 1px;
+            
+            --shadow-color: 0 0 0;
+            --shadow-offset-x: 0px;
+            --shadow-offset-y: 1px;
+            --shadow-blur: 3px;
+            --shadow-spread: 0px;
+            --shadow-opacity: 0.1;
+            --shadow-custom: 0px 1px 3px 0px rgba(0, 0, 0, 0.1);
+            --shadow-custom-hover: 0px 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); opacity: 1; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+        
+        .float-animation {
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        .pulse-ring {
+            animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        .shake-animation {
+            animation: shake 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body style="height: auto; min-height: 100%;" class="font-body bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 text-slate-900 dark:text-slate-100 transition-colors duration-300">
+
+    <div class="flex flex-col">
+        <!-- Header -->
+        <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 transition-colors duration-300 max-h-[80px]">
+            <div class="px-4 md:px-8 py-4 flex items-center justify-between max-w-7xl mx-auto">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 dark:from-blue-500 dark:to-blue-600 rounded-large flex items-center justify-center text-white font-bold text-xl shadow-custom">H</div>
+                    <div>
+                        <span class="font-heading font-bold text-xl text-slate-800 dark:text-white block">HR Nexus</span>
+                        <span class="text-xs text-slate-500 dark:text-slate-400">Phiên Bản Doanh Nghiệp</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <button onclick="toggleDarkMode()" class="p-2 text-slate-400 dark:text-slate-300 hover:text-slate-600 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-700 rounded-large transition-colors">
+                        <i data-lucide="moon" class="w-5 h-5 dark:hidden"></i>
+                        <i data-lucide="sun" class="w-5 h-5 hidden dark:block"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex items-center justify-center p-4 md:p-8 max-h-[900px]">
+            <div class="max-w-2xl w-full">
+                <!-- Error Icon with Animation -->
+                <div class="flex justify-center mb-8 relative">
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <div class="w-32 h-32 bg-amber-500/20 dark:bg-amber-500/10 rounded-full pulse-ring"></div>
+                    </div>
+                    <div class="relative w-32 h-32 bg-gradient-to-br from-amber-500 to-amber-600 dark:from-amber-600 dark:to-amber-700 rounded-full flex items-center justify-center shadow-custom-hover float-animation">
+                        <i data-lucide="search-x" class="w-16 h-16 text-white"></i>
+                    </div>
+                </div>
+
+                <!-- Error Message Card -->
+                <div class="bg-white dark:bg-slate-800 rounded-large border border-slate-200 dark:border-slate-700 shadow-custom-hover p-8 md:p-12 text-center">
+                    <!-- Error Code -->
+                    <div class="inline-block px-4 py-2 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded-large text-sm font-semibold mb-4">
+                        Lỗi 404 - Not Found
+                    </div>
+
+                    <!-- Main Heading -->
+                    <h1 class="font-heading text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4">
+                        Không Tìm Thấy Trang
+                    </h1>
+
+                    <!-- Description -->
+                    <p class="text-slate-600 dark:text-slate-400 text-lg mb-8 max-w-xl mx-auto">
+                        Trang bạn đang tìm kiếm không tồn tại hoặc đã bị di chuyển. Vui lòng kiểm tra lại đường dẫn hoặc quay về trang chủ.
+                    </p>
+
+                    <!-- Divider -->
+                    <div class="w-16 h-1 bg-gradient-to-r from-amber-500 to-amber-600 rounded-full mx-auto mb-8"></div>
+
+                    <!-- Suggested Actions -->
+                    <div class="mb-8 p-4 bg-slate-50 dark:bg-slate-700/50 rounded-large border border-slate-200 dark:border-slate-600">
+                        <p class="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">Có thể bạn đang tìm:</p>
+                        <div class="flex flex-wrap items-center justify-center gap-2">
+                            <a href="/dashboard" class="px-3 py-1.5 bg-white dark:bg-slate-600 hover:bg-slate-50 dark:hover:bg-slate-500 border border-slate-200 dark:border-slate-500 text-slate-700 dark:text-slate-200 rounded-small text-sm transition-colors">Trang Chủ</a>
+                            <a href="/employees" class="px-3 py-1.5 bg-white dark:bg-slate-600 hover:bg-slate-50 dark:hover:bg-slate-500 border border-slate-200 dark:border-slate-500 text-slate-700 dark:text-slate-200 rounded-small text-sm transition-colors">Nhân Viên</a>
+                            <a href="/attendance" class="px-3 py-1.5 bg-white dark:bg-slate-600 hover:bg-slate-50 dark:hover:bg-slate-500 border border-slate-200 dark:border-slate-500 text-slate-700 dark:text-slate-200 rounded-small text-sm transition-colors">Chấm Công</a>
+                            <a href="/payroll" class="px-3 py-1.5 bg-white dark:bg-slate-600 hover:bg-slate-50 dark:hover:bg-slate-500 border border-slate-200 dark:border-slate-500 text-slate-700 dark:text-slate-200 rounded-small text-sm transition-colors">Lương</a>
+                            <a href="/reports" class="px-3 py-1.5 bg-white dark:bg-slate-600 hover:bg-slate-50 dark:hover:bg-slate-500 border border-slate-200 dark:border-slate-500 text-slate-700 dark:text-slate-200 rounded-small text-sm transition-colors">Báo Cáo</a>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex flex-col sm:flex-row items-center justify-center gap-3 mb-8">
+                        <button onclick="window.history.back()" class="w-full sm:w-auto px-6 py-3 bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-large font-medium transition-colors flex items-center justify-center gap-2 shadow-custom">
+                            <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                            <span>Quay Lại Trang Trước</span>
+                        </button>
+                        <button onclick="window.location.href='/dashboard'" class="w-full sm:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white rounded-large font-medium transition-colors flex items-center justify-center gap-2 shadow-custom">
+                            <i data-lucide="home" class="w-4 h-4"></i>
+                            <span>Về Trang Chủ</span>
+                        </button>
+                    </div>
+
+                    <!-- Contact Support -->
+                    <div class="pt-6 border-t border-slate-200 dark:border-slate-700">
+                        <p class="text-sm text-slate-500 dark:text-slate-400 mb-3">
+                            Vẫn gặp vấn đề? Liên hệ với chúng tôi:
+                        </p>
+                        <div class="flex flex-col sm:flex-row items-center justify-center gap-4 text-sm">
+                            <a href="mailto:support@hrnexus.com" class="flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors">
+                                <i data-lucide="mail" class="w-4 h-4"></i>
+                                <span>support@hrnexus.com</span>
+                            </a>
+                            <span class="hidden sm:block text-slate-300 dark:text-slate-600">|</span>
+                            <a href="tel:+84123456789" class="flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors">
+                                <i data-lucide="phone" class="w-4 h-4"></i>
+                                <span>+84 123 456 789</span>
+                            </a>
+                            <span class="hidden sm:block text-slate-300 dark:text-slate-600">|</span>
+                            <button onclick="alert('Đang mở chat hỗ trợ...')" class="flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors">
+                                <i data-lucide="message-circle" class="w-4 h-4"></i>
+                                <span>Chat Trực Tuyến</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 py-6 transition-colors duration-300 max-h-[120px]">
+            <div class="max-w-7xl mx-auto px-4 md:px-8">
+                <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                    <p class="text-sm text-slate-500 dark:text-slate-400">
+                        © 2024 HR Nexus Pro - TechCorp Inc. Bảo lưu mọi quyền.
+                    </p>
+                    <div class="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
+                        <a href="#" class="hover:text-slate-700 dark:hover:text-slate-300 transition-colors">Chính Sách Bảo Mật</a>
+                        <span>|</span>
+                        <a href="#" class="hover:text-slate-700 dark:hover:text-slate-300 transition-colors">Điều Khoản Sử Dụng</a>
+                        <span>|</span>
+                        <a href="#" class="hover:text-slate-700 dark:hover:text-slate-300 transition-colors">Liên Hệ</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        function toggleDarkMode() {
+            document.documentElement.classList.toggle('dark');
+            lucide.createIcons();
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            lucide.createIcons();
+        });
+
+        lucide.createIcons();
+    </script>
+</body>
+</html>

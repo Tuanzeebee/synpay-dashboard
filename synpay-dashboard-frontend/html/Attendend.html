@@ -1,0 +1,1434 @@
+<!DOCTYPE html>
+<html lang="vi" style="height: auto; min-height: 100%;">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Chấm Công Tính Lương - HR Nexus</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <link id="heading-font-link" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link id="body-font-link" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        heading: ['var(--font-heading-name)', 'sans-serif'],
+                        body: ['var(--font-body-name)', 'sans-serif'],
+                    },
+                    spacing: {
+                        base: 'var(--space-base)',
+                    },
+                    borderRadius: {
+                        small: 'var(--radius-small)',
+                        large: 'var(--radius-large)',
+                    },
+                    boxShadow: {
+                        custom: 'var(--shadow-custom)',
+                        'custom-hover': 'var(--shadow-custom-hover)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        :root {
+            --font-heading-name: 'Inter';
+            --font-body-name: 'Inter';
+            --font-heading: 'Inter', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --letter-spacing-heading: -0.02em;
+            --letter-spacing-body: 0px;
+            --space-base: 1rem;
+            --radius-small: 0.375rem;
+            --radius-large: 0.5rem;
+            --border-width: 1px;
+            --shadow-color: 148 163 184;
+            --shadow-offset-x: 0px;
+            --shadow-offset-y: 4px;
+            --shadow-blur: 6px;
+            --shadow-spread: -1px;
+            --shadow-opacity: 0.1;
+            --shadow-custom: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+            --shadow-custom-hover: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+
+        body {
+            transition: background-color 0.3s ease, color 0.3s ease;
+            font-variant-numeric: tabular-nums;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #475569;
+        }
+        .dark ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-backdrop {
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+        }
+
+        .row-warning {
+            background-color: #FFFBEB;
+        }
+        .dark .row-warning {
+            background-color: rgba(245, 158, 11, 0.1);
+        }
+
+        .row-danger {
+            background-color: #FEF2F2;
+        }
+        .dark .row-danger {
+            background-color: rgba(239, 68, 68, 0.1);
+        }
+
+        .progress-bar {
+            transition: width 0.3s ease;
+        }
+
+        .filter-chip {
+            animation: slideIn 0.2s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .tab-indicator {
+            transition: all 0.3s ease;
+        }
+
+        .skeleton {
+            background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .card-hover {
+            transition: all 0.2s ease;
+        }
+
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+
+        .badge-ok {
+            background-color: #D1FAE5;
+            color: #065F46;
+        }
+        .dark .badge-ok {
+            background-color: rgba(16, 185, 129, 0.2);
+            color: #6EE7B7;
+        }
+
+        .badge-warning {
+            background-color: #FEF3C7;
+            color: #92400E;
+        }
+        .dark .badge-warning {
+            background-color: rgba(245, 158, 11, 0.2);
+            color: #FCD34D;
+        }
+
+        .badge-danger {
+            background-color: #FEE2E2;
+            color: #991B1B;
+        }
+        .dark .badge-danger {
+            background-color: rgba(239, 68, 68, 0.2);
+            color: #FCA5A5;
+        }
+
+        .badge-pending {
+            background-color: #DBEAFE;
+            color: #1E40AF;
+        }
+        .dark .badge-pending {
+            background-color: rgba(59, 130, 246, 0.2);
+            color: #93C5FD;
+        }
+
+        .badge-approved {
+            background-color: #D1FAE5;
+            color: #065F46;
+        }
+        .dark .badge-approved {
+            background-color: rgba(16, 185, 129, 0.2);
+            color: #6EE7B7;
+        }
+
+        .badge-rejected {
+            background-color: #FEE2E2;
+            color: #991B1B;
+        }
+        .dark .badge-rejected {
+            background-color: rgba(239, 68, 68, 0.2);
+            color: #FCA5A5;
+        }
+    </style>
+</head>
+<body style="height: auto; min-height: 100%;" class="font-body bg-slate-50 dark:bg-slate-900">
+
+    <div class="flex min-h-screen">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex-col hidden lg:flex">
+            <div class="p-6 border-b border-slate-100 dark:border-slate-700">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 bg-blue-600 dark:bg-blue-500 rounded-lg flex items-center justify-center text-white font-bold text-lg font-heading">H</div>
+                    <span class="font-heading font-bold text-xl text-slate-800 dark:text-white">HR Nexus</span>
+                </div>
+            </div>
+
+            <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
+                <div class="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-4 px-2">Menu Chính</div>
+                
+                <a href="#" class="nav-item flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white rounded-large font-medium transition-colors">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                    <span>Bảng Điều Khiển</span>
+                </a>
+                <a href="#" class="nav-item flex items-center gap-3 px-3 py-2.5 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-md font-medium transition-colors">
+                    <i data-lucide="calendar-check" class="w-5 h-5"></i>
+                    <span>Chấm Công Lương</span>
+                </a>
+                <a href="#" class="nav-item flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white rounded-large font-medium transition-colors">
+                    <i data-lucide="users" class="w-5 h-5"></i>
+                    <span>Nhân Viên</span>
+                    <span class="ml-auto px-2 py-0.5 text-xs font-semibold rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400">342</span>
+                </a>
+                <a href="#" class="nav-item flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white rounded-large font-medium transition-colors">
+                    <i data-lucide="banknote" class="w-5 h-5"></i>
+                    <span>Bảng Lương</span>
+                </a>
+                <a href="#" class="nav-item flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white rounded-large font-medium transition-colors">
+                    <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
+                    <span>Báo Cáo</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col min-w-0">
+            <!-- Header -->
+            <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-20">
+                <div class="px-4 md:px-8 py-4 flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <button class="text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 lg:hidden">
+                            <i data-lucide="menu" class="w-6 h-6"></i>
+                        </button>
+                        <div class="flex items-center gap-3 lg:hidden">
+                            <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-lg font-heading">H</div>
+                            <span class="font-heading font-bold text-xl text-slate-800 dark:text-white">HR Nexus</span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <button onclick="toggleTheme()" class="p-2 text-slate-400 dark:text-slate-300 hover:text-slate-600 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg transition-colors">
+                            <i data-lucide="sun" class="w-5 h-5 hidden dark:block"></i>
+                            <i data-lucide="moon" class="w-5 h-5 block dark:hidden"></i>
+                        </button>
+                        <button class="relative p-2 text-slate-400 dark:text-slate-300 hover:text-slate-600 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg transition-colors">
+                            <i data-lucide="bell" class="w-5 h-5"></i>
+                            <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                        </button>
+                        <div class="flex items-center gap-3 p-2 rounded-lg">
+                            <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="Profile" class="w-9 h-9 rounded-full border-2 border-slate-200 dark:border-slate-600">
+                            <div class="hidden md:block text-left">
+                                <p class="text-sm font-semibold text-slate-900 dark:text-white">Admin User</p>
+                                <p class="text-xs text-slate-500 dark:text-slate-400">Quản Trị Viên</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <div class="flex-1 p-4 md:p-8 overflow-y-auto">
+                <!-- Page Header with Month Selector -->
+                <div class="mb-8">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+                        <div>
+                            <h1 class="font-heading text-3xl font-bold text-slate-900 dark:text-white mb-2">Chấm Công Tính Lương</h1>
+                            <p class="text-slate-600 dark:text-slate-400">Quản lý chấm công theo chu kỳ lương tháng</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <button onclick="exportReport()" class="bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 px-4 py-2.5 rounded-lg font-medium text-sm transition-colors shadow-sm border border-slate-200 dark:border-slate-700 flex items-center gap-2">
+                                <i data-lucide="download" class="w-4 h-4"></i>
+                                <span>Xuất Báo Cáo</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Month Selector - Prominent -->
+                    <div class="bg-white dark:bg-slate-800 rounded-large border border-slate-200 dark:border-slate-700 shadow-sm p-6">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-4">
+                                <button onclick="previousMonth()" class="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors">
+                                    <i data-lucide="chevron-left" class="w-6 h-6 text-slate-600 dark:text-slate-400"></i>
+                                </button>
+                                <div class="text-center">
+                                    <h2 class="font-heading text-3xl font-bold text-slate-900 dark:text-white" id="currentMonth">Tháng 9/2024</h2>
+                                    <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Chu kỳ lương hiện tại</p>
+                                </div>
+                                <button onclick="nextMonth()" class="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors">
+                                    <i data-lucide="chevron-right" class="w-6 h-6 text-slate-600 dark:text-slate-400"></i>
+                                </button>
+                            </div>
+                            <div class="hidden md:flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+                                <i data-lucide="info" class="w-4 h-4"></i>
+                                <span>Dữ liệu tổng hợp theo tháng</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- View Tabs -->
+                <div class="mb-6">
+                    <div class="border-b border-slate-200 dark:border-slate-700">
+                        <div class="flex gap-6">
+                            <button onclick="switchView('employee')" id="tab-employee" class="view-tab py-3 border-b-2 border-blue-600 dark:border-blue-400 text-blue-600 dark:text-blue-400 font-semibold text-sm relative">
+                                Theo Nhân Viên
+                                <div class="tab-indicator absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 dark:bg-blue-400"></div>
+                            </button>
+                            <button onclick="switchView('department')" id="tab-department" class="view-tab py-3 border-b-2 border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 font-semibold text-sm">
+                                Theo Phòng Ban
+                            </button>
+                            <button onclick="switchView('leave')" id="tab-leave" class="view-tab py-3 border-b-2 border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 font-semibold text-sm">
+                                Quản Lý Nghỉ Phép
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Employee View -->
+                <div id="employeeView" class="fade-in">
+                    <!-- Summary Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+                        <div class="bg-white dark:bg-slate-800 rounded-large border border-slate-200 dark:border-slate-700 shadow-sm p-6 card-hover">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                                    <i data-lucide="users" class="w-6 h-6 text-blue-600 dark:text-blue-400"></i>
+                                </div>
+                            </div>
+                            <h3 class="font-heading text-sm font-medium text-slate-500 dark:text-slate-400 mb-2">Tổng Nhân Viên</h3>
+                            <p class="font-heading text-3xl font-bold text-slate-900 dark:text-white mb-1">342</p>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Trong chu kỳ lương này</p>
+                        </div>
+
+                        <div class="bg-white dark:bg-slate-800 rounded-large border border-slate-200 dark:border-slate-700 shadow-sm p-6 card-hover">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center">
+                                    <i data-lucide="calendar-check" class="w-6 h-6 text-emerald-600 dark:text-emerald-400"></i>
+                                </div>
+                                <span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 px-2 py-1 rounded">+0.3</span>
+                            </div>
+                            <h3 class="font-heading text-sm font-medium text-slate-500 dark:text-slate-400 mb-2">TB Ngày Công</h3>
+                            <p class="font-heading text-3xl font-bold text-slate-900 dark:text-white mb-1">21.2</p>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Trên tổng số 22 ngày chuẩn</p>
+                        </div>
+
+                        <div class="bg-white dark:bg-slate-800 rounded-large border border-slate-200 dark:border-slate-700 shadow-sm p-6 card-hover">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 bg-cyan-100 dark:bg-cyan-900/30 rounded-lg flex items-center justify-center">
+                                    <i data-lucide="calendar-days" class="w-6 h-6 text-cyan-600 dark:text-cyan-400"></i>
+                                </div>
+                            </div>
+                            <h3 class="font-heading text-sm font-medium text-slate-500 dark:text-slate-400 mb-2">Người Nghỉ Phép</h3>
+                            <p class="font-heading text-3xl font-bold text-cyan-600 dark:text-cyan-400 mb-1">87</p>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Có sử dụng ngày phép tháng này</p>
+                        </div>
+
+                        <div class="bg-white dark:bg-slate-800 rounded-large border border-slate-200 dark:border-slate-700 shadow-sm p-6 card-hover">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 bg-rose-100 dark:bg-rose-900/30 rounded-lg flex items-center justify-center">
+                                    <i data-lucide="alert-circle" class="w-6 h-6 text-rose-600 dark:text-rose-400"></i>
+                                </div>
+                                <span class="text-xs font-semibold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-900/20 px-2 py-1 rounded">+12%</span>
+                            </div>
+                            <h3 class="font-heading text-sm font-medium text-slate-500 dark:text-slate-400 mb-2">Tổng Vắng Mặt</h3>
+                            <p class="font-heading text-3xl font-bold text-rose-600 dark:text-rose-400 mb-1">145</p>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Ngày vắng không phép</p>
+                        </div>
+
+                        <div class="bg-white dark:bg-slate-800 rounded-large border border-slate-200 dark:border-slate-700 shadow-sm p-6 card-hover">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-lg flex items-center justify-center">
+                                    <i data-lucide="alert-triangle" class="w-6 h-6 text-amber-600 dark:text-amber-400"></i>
+                                </div>
+                            </div>
+                            <h3 class="font-heading text-sm font-medium text-slate-500 dark:text-slate-400 mb-2">NV Có Rủi Ro</h3>
+                            <p class="font-heading text-3xl font-bold text-amber-600 dark:text-amber-400 mb-1">28</p>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Cần xem xét khấu trừ lương</p>
+                        </div>
+                    </div>
+
+                    <!-- Filters & Actions Bar -->
+                    <div class="bg-white dark:bg-slate-800 rounded-large border border-slate-200 dark:border-slate-700 shadow-sm p-6 mb-6">
+                        <div class="flex flex-col md:flex-row gap-4">
+                            <div class="flex-1">
+                                <div class="relative">
+                                    <i data-lucide="search" class="w-5 h-5 text-slate-400 absolute left-3 top-1/2 transform -translate-y-1/2"></i>
+                                    <input type="text" id="searchInput" placeholder="Tìm kiếm nhân viên..." class="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 text-slate-900 dark:text-white" oninput="filterTable()">
+                                </div>
+                            </div>
+                            <select id="riskFilter" class="px-4 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500" onchange="filterTable()">
+                                <option value="all">Tất cả trạng thái</option>
+                                <option value="ok">✅ OK</option>
+                                <option value="warning">⚠️ Cảnh báo</option>
+                                <option value="danger">🔴 Rủi ro cao</option>
+                            </select>
+                            <select id="deptFilter" class="px-4 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500" onchange="filterTable()">
+                                <option value="all">Tất cả phòng ban</option>
+                                <option value="engineering">Kỹ Thuật</option>
+                                <option value="sales">Kinh Doanh</option>
+                                <option value="marketing">Marketing</option>
+                                <option value="support">Hỗ Trợ</option>
+                                <option value="hr">Nhân Sự</option>
+                            </select>
+                        </div>
+
+                        <!-- Active Filters -->
+                        <div id="activeFilters" class="mt-4 flex flex-wrap gap-2 hidden">
+                            <!-- Filter chips will be inserted here -->
+                        </div>
+                    </div>
+
+                    <!-- Employee Attendance Table -->
+                    <div class="bg-white dark:bg-slate-800 rounded-large border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead class="bg-slate-50 dark:bg-slate-700/50 border-b border-slate-200 dark:border-slate-700">
+                                    <tr>
+                                        <th class="px-6 py-4 text-left text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Họ và Tên</th>
+                                        <th class="px-6 py-4 text-left text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Phòng Ban</th>
+                                        <th class="px-6 py-4 text-center text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Ngày Công</th>
+                                        <th class="px-6 py-4 text-center text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Ngày Nghỉ Phép</th>
+                                        <th class="px-6 py-4 text-center text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Ngày Vắng</th>
+                                        <th class="px-6 py-4 text-center text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Ảnh Hưởng Lương</th>
+                                        <th class="px-6 py-4 text-center text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Thao Tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="employeeTableBody" class="bg-white dark:bg-slate-800 divide-y divide-slate-200 dark:divide-slate-700">
+                                    <!-- Table rows will be inserted here by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pagination -->
+                        <div class="px-6 py-4 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                            <p class="text-sm text-slate-600 dark:text-slate-400">Hiển thị <span class="font-semibold">1-10</span> trong <span class="font-semibold">342</span> nhân viên</p>
+                            <div class="flex gap-2">
+                                <button class="px-3 py-1.5 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded text-sm hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled>Trước</button>
+                                <button class="px-3 py-1.5 bg-blue-600 text-white rounded text-sm font-medium">1</button>
+                                <button class="px-3 py-1.5 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded text-sm hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors">2</button>
+                                <button class="px-3 py-1.5 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded text-sm hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors">3</button>
+                                <button class="px-3 py-1.5 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded text-sm hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors">Sau</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Department View -->
+                <div id="departmentView" class="hidden fade-in">
+                    <!-- Department Summary Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                        <div class="bg-white dark:bg-slate-800 rounded-large border border-slate-200 dark:border-slate-700 shadow-sm p-6 card-hover">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
+                                    <i data-lucide="building-2" class="w-6 h-6 text-purple-600 dark:text-purple-400"></i>
+                                </div>
+                            </div>
+                            <h3 class="font-heading text-sm font-medium text-slate-500 dark:text-slate-400 mb-2">Tổng Phòng Ban</h3>
+                            <p class="font-heading text-3xl font-bold text-slate-900 dark:text-white mb-1">8</p>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Đang hoạt động</p>
+                        </div>
+
+                        <div class="bg-white dark:bg-slate-800 rounded-large border border-slate-200 dark:border-slate-700 shadow-sm p-6 card-hover">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center">
+                                    <i data-lucide="trophy" class="w-6 h-6 text-emerald-600 dark:text-emerald-400"></i>
+                                </div>
+                            </div>
+                            <h3 class="font-heading text-sm font-medium text-slate-500 dark:text-slate-400 mb-2">Hiệu Suất Cao Nhất</h3>
+                            <p class="font-heading text-lg font-bold text-slate-900 dark:text-white mb-1">Kỹ Thuật</p>
+                            <p class="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">21.8 ngày công TB</p>
+                        </div>
+
+                        <div class="bg-white dark:bg-slate-800 rounded-large border border-slate-200 dark:border-slate-700 shadow-sm p-6 card-hover">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 bg-rose-100 dark:bg-rose-900/30 rounded-lg flex items-center justify-center">
+                                    <i data-lucide="trending-down" class="w-6 h-6 text-rose-600 dark:text-rose-400"></i>
+                                </div>
+                            </div>
+                            <h3 class="font-heading text-sm font-medium text-slate-500 dark:text-slate-400 mb-2">Cần Cải Thiện</h3>
+                            <p class="font-heading text-lg font-bold text-slate-900 dark:text-white mb-1">Hỗ Trợ</p>
+                            <p class="text-xs text-rose-600 dark:text-rose-400 font-semibold">19.8 ngày công TB</p>
+                        </div>
+
+                        <div class="bg-white dark:bg-slate-800 rounded-large border border-slate-200 dark:border-slate-700 shadow-sm p-6 card-hover">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-lg flex items-center justify-center">
+                                    <i data-lucide="alert-triangle" class="w-6 h-6 text-amber-600 dark:text-amber-400"></i>
+                                </div>
+                            </div>
+                            <h3 class="font-heading text-sm font-medium text-slate-500 dark:text-slate-400 mb-2">PB Có Rủi Ro</h3>
+                            <p class="font-heading text-3xl font-bold text-amber-600 dark:text-amber-400 mb-1">3</p>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Có nhân viên rủi ro cao</p>
+                        </div>
+                    </div>
+
+                    <!-- Department Table -->
+                    <div class="bg-white dark:bg-slate-800 rounded-large border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead class="bg-slate-50 dark:bg-slate-700/50 border-b border-slate-200 dark:border-slate-700">
+                                    <tr>
+                                        <th class="px-6 py-4 text-left text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Phòng Ban</th>
+                                        <th class="px-6 py-4 text-center text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Số Nhân Viên</th>
+                                        <th class="px-6 py-4 text-center text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">TB Ngày Công</th>
+                                        <th class="px-6 py-4 text-center text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Tổng Vắng</th>
+                                        <th class="px-6 py-4 text-center text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">NV Có Rủi Ro</th>
+                                        <th class="px-6 py-4 text-center text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Thao Tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="departmentTableBody" class="bg-white dark:bg-slate-800 divide-y divide-slate-200 dark:divide-slate-700">
+                                    <!-- Department rows will be inserted here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Leave Management View -->
+                <div id="leaveView" class="hidden fade-in">
+                    <!-- Leave Summary Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                        <div class="bg-white dark:bg-slate-800 rounded-large border border-slate-200 dark:border-slate-700 shadow-sm p-6 card-hover">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                                    <i data-lucide="file-text" class="w-6 h-6 text-blue-600 dark:text-blue-400"></i>
+                                </div>
+                            </div>
+                            <h3 class="font-heading text-sm font-medium text-slate-500 dark:text-slate-400 mb-2">Tổng Đơn Nghỉ</h3>
+                            <p class="font-heading text-3xl font-bold text-slate-900 dark:text-white mb-1">124</p>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Trong tháng này</p>
+                        </div>
+
+                        <div class="bg-white dark:bg-slate-800 rounded-large border border-slate-200 dark:border-slate-700 shadow-sm p-6 card-hover">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-lg flex items-center justify-center">
+                                    <i data-lucide="clock" class="w-6 h-6 text-amber-600 dark:text-amber-400"></i>
+                                </div>
+                                <span class="text-xs font-semibold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-2 py-1 rounded">Cần duyệt</span>
+                            </div>
+                            <h3 class="font-heading text-sm font-medium text-slate-500 dark:text-slate-400 mb-2">Chờ Phê Duyệt</h3>
+                            <p class="font-heading text-3xl font-bold text-amber-600 dark:text-amber-400 mb-1">18</p>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Đơn đang chờ xử lý</p>
+                        </div>
+
+                        <div class="bg-white dark:bg-slate-800 rounded-large border border-slate-200 dark:border-slate-700 shadow-sm p-6 card-hover">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center">
+                                    <i data-lucide="check-circle" class="w-6 h-6 text-emerald-600 dark:text-emerald-400"></i>
+                                </div>
+                            </div>
+                            <h3 class="font-heading text-sm font-medium text-slate-500 dark:text-slate-400 mb-2">Đã Phê Duyệt</h3>
+                            <p class="font-heading text-3xl font-bold text-emerald-600 dark:text-emerald-400 mb-1">98</p>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Đơn được chấp thuận</p>
+                        </div>
+
+                        <div class="bg-white dark:bg-slate-800 rounded-large border border-slate-200 dark:border-slate-700 shadow-sm p-6 card-hover">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 bg-rose-100 dark:bg-rose-900/30 rounded-lg flex items-center justify-center">
+                                    <i data-lucide="x-circle" class="w-6 h-6 text-rose-600 dark:text-rose-400"></i>
+                                </div>
+                            </div>
+                            <h3 class="font-heading text-sm font-medium text-slate-500 dark:text-slate-400 mb-2">Từ Chối</h3>
+                            <p class="font-heading text-3xl font-bold text-rose-600 dark:text-rose-400 mb-1">8</p>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Đơn không được duyệt</p>
+                        </div>
+                    </div>
+
+                    <!-- Leave Filters -->
+                    <div class="bg-white dark:bg-slate-800 rounded-large border border-slate-200 dark:border-slate-700 shadow-sm p-6 mb-6">
+                        <div class="flex flex-col md:flex-row gap-4">
+                            <div class="flex-1">
+                                <div class="relative">
+                                    <i data-lucide="search" class="w-5 h-5 text-slate-400 absolute left-3 top-1/2 transform -translate-y-1/2"></i>
+                                    <input type="text" id="leaveSearchInput" placeholder="Tìm kiếm nhân viên..." class="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 text-slate-900 dark:text-white" oninput="filterLeaveTable()">
+                                </div>
+                            </div>
+                            <select id="leaveStatusFilter" class="px-4 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500" onchange="filterLeaveTable()">
+                                <option value="all">Tất cả trạng thái</option>
+                                <option value="pending">Chờ phê duyệt</option>
+                                <option value="approved">Đã phê duyệt</option>
+                                <option value="rejected">Từ chối</option>
+                            </select>
+                            <select id="leaveTypeFilter" class="px-4 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500" onchange="filterLeaveTable()">
+                                <option value="all">Tất cả loại phép</option>
+                                <option value="paid">Nghỉ phép có lương</option>
+                                <option value="unpaid">Nghỉ không lương</option>
+                                <option value="sick">Nghỉ ốm</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Leave Requests Table -->
+                    <div class="bg-white dark:bg-slate-800 rounded-large border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead class="bg-slate-50 dark:bg-slate-700/50 border-b border-slate-200 dark:border-slate-700">
+                                    <tr>
+                                        <th class="px-6 py-4 text-left text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Nhân Viên</th>
+                                        <th class="px-6 py-4 text-left text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Loại Phép</th>
+                                        <th class="px-6 py-4 text-center text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Từ Ngày</th>
+                                        <th class="px-6 py-4 text-center text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Đến Ngày</th>
+                                        <th class="px-6 py-4 text-center text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Số Ngày</th>
+                                        <th class="px-6 py-4 text-left text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Lý Do</th>
+                                        <th class="px-6 py-4 text-center text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Trạng Thái</th>
+                                        <th class="px-6 py-4 text-center text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Thao Tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="leaveTableBody" class="bg-white dark:bg-slate-800 divide-y divide-slate-200 dark:divide-slate-700">
+                                    <!-- Leave request rows will be inserted here -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pagination -->
+                        <div class="px-6 py-4 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                            <p class="text-sm text-slate-600 dark:text-slate-400">Hiển thị <span class="font-semibold">1-10</span> trong <span class="font-semibold">124</span> đơn nghỉ</p>
+                            <div class="flex gap-2">
+                                <button class="px-3 py-1.5 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded text-sm hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled>Trước</button>
+                                <button class="px-3 py-1.5 bg-blue-600 text-white rounded text-sm font-medium">1</button>
+                                <button class="px-3 py-1.5 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded text-sm hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors">2</button>
+                                <button class="px-3 py-1.5 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded text-sm hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors">Sau</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Employee Detail Modal -->
+    <div id="employeeModal" class="fixed inset-0 z-50 hidden">
+        <div class="modal-backdrop absolute inset-0" onclick="closeEmployeeModal()"></div>
+        <div class="relative min-h-screen flex items-center justify-center p-4">
+            <div class="bg-white dark:bg-slate-800 rounded-large shadow-custom max-w-3xl w-full max-h-[90vh] overflow-y-auto fade-in">
+                <!-- Modal Header -->
+                <div class="p-6 border-b border-slate-200 dark:border-slate-700">
+                    <div class="flex items-start justify-between">
+                        <div class="flex items-center gap-4">
+                            <img id="modalEmployeeAvatar" src="" alt="Employee" class="w-16 h-16 rounded-full border-2 border-slate-200 dark:border-slate-600">
+                            <div>
+                                <h2 id="modalEmployeeName" class="font-heading text-2xl font-bold text-slate-900 dark:text-white mb-1"></h2>
+                                <div class="flex items-center gap-2">
+                                    <span id="modalEmployeeDept" class="text-sm font-medium text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 px-3 py-1 rounded-full"></span>
+                                    <span class="text-sm text-slate-500 dark:text-slate-400">Tháng 9/2024</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button onclick="closeEmployeeModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
+                            <i data-lucide="x" class="w-6 h-6"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Modal Content -->
+                <div class="p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Attendance Breakdown -->
+                        <div>
+                            <h3 class="font-heading text-lg font-bold text-slate-900 dark:text-white mb-4">Chi Tiết Chấm Công</h3>
+                            
+                            <!-- WorkDays Card -->
+                            <div class="bg-slate-50 dark:bg-slate-700/50 rounded-large p-4 mb-4">
+                                <div class="flex items-center justify-between mb-3">
+                                    <span class="text-sm font-medium text-slate-600 dark:text-slate-400">Ngày Công</span>
+                                    <div id="modalWorkDaysStatus" class="flex items-center gap-1">
+                                        <!-- Status icon will be inserted here -->
+                                    </div>
+                                </div>
+                                <div class="flex items-baseline gap-2 mb-3">
+                                    <span id="modalWorkDays" class="text-3xl font-bold text-slate-900 dark:text-white"></span>
+                                    <span class="text-lg text-slate-500 dark:text-slate-400">/ 22</span>
+                                </div>
+                                <div class="w-full bg-slate-200 dark:bg-slate-600 rounded-full h-2.5 overflow-hidden">
+                                    <div id="modalWorkDaysBar" class="progress-bar h-2.5 rounded-full"></div>
+                                </div>
+                            </div>
+
+                            <!-- LeaveDays Card -->
+                            <div class="bg-slate-50 dark:bg-slate-700/50 rounded-large p-4 mb-4">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-sm font-medium text-slate-600 dark:text-slate-400">Ngày Nghỉ Phép</span>
+                                    <i data-lucide="calendar" class="w-4 h-4 text-slate-400"></i>
+                                </div>
+                                <span id="modalLeaveDays" class="text-3xl font-bold text-amber-600 dark:text-amber-400"></span>
+                            </div>
+
+                            <!-- AbsentDays Card -->
+                            <div class="bg-slate-50 dark:bg-slate-700/50 rounded-large p-4 mb-4">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-sm font-medium text-slate-600 dark:text-slate-400">Ngày Vắng Mặt</span>
+                                    <i data-lucide="alert-circle" class="w-4 h-4 text-rose-500"></i>
+                                </div>
+                                <span id="modalAbsentDays" class="text-3xl font-bold text-rose-600 dark:text-rose-400"></span>
+                            </div>
+
+                            <!-- Overall Status Badge -->
+                            <div id="modalOverallStatus" class="text-center py-3 rounded-large font-semibold text-sm">
+                                <!-- Status badge will be inserted here -->
+                            </div>
+                        </div>
+
+                        <!-- Salary Impact Section -->
+                        <div>
+                            <h3 class="font-heading text-lg font-bold text-slate-900 dark:text-white mb-4">Ảnh Hưởng Đến Lương</h3>
+                            
+                            <div class="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-large p-5 border border-blue-200 dark:border-blue-800">
+                                <!-- Base Salary -->
+                                <div class="mb-4">
+                                    <span class="text-xs font-medium text-blue-900 dark:text-blue-300 uppercase tracking-wide">Lương Cơ Bản</span>
+                                    <p id="modalBaseSalary" class="text-2xl font-bold text-blue-900 dark:text-blue-200 mt-1"></p>
+                                </div>
+
+                                <!-- Attendance Bonus Section -->
+                                <div id="modalBonusSection" class="bg-white dark:bg-slate-800 rounded-lg p-4 mb-4">
+                                    <!-- Bonus content will be inserted here -->
+                                </div>
+
+                                <!-- Deduction Arrow -->
+                                <div class="flex items-center justify-center my-4">
+                                    <i data-lucide="arrow-down" class="w-6 h-6 text-slate-400"></i>
+                                </div>
+
+                                <!-- Attendance Deduction -->
+                                <div class="bg-white dark:bg-slate-800 rounded-lg p-4 mb-4">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <span class="text-sm font-medium text-slate-600 dark:text-slate-400">Khấu Trừ Chuyên Cần</span>
+                                        <i data-lucide="minus-circle" class="w-4 h-4 text-rose-500"></i>
+                                    </div>
+                                    <p id="modalDeduction" class="text-xl font-bold text-rose-600 dark:text-rose-400 mb-2"></p>
+                                    <button id="modalDeductionReason" onclick="showDeductionDetail()" class="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 underline cursor-pointer">
+                                        <!-- Reason will be inserted here -->
+                                    </button>
+                                </div>
+
+                                <!-- Net Salary -->
+                                <div class="border-t border-blue-200 dark:border-blue-700 pt-4">
+                                    <span class="text-xs font-medium text-blue-900 dark:text-blue-300 uppercase tracking-wide">Lương Thực Nhận</span>
+                                    <p id="modalNetSalary" class="text-3xl font-bold text-blue-900 dark:text-blue-200 mt-1"></p>
+                                </div>
+                            </div>
+
+                            <!-- View Full Salary Button -->
+                            <button onclick="viewFullSalary()" class="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-lg font-semibold text-sm transition-colors flex items-center justify-center gap-2">
+                                <i data-lucide="file-text" class="w-4 h-4"></i>
+                                <span>Xem Chi Tiết Bảng Lương</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leave Request Detail Modal -->
+    <div id="leaveModal" class="fixed inset-0 z-50 hidden">
+        <div class="modal-backdrop absolute inset-0" onclick="closeLeaveModal()"></div>
+        <div class="relative min-h-screen flex items-center justify-center p-4">
+            <div class="bg-white dark:bg-slate-800 rounded-large shadow-custom max-w-lg w-full fade-in">
+                <!-- Modal Header -->
+                <div class="p-6 border-b border-slate-200 dark:border-slate-700">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <h2 class="font-heading text-xl font-bold text-slate-900 dark:text-white mb-1">Chi Tiết Đơn Nghỉ Phép</h2>
+                            <p class="text-sm text-slate-500 dark:text-slate-400">Xem xét và phê duyệt đơn</p>
+                        </div>
+                        <button onclick="closeLeaveModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
+                            <i data-lucide="x" class="w-6 h-6"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Modal Content -->
+                <div class="p-6">
+                    <div class="space-y-4">
+                        <!-- Employee Info -->
+                        <div class="flex items-center gap-3 p-4 bg-slate-50 dark:bg-slate-700/50 rounded-lg">
+                            <img id="leaveModalAvatar" src="" alt="Employee" class="w-12 h-12 rounded-full border-2 border-slate-200 dark:border-slate-600">
+                            <div>
+                                <p id="leaveModalName" class="font-semibold text-slate-900 dark:text-white"></p>
+                                <p id="leaveModalDept" class="text-sm text-slate-500 dark:text-slate-400"></p>
+                            </div>
+                        </div>
+
+                        <!-- Leave Details -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide">Loại Phép</label>
+                                <p id="leaveModalType" class="text-sm font-semibold text-slate-900 dark:text-white mt-1"></p>
+                            </div>
+                            <div>
+                                <label class="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide">Số Ngày</label>
+                                <p id="leaveModalDays" class="text-sm font-semibold text-slate-900 dark:text-white mt-1"></p>
+                            </div>
+                            <div>
+                                <label class="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide">Từ Ngày</label>
+                                <p id="leaveModalFrom" class="text-sm font-semibold text-slate-900 dark:text-white mt-1"></p>
+                            </div>
+                            <div>
+                                <label class="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide">Đến Ngày</label>
+                                <p id="leaveModalTo" class="text-sm font-semibold text-slate-900 dark:text-white mt-1"></p>
+                            </div>
+                        </div>
+
+                        <!-- Reason -->
+                        <div>
+                            <label class="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide">Lý Do</label>
+                            <p id="leaveModalReason" class="text-sm text-slate-700 dark:text-slate-300 mt-1 p-3 bg-slate-50 dark:bg-slate-700/50 rounded-lg"></p>
+                        </div>
+
+                        <!-- Leave Balance -->
+                        <div class="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm font-medium text-blue-900 dark:text-blue-300">Số Phép Còn Lại</span>
+                                <span id="leaveModalBalance" class="text-lg font-bold text-blue-900 dark:text-blue-200"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal Actions -->
+                <div class="p-6 border-t border-slate-200 dark:border-slate-700 flex gap-3">
+                    <button onclick="rejectLeave()" class="flex-1 bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-600 px-4 py-2.5 rounded-lg font-semibold text-sm transition-colors flex items-center justify-center gap-2">
+                        <i data-lucide="x-circle" class="w-4 h-4"></i>
+                        <span>Từ Chối</span>
+                    </button>
+                    <button onclick="approveLeave()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-lg font-semibold text-sm transition-colors flex items-center justify-center gap-2">
+                        <i data-lucide="check-circle" class="w-4 h-4"></i>
+                        <span>Phê Duyệt</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        // Constants
+        const ATTENDANCE_BONUS = 500000;
+
+        // Mock Data
+        const employeesData = [
+            { id: 1, name: 'Nguyễn Thị Mai', dept: 'Hỗ Trợ', deptKey: 'support', workDays: 14, leaveDays: 2, absentDays: 8, baseSalary: 8500000, avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80' },
+            { id: 2, name: 'Trần Văn Hùng', dept: 'Kinh Doanh', deptKey: 'sales', workDays: 18, leaveDays: 6, absentDays: 0, baseSalary: 12000000, avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80' },
+            { id: 3, name: 'Lê Minh Tuấn', dept: 'Kỹ Thuật', deptKey: 'engineering', workDays: 22, leaveDays: 2, absentDays: 0, baseSalary: 15000000, avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80' },
+            { id: 4, name: 'Phạm Thị Lan', dept: 'Marketing', deptKey: 'marketing', workDays: 21, leaveDays: 3, absentDays: 0, baseSalary: 11000000, avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80' },
+            { id: 5, name: 'Hoàng Văn Nam', dept: 'Kỹ Thuật', deptKey: 'engineering', workDays: 20, leaveDays: 2, absentDays: 1, baseSalary: 14000000, avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80' },
+            { id: 6, name: 'Vũ Thị Hương', dept: 'Nhân Sự', deptKey: 'hr', workDays: 22, leaveDays: 1, absentDays: 0, baseSalary: 10000000, avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80' },
+            { id: 7, name: 'Đặng Minh Quân', dept: 'Hỗ Trợ', deptKey: 'support', workDays: 17, leaveDays: 4, absentDays: 3, baseSalary: 8000000, avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80' },
+            { id: 8, name: 'Bùi Thị Nga', dept: 'Kinh Doanh', deptKey: 'sales', workDays: 21, leaveDays: 2, absentDays: 0, baseSalary: 11500000, avatar: 'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80' },
+            { id: 9, name: 'Ngô Văn Đức', dept: 'Marketing', deptKey: 'marketing', workDays: 19, leaveDays: 5, absentDays: 1, baseSalary: 10500000, avatar: 'https://images.unsplash.com/photo-1519345182560-3f2917c472ef?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80' },
+            { id: 10, name: 'Lý Thị Thanh', dept: 'Kỹ Thuật', deptKey: 'engineering', workDays: 22, leaveDays: 1, absentDays: 0, baseSalary: 16000000, avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80' }
+        ];
+
+        const departmentsData = [
+            { name: 'Kỹ Thuật', key: 'engineering', employees: 320, avgWorkDays: 21.8, totalAbsent: 15, riskEmployees: 3 },
+            { name: 'Kinh Doanh', key: 'sales', employees: 240, avgWorkDays: 21.2, totalAbsent: 18, riskEmployees: 5 },
+            { name: 'Marketing', key: 'marketing', employees: 180, avgWorkDays: 20.8, totalAbsent: 22, riskEmployees: 8 },
+            { name: 'Hỗ Trợ', key: 'support', employees: 150, avgWorkDays: 19.8, totalAbsent: 35, riskEmployees: 12 },
+            { name: 'Nhân Sự', key: 'hr', employees: 45, avgWorkDays: 21.5, totalAbsent: 3, riskEmployees: 0 },
+            { name: 'Tài Chính', key: 'finance', employees: 60, avgWorkDays: 21.3, totalAbsent: 5, riskEmployees: 1 },
+            { name: 'Vận Hành', key: 'operations', employees: 120, avgWorkDays: 20.5, totalAbsent: 28, riskEmployees: 6 },
+            { name: 'Pháp Lý', key: 'legal', employees: 25, avgWorkDays: 21.0, totalAbsent: 2, riskEmployees: 0 }
+        ];
+
+        const leaveRequestsData = [
+            { id: 1, employeeId: 1, employeeName: 'Nguyễn Thị Mai', dept: 'Hỗ Trợ', type: 'paid', typeName: 'Nghỉ phép có lương', from: '2024-09-15', to: '2024-09-16', days: 2, reason: 'Nghỉ phép thường niên', status: 'pending', balance: 8, avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80' },
+            { id: 2, employeeId: 2, employeeName: 'Trần Văn Hùng', dept: 'Kinh Doanh', type: 'paid', typeName: 'Nghỉ phép có lương', from: '2024-09-10', to: '2024-09-15', days: 6, reason: 'Du lịch gia đình', status: 'approved', balance: 6, avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80' },
+            { id: 3, employeeId: 3, employeeName: 'Lê Minh Tuấn', dept: 'Kỹ Thuật', type: 'sick', typeName: 'Nghỉ ốm', from: '2024-09-08', to: '2024-09-09', days: 2, reason: 'Bị cảm cúm', status: 'approved', balance: 10, avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80' },
+            { id: 4, employeeId: 4, employeeName: 'Phạm Thị Lan', dept: 'Marketing', type: 'paid', typeName: 'Nghỉ phép có lương', from: '2024-09-20', to: '2024-09-22', days: 3, reason: 'Việc gia đình', status: 'pending', balance: 9, avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80' },
+            { id: 5, employeeId: 5, employeeName: 'Hoàng Văn Nam', dept: 'Kỹ Thuật', type: 'paid', typeName: 'Nghỉ phép có lương', from: '2024-09-25', to: '2024-09-26', days: 2, reason: 'Nghỉ phép thường niên', status: 'pending', balance: 7, avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80' },
+            { id: 6, employeeId: 6, employeeName: 'Vũ Thị Hương', dept: 'Nhân Sự', type: 'paid', typeName: 'Nghỉ phép có lương', from: '2024-09-12', to: '2024-09-12', days: 1, reason: 'Khám sức khỏe định kỳ', status: 'approved', balance: 11, avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80' },
+            { id: 7, employeeId: 7, employeeName: 'Đặng Minh Quân', dept: 'Hỗ Trợ', type: 'unpaid', typeName: 'Nghỉ không lương', from: '2024-09-18', to: '2024-09-21', days: 4, reason: 'Việc cá nhân', status: 'rejected', balance: 0, avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80' },
+            { id: 8, employeeId: 8, employeeName: 'Bùi Thị Nga', dept: 'Kinh Doanh', type: 'paid', typeName: 'Nghỉ phép có lương', from: '2024-09-05', to: '2024-09-06', days: 2, reason: 'Nghỉ phép thường niên', status: 'approved', balance: 10, avatar: 'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80' },
+            { id: 9, employeeId: 9, employeeName: 'Ngô Văn Đức', dept: 'Marketing', type: 'paid', typeName: 'Nghỉ phép có lương', from: '2024-09-01', to: '2024-09-05', days: 5, reason: 'Du lịch', status: 'approved', balance: 7, avatar: 'https://images.unsplash.com/photo-1519345182560-3f2917c472ef?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80' },
+            { id: 10, employeeId: 10, employeeName: 'Lý Thị Thanh', dept: 'Kỹ Thuật', type: 'paid', typeName: 'Nghỉ phép có lương', from: '2024-09-28', to: '2024-09-28', days: 1, reason: 'Việc gia đình', status: 'pending', balance: 11, avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80' }
+        ];
+
+        let currentLeaveRequest = null;
+
+        // Theme Management
+        function toggleTheme() {
+            const html = document.documentElement;
+            const isDark = html.classList.contains('dark');
+            
+            if (isDark) {
+                html.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+            
+            lucide.createIcons();
+        }
+
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            
+            if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+                document.documentElement.classList.add('dark');
+            }
+        }
+
+        initTheme();
+
+        // Risk Calculation
+        function calculateRisk(workDays, absentDays) {
+            if (absentDays >= 3 || workDays < 18) {
+                return 'danger';
+            } else if (absentDays >= 1 || workDays < 20) {
+                return 'warning';
+            }
+            return 'ok';
+        }
+
+        function getRiskBadge(risk) {
+            const badges = {
+                ok: '<span class="badge-ok px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1"><span>✅</span><span>OK</span></span>',
+                warning: '<span class="badge-warning px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1"><span>⚠️</span><span>Cảnh báo</span></span>',
+                danger: '<span class="badge-danger px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1"><span>🔴</span><span>Rủi ro cao</span></span>'
+            };
+            return badges[risk];
+        }
+
+        function getLeaveStatusBadge(status) {
+            const badges = {
+                pending: '<span class="badge-pending px-3 py-1 rounded-full text-xs font-semibold">Chờ duyệt</span>',
+                approved: '<span class="badge-approved px-3 py-1 rounded-full text-xs font-semibold">Đã duyệt</span>',
+                rejected: '<span class="badge-rejected px-3 py-1 rounded-full text-xs font-semibold">Từ chối</span>'
+            };
+            return badges[status];
+        }
+
+        // Bonus Calculation
+        function calculateAttendanceBonus(absentDays) {
+            return absentDays === 0 ? ATTENDANCE_BONUS : 0;
+        }
+
+        function getBonusReason(absentDays) {
+            if (absentDays === 0) {
+                return 'Full attendance — no absence in September';
+            } else {
+                return `${absentDays} absence day${absentDays > 1 ? 's' : ''} — bonus not earned`;
+            }
+        }
+
+        // Salary Calculation
+        function calculateDeduction(workDays, absentDays, baseSalary) {
+            const standardDays = 22;
+            const dailySalary = baseSalary / standardDays;
+            const missedDays = standardDays - workDays;
+            return Math.round(missedDays * dailySalary);
+        }
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+        }
+
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('vi-VN');
+        }
+
+        // Render Employee Table
+        function renderEmployeeTable(data = employeesData) {
+            const tbody = document.getElementById('employeeTableBody');
+            tbody.innerHTML = '';
+
+            data.forEach(emp => {
+                const risk = calculateRisk(emp.workDays, emp.absentDays);
+                const deduction = calculateDeduction(emp.workDays, emp.absentDays, emp.baseSalary);
+                const rowClass = risk === 'danger' ? 'row-danger' : risk === 'warning' ? 'row-warning' : '';
+
+                const row = `
+                    <tr class="${rowClass} hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer transition-colors" onclick="openEmployeeModal(${emp.id})">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center gap-3">
+                                <img src="${emp.avatar}" alt="${emp.name}" class="w-10 h-10 rounded-full border-2 border-slate-200 dark:border-slate-600">
+                                <div>
+                                    <div class="text-sm font-semibold text-slate-900 dark:text-white">${emp.name}</div>
+                                    <div class="text-xs text-slate-500 dark:text-slate-400">NV-${String(emp.id).padStart(4, '0')}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="text-sm text-slate-700 dark:text-slate-300">${emp.dept}</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            <span class="text-sm font-bold ${emp.workDays < 20 ? 'text-amber-600 dark:text-amber-400' : 'text-slate-900 dark:text-white'}">${emp.workDays} / 22</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            <span class="text-sm font-semibold text-amber-600 dark:text-amber-400">${emp.leaveDays}</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            <span class="text-sm font-semibold ${emp.absentDays > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-slate-500 dark:text-slate-400'}">${emp.absentDays}</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            ${getRiskBadge(risk)}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            <button class="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-sm font-medium">Chi tiết</button>
+                        </td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+
+            lucide.createIcons();
+        }
+
+        // Render Department Table
+        function renderDepartmentTable() {
+            const tbody = document.getElementById('departmentTableBody');
+            tbody.innerHTML = '';
+
+            departmentsData.forEach(dept => {
+                const hasRisk = dept.riskEmployees > 0;
+                const borderClass = hasRisk ? 'border-l-4 border-l-amber-500' : '';
+
+                const row = `
+                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors ${borderClass}">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
+                                    <i data-lucide="building-2" class="w-5 h-5 text-purple-600 dark:text-purple-400"></i>
+                                </div>
+                                <span class="text-sm font-semibold text-slate-900 dark:text-white">${dept.name}</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            <span class="text-sm font-semibold text-slate-900 dark:text-white">${dept.employees}</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            <span class="text-sm font-bold ${dept.avgWorkDays >= 21 ? 'text-emerald-600 dark:text-emerald-400' : dept.avgWorkDays >= 20 ? 'text-amber-600 dark:text-amber-400' : 'text-rose-600 dark:text-rose-400'}">${dept.avgWorkDays}</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            <span class="text-sm font-semibold text-rose-600 dark:text-rose-400">${dept.totalAbsent}</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            <span class="text-sm font-bold ${dept.riskEmployees > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400'}">${dept.riskEmployees}</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            <button onclick="filterByDepartment('${dept.key}')" class="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-sm font-medium">Xem nhân viên</button>
+                        </td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+
+            lucide.createIcons();
+        }
+
+        // Render Leave Table
+        function renderLeaveTable(data = leaveRequestsData) {
+            const tbody = document.getElementById('leaveTableBody');
+            tbody.innerHTML = '';
+
+            data.forEach(leave => {
+                const row = `
+                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center gap-3">
+                                <img src="${leave.avatar}" alt="${leave.employeeName}" class="w-10 h-10 rounded-full border-2 border-slate-200 dark:border-slate-600">
+                                <div>
+                                    <div class="text-sm font-semibold text-slate-900 dark:text-white">${leave.employeeName}</div>
+                                    <div class="text-xs text-slate-500 dark:text-slate-400">${leave.dept}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="text-sm text-slate-700 dark:text-slate-300">${leave.typeName}</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            <span class="text-sm text-slate-900 dark:text-white">${formatDate(leave.from)}</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            <span class="text-sm text-slate-900 dark:text-white">${formatDate(leave.to)}</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            <span class="text-sm font-bold text-slate-900 dark:text-white">${leave.days}</span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="text-sm text-slate-700 dark:text-slate-300">${leave.reason}</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            ${getLeaveStatusBadge(leave.status)}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            <button onclick="openLeaveModal(${leave.id})" class="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-sm font-medium">Chi tiết</button>
+                        </td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+
+            lucide.createIcons();
+        }
+
+        // Filter Table
+        function filterTable() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const riskFilter = document.getElementById('riskFilter').value;
+            const deptFilter = document.getElementById('deptFilter').value;
+
+            let filtered = employeesData.filter(emp => {
+                const matchesSearch = emp.name.toLowerCase().includes(searchTerm);
+                const risk = calculateRisk(emp.workDays, emp.absentDays);
+                const matchesRisk = riskFilter === 'all' || risk === riskFilter;
+                const matchesDept = deptFilter === 'all' || emp.deptKey === deptFilter;
+
+                return matchesSearch && matchesRisk && matchesDept;
+            });
+
+            renderEmployeeTable(filtered);
+            updateActiveFilters();
+        }
+
+        function filterLeaveTable() {
+            const searchTerm = document.getElementById('leaveSearchInput').value.toLowerCase();
+            const statusFilter = document.getElementById('leaveStatusFilter').value;
+            const typeFilter = document.getElementById('leaveTypeFilter').value;
+
+            let filtered = leaveRequestsData.filter(leave => {
+                const matchesSearch = leave.employeeName.toLowerCase().includes(searchTerm);
+                const matchesStatus = statusFilter === 'all' || leave.status === statusFilter;
+                const matchesType = typeFilter === 'all' || leave.type === typeFilter;
+
+                return matchesSearch && matchesStatus && matchesType;
+            });
+
+            renderLeaveTable(filtered);
+        }
+
+        function updateActiveFilters() {
+            const container = document.getElementById('activeFilters');
+            const riskFilter = document.getElementById('riskFilter').value;
+            const deptFilter = document.getElementById('deptFilter').value;
+            const searchTerm = document.getElementById('searchInput').value;
+
+            let chips = [];
+
+            if (riskFilter !== 'all') {
+                const labels = { ok: '✅ OK', warning: '⚠️ Cảnh báo', danger: '🔴 Rủi ro cao' };
+                chips.push(`<span class="filter-chip bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-2">${labels[riskFilter]}<button onclick="clearRiskFilter()" class="hover:text-blue-900 dark:hover:text-blue-200">×</button></span>`);
+            }
+
+            if (deptFilter !== 'all') {
+                const dept = departmentsData.find(d => d.key === deptFilter);
+                chips.push(`<span class="filter-chip bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-2">${dept.name}<button onclick="clearDeptFilter()" class="hover:text-purple-900 dark:hover:text-purple-200">×</button></span>`);
+            }
+
+            if (searchTerm) {
+                chips.push(`<span class="filter-chip bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-2">Tìm: "${searchTerm}"<button onclick="clearSearch()" class="hover:text-slate-900 dark:hover:text-slate-100">×</button></span>`);
+            }
+
+            if (chips.length > 0) {
+                container.innerHTML = chips.join('');
+                container.classList.remove('hidden');
+            } else {
+                container.classList.add('hidden');
+            }
+        }
+
+        function clearRiskFilter() {
+            document.getElementById('riskFilter').value = 'all';
+            filterTable();
+        }
+
+        function clearDeptFilter() {
+            document.getElementById('deptFilter').value = 'all';
+            filterTable();
+        }
+
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            filterTable();
+        }
+
+        function filterByDepartment(deptKey) {
+            switchView('employee');
+            document.getElementById('deptFilter').value = deptKey;
+            filterTable();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // View Switching
+        function switchView(view) {
+            const employeeView = document.getElementById('employeeView');
+            const departmentView = document.getElementById('departmentView');
+            const leaveView = document.getElementById('leaveView');
+            const employeeTab = document.getElementById('tab-employee');
+            const departmentTab = document.getElementById('tab-department');
+            const leaveTab = document.getElementById('tab-leave');
+
+            // Hide all views
+            employeeView.classList.add('hidden');
+            departmentView.classList.add('hidden');
+            leaveView.classList.add('hidden');
+
+            // Reset all tabs
+            [employeeTab, departmentTab, leaveTab].forEach(tab => {
+                tab.classList.remove('border-blue-600', 'dark:border-blue-400', 'text-blue-600', 'dark:text-blue-400');
+                tab.classList.add('border-transparent', 'text-slate-500', 'dark:text-slate-400');
+            });
+
+            // Show selected view and activate tab
+            if (view === 'employee') {
+                employeeView.classList.remove('hidden');
+                employeeTab.classList.add('border-blue-600', 'dark:border-blue-400', 'text-blue-600', 'dark:text-blue-400');
+                employeeTab.classList.remove('border-transparent', 'text-slate-500', 'dark:text-slate-400');
+            } else if (view === 'department') {
+                departmentView.classList.remove('hidden');
+                departmentTab.classList.add('border-blue-600', 'dark:border-blue-400', 'text-blue-600', 'dark:text-blue-400');
+                departmentTab.classList.remove('border-transparent', 'text-slate-500', 'dark:text-slate-400');
+            } else if (view === 'leave') {
+                leaveView.classList.remove('hidden');
+                leaveTab.classList.add('border-blue-600', 'dark:border-blue-400', 'text-blue-600', 'dark:text-blue-400');
+                leaveTab.classList.remove('border-transparent', 'text-slate-500', 'dark:text-slate-400');
+            }
+
+            lucide.createIcons();
+        }
+
+        // Employee Modal
+        function openEmployeeModal(employeeId) {
+            const emp = employeesData.find(e => e.id === employeeId);
+            if (!emp) return;
+
+            const modal = document.getElementById('employeeModal');
+            const risk = calculateRisk(emp.workDays, emp.absentDays);
+            const deduction = calculateDeduction(emp.workDays, emp.absentDays, emp.baseSalary);
+            const bonus = calculateAttendanceBonus(emp.absentDays);
+            const netSalary = emp.baseSalary + bonus - deduction;
+
+            // Set employee info
+            document.getElementById('modalEmployeeAvatar').src = emp.avatar;
+            document.getElementById('modalEmployeeName').textContent = emp.name;
+            document.getElementById('modalEmployeeDept').textContent = emp.dept;
+
+            // Set attendance data
+            document.getElementById('modalWorkDays').textContent = emp.workDays;
+            document.getElementById('modalLeaveDays').textContent = emp.leaveDays;
+            document.getElementById('modalAbsentDays').textContent = emp.absentDays;
+
+            // WorkDays status
+            const workDaysStatus = document.getElementById('modalWorkDaysStatus');
+            if (emp.workDays >= 20) {
+                workDaysStatus.innerHTML = '<i data-lucide="check-circle" class="w-4 h-4 text-emerald-500"></i><span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400">Đạt chuẩn</span>';
+            } else {
+                workDaysStatus.innerHTML = '<i data-lucide="x-circle" class="w-4 h-4 text-rose-500"></i><span class="text-xs font-semibold text-rose-600 dark:text-rose-400">Dưới chuẩn</span>';
+            }
+
+            // WorkDays progress bar
+            const workDaysBar = document.getElementById('modalWorkDaysBar');
+            const percentage = (emp.workDays / 22) * 100;
+            workDaysBar.style.width = percentage + '%';
+            workDaysBar.className = 'progress-bar h-2.5 rounded-full ' + (emp.workDays >= 20 ? 'bg-emerald-500' : 'bg-rose-500');
+
+            // Overall status
+            const overallStatus = document.getElementById('modalOverallStatus');
+            if (risk === 'ok') {
+                overallStatus.className = 'text-center py-3 rounded-large font-semibold text-sm badge-ok';
+                overallStatus.innerHTML = '✅ Chấm công đạt chuẩn';
+            } else if (risk === 'warning') {
+                overallStatus.className = 'text-center py-3 rounded-large font-semibold text-sm badge-warning';
+                overallStatus.innerHTML = '⚠️ Có cảnh báo chấm công';
+            } else {
+                overallStatus.className = 'text-center py-3 rounded-large font-semibold text-sm badge-danger';
+                overallStatus.innerHTML = '🔴 Rủi ro cao - Cần xem xét';
+            }
+
+            // Salary impact
+            document.getElementById('modalBaseSalary').textContent = formatCurrency(emp.baseSalary);
+            
+            // Attendance Bonus Section
+            const bonusSection = document.getElementById('modalBonusSection');
+            if (bonus > 0) {
+                bonusSection.innerHTML = `
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm font-medium text-slate-600 dark:text-slate-400">Thưởng Chuyên Cần</span>
+                        <i data-lucide="gift" class="w-4 h-4 text-emerald-500"></i>
+                    </div>
+                    <p class="text-xl font-bold text-emerald-600 dark:text-emerald-400 mb-2">+${formatCurrency(bonus)}</p>
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 px-2 py-1 rounded">✅ Earned</span>
+                    </div>
+                    <p class="text-xs text-slate-600 dark:text-slate-400">${getBonusReason(emp.absentDays)}</p>
+                `;
+            } else {
+                bonusSection.innerHTML = `
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm font-medium text-slate-600 dark:text-slate-400">Thưởng Chuyên Cần</span>
+                        <i data-lucide="gift" class="w-4 h-4 text-slate-400"></i>
+                    </div>
+                    <p class="text-xl font-bold text-slate-400 dark:text-slate-500 mb-2">+${formatCurrency(ATTENDANCE_BONUS)}</p>
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded">❌ Not Earned</span>
+                    </div>
+                    <p class="text-xs text-slate-600 dark:text-slate-400">${getBonusReason(emp.absentDays)}</p>
+                `;
+            }
+
+            document.getElementById('modalDeduction').textContent = '-' + formatCurrency(deduction);
+            document.getElementById('modalNetSalary').textContent = formatCurrency(netSalary);
+
+            // Deduction reason
+            const reasonBtn = document.getElementById('modalDeductionReason');
+            if (emp.absentDays > 0) {
+                reasonBtn.textContent = `${emp.absentDays} ngày vắng mặt không phép`;
+            } else if (emp.workDays < 22) {
+                const missedDays = 22 - emp.workDays;
+                reasonBtn.textContent = `Thiếu ${missedDays} ngày công`;
+            } else {
+                reasonBtn.textContent = 'Không có khấu trừ';
+            }
+
+            modal.classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function closeEmployeeModal() {
+            document.getElementById('employeeModal').classList.add('hidden');
+        }
+
+        function showDeductionDetail() {
+            alert('Chi tiết khấu trừ: Hiển thị công thức tính toán và breakdown theo từng ngày vắng mặt.');
+        }
+
+        function viewFullSalary() {
+            alert('Chuyển đến trang chi tiết bảng lương đầy đủ của nhân viên.');
+        }
+
+        // Leave Modal
+        function openLeaveModal(leaveId) {
+            const leave = leaveRequestsData.find(l => l.id === leaveId);
+            if (!leave) return;
+
+            currentLeaveRequest = leave;
+            const modal = document.getElementById('leaveModal');
+
+            document.getElementById('leaveModalAvatar').src = leave.avatar;
+            document.getElementById('leaveModalName').textContent = leave.employeeName;
+            document.getElementById('leaveModalDept').textContent = leave.dept;
+            document.getElementById('leaveModalType').textContent = leave.typeName;
+            document.getElementById('leaveModalDays').textContent = leave.days + ' ngày';
+            document.getElementById('leaveModalFrom').textContent = formatDate(leave.from);
+            document.getElementById('leaveModalTo').textContent = formatDate(leave.to);
+            document.getElementById('leaveModalReason').textContent = leave.reason;
+            document.getElementById('leaveModalBalance').textContent = leave.balance + ' ngày';
+
+            modal.classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function closeLeaveModal() {
+            document.getElementById('leaveModal').classList.add('hidden');
+            currentLeaveRequest = null;
+        }
+
+        function approveLeave() {
+            if (!currentLeaveRequest) return;
+            
+            alert(`Đã phê duyệt đơn nghỉ phép của ${currentLeaveRequest.employeeName}`);
+            currentLeaveRequest.status = 'approved';
+            closeLeaveModal();
+            renderLeaveTable();
+        }
+
+        function rejectLeave() {
+            if (!currentLeaveRequest) return;
+            
+            const reason = prompt('Nhập lý do từ chối:');
+            if (reason) {
+                alert(`Đã từ chối đơn nghỉ phép của ${currentLeaveRequest.employeeName}\nLý do: ${reason}`);
+                currentLeaveRequest.status = 'rejected';
+                closeLeaveModal();
+                renderLeaveTable();
+            }
+        }
+
+        // Month Navigation
+        function previousMonth() {
+            alert('Chuyển sang tháng trước (Tháng 8/2024)');
+        }
+
+        function nextMonth() {
+            alert('Chuyển sang tháng sau (Tháng 10/2024)');
+        }
+
+        // Export
+        function exportReport() {
+            alert('Xuất báo cáo chấm công tính lương dạng Excel/PDF');
+        }
+
+        // Initialize
+        renderEmployeeTable();
+        renderDepartmentTable();
+        renderLeaveTable();
+    </script>
+</body>
+</html>

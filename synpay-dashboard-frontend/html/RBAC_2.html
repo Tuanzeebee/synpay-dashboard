@@ -1,0 +1,501 @@
+
+<!DOCTYPE html>
+<html lang="vi" style="height: auto; min-height: 100%;">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Audit Log - HR Nexus</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link id="heading-font-link" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link id="body-font-link" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        heading: ['var(--font-heading-name)', 'sans-serif'],
+                        body: ['var(--font-body-name)', 'sans-serif'],
+                    },
+                    spacing: {
+                        base: 'var(--space-base)',
+                    },
+                    borderRadius: {
+                        small: 'var(--radius-small)',
+                        large: 'var(--radius-large)',
+                    },
+                    boxShadow: {
+                        custom: 'var(--shadow-custom)',
+                        'custom-hover': 'var(--shadow-custom-hover)',
+                    },
+                    colors: {
+                        background: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            200: '#e2e8f0',
+                            800: '#1e293b',
+                            900: '#0f172a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        :root {
+            --font-heading-name: 'Inter';
+            --font-body-name: 'Inter';
+            --font-heading: 'Inter', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --letter-spacing-heading: -0.02em;
+            --letter-spacing-body: 0em;
+            --space-base: 1rem;
+            --radius-small: 0.5rem;
+            --radius-large: 0.75rem;
+            --border-width: 1px;
+            --shadow-color: 15 23 42;
+            --shadow-offset-x: 0px;
+            --shadow-offset-y: 1px;
+            --shadow-blur: 3px;
+            --shadow-spread: 0px;
+            --shadow-opacity: 0.1;
+            --shadow-custom: 0px 1px 3px 0px rgba(15, 23, 42, 0.1), 0px 1px 2px -1px rgba(15, 23, 42, 0.1);
+            --shadow-custom-hover: 0px 10px 15px -3px rgba(15, 23, 42, 0.1), 0px 4px 6px -4px rgba(15, 23, 42, 0.1);
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #475569;
+        }
+        
+        /* Animations */
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .view-content {
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        /* Timeline styling */
+        .audit-timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 19px;
+            top: 40px;
+            bottom: -20px;
+            width: 2px;
+            background: linear-gradient(to bottom, #e2e8f0, transparent);
+            z-index: 0;
+        }
+        .audit-timeline-item:last-child::before {
+            display: none;
+        }
+        .dark .audit-timeline-item::before {
+            background: linear-gradient(to bottom, #334155, transparent);
+        }
+    </style>
+</head>
+<body style="height: auto; min-height: 100%;" class="font-body bg-background-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 transition-colors duration-300">
+
+    <!-- Main Application Wrapper -->
+    <div id="mainApp" class="flex w-full min-h-screen">
+        
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex-col hidden lg:flex shrink-0 transition-colors duration-300 sticky top-0 h-screen overflow-hidden">
+            <!-- Brand -->
+            <div class="p-6 border-b border-slate-100 dark:border-slate-700">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-large flex items-center justify-center text-white font-bold text-xl shadow-custom">H</div>
+                    <div>
+                        <span class="font-heading font-bold text-xl text-slate-800 dark:text-white block">HR Nexus</span>
+                        <span class="text-xs text-slate-500 dark:text-slate-400">Enterprise Edition</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
+                <div class="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-4 px-2">Menu Chính</div>
+                
+                <a href="#" class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white rounded-large font-medium transition-colors">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                    <span>Bảng Điều Khiển</span>
+                </a>
+                <a href="#" class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white rounded-large font-medium transition-colors">
+                    <i data-lucide="users" class="w-5 h-5"></i>
+                    <span>Nhân Viên</span>
+                </a>
+                
+                <div class="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-4 px-2 pt-6">Quản Lý Bảo Mật</div>
+                
+                <a href="#" onclick="showView('users')" id="nav-users" class="nav-item flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white rounded-large font-medium transition-colors">
+                    <i data-lucide="user-cog" class="w-5 h-5"></i>
+                    <span>Quản Lý Người Dùng</span>
+                </a>
+                <a href="#" onclick="showView('roles')" id="nav-roles" class="nav-item flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white rounded-large font-medium transition-colors">
+                    <i data-lucide="shield" class="w-5 h-5"></i>
+                    <span>Quản Lý Vai Trò</span>
+                </a>
+                <a href="#" onclick="showView('permissions')" id="nav-permissions" class="nav-item flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white rounded-large font-medium transition-colors">
+                    <i data-lucide="key" class="w-5 h-5"></i>
+                    <span>Ma Trận Quyền</span>
+                </a>
+                <a href="#" onclick="showView('audit')" id="nav-audit" class="nav-item flex items-center gap-3 px-3 py-2.5 bg-gradient-to-r from-blue-50 to-blue-100/50 dark:from-blue-900/30 dark:to-blue-900/20 text-blue-700 dark:text-blue-400 rounded-large font-semibold transition-colors shadow-custom">
+                    <i data-lucide="file-text" class="w-5 h-5"></i>
+                    <span>Nhật Ký Kiểm Toán</span>
+                </a>
+                
+                <div class="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-4 px-2 pt-6">Cài Đặt</div>
+                
+                <a href="#" class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white rounded-large font-medium transition-colors">
+                    <i data-lucide="settings" class="w-5 h-5"></i>
+                    <span>Cài Đặt Hệ Thống</span>
+                </a>
+            </nav>
+            
+            <!-- User Profile Footer -->
+            <div class="p-4 border-t border-slate-100 dark:border-slate-700">
+                <div class="flex items-center gap-3 px-3 py-3 bg-slate-50 dark:bg-slate-900/50 rounded-large">
+                    <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="Profile" class="w-9 h-9 rounded-full border border-slate-200 dark:border-slate-600">
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-semibold text-slate-700 dark:text-slate-300 truncate">Nguyễn Thị Mai</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 truncate">Quản Trị Viên</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col min-w-0">
+            <!-- Header -->
+            <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-20 transition-colors duration-300">
+                <div class="px-4 md:px-8 py-4 flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <button class="text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 lg:hidden">
+                            <i data-lucide="menu" class="w-6 h-6"></i>
+                        </button>
+                        <div>
+                            <h1 class="font-heading text-xl font-bold text-slate-900 dark:text-white" id="pageTitle">Nhật Ký Kiểm Toán</h1>
+                            <p class="text-sm text-slate-500 dark:text-slate-400 hidden sm:block" id="pageSubtitle">Theo dõi tất cả thay đổi bảo mật và truy cập</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-3">
+                        <button onclick="document.documentElement.classList.toggle('dark')" class="p-2 text-slate-400 dark:text-slate-300 hover:text-slate-600 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-700 rounded-large transition-colors">
+                            <i data-lucide="moon" class="w-5 h-5 dark:hidden"></i>
+                            <i data-lucide="sun" class="w-5 h-5 hidden dark:block"></i>
+                        </button>
+                        <div class="h-8 w-px bg-slate-200 dark:bg-slate-700 mx-1"></div>
+                        <button class="flex items-center gap-2 px-3 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-large text-sm font-medium">
+                            <i data-lucide="help-circle" class="w-4 h-4"></i>
+                            <span class="hidden sm:inline">Trợ Giúp</span>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <div class="flex-1 p-4 md:p-8 overflow-y-auto bg-background-50 dark:bg-slate-900">
+                
+                <!-- AUDIT LOG VIEW (DEFAULT) -->
+                <div id="auditView" class="view-content">
+                    <!-- Stats Cards for Audit -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                        <div class="bg-white dark:bg-slate-800 p-6 rounded-large shadow-custom border border-slate-200 dark:border-slate-700">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center text-blue-600 dark:text-blue-400">
+                                    <i data-lucide="activity" class="w-5 h-5"></i>
+                                </div>
+                                <span class="text-xs font-medium text-green-600 bg-green-100 dark:bg-green-900/30 px-2 py-1 rounded-full">+12%</span>
+                            </div>
+                            <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-1">2,451</h3>
+                            <p class="text-sm text-slate-500 dark:text-slate-400">Tổng sự kiện hôm nay</p>
+                        </div>
+                        
+                        <div class="bg-white dark:bg-slate-800 p-6 rounded-large shadow-custom border border-slate-200 dark:border-slate-700">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-10 h-10 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center text-amber-600 dark:text-amber-400">
+                                    <i data-lucide="shield-alert" class="w-5 h-5"></i>
+                                </div>
+                                <span class="text-xs font-medium text-slate-500 bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded-full">24h qua</span>
+                            </div>
+                            <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-1">5</h3>
+                            <p class="text-sm text-slate-500 dark:text-slate-400">Cảnh báo bảo mật</p>
+                        </div>
+                        
+                        <div class="bg-white dark:bg-slate-800 p-6 rounded-large shadow-custom border border-slate-200 dark:border-slate-700">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center text-purple-600 dark:text-purple-400">
+                                    <i data-lucide="users" class="w-5 h-5"></i>
+                                </div>
+                                <span class="text-xs font-medium text-slate-500 bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded-full">Đang hoạt động</span>
+                            </div>
+                            <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-1">48</h3>
+                            <p class="text-sm text-slate-500 dark:text-slate-400">Người dùng trực tuyến</p>
+                        </div>
+                    </div>
+
+                    <!-- Filters & Actions -->
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                        <div class="flex flex-wrap items-center gap-3">
+                            <div class="relative">
+                                <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                                <input type="text" placeholder="Tìm kiếm sự kiện..." class="pl-9 pr-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-large text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 w-64 shadow-sm">
+                            </div>
+                            <select id="auditEventFilter" onchange="filterAuditLog()" class="px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-large text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 shadow-sm cursor-pointer">
+                                <option value="all">Tất cả sự kiện</option>
+                                <option value="login">Đăng nhập</option>
+                                <option value="role_change">Thay đổi vai trò</option>
+                                <option value="permission_change">Thay đổi quyền</option>
+                                <option value="user_assignment">Phân quyền người dùng</option>
+                            </select>
+                            <select id="auditTimeFilter" onchange="filterAuditLog()" class="px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-large text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 shadow-sm cursor-pointer">
+                                <option value="all">Tất cả thời gian</option>
+                                <option value="today">Hôm nay</option>
+                                <option value="week">Tuần này</option>
+                                <option value="month">Tháng này</option>
+                            </select>
+                        </div>
+                        <button onclick="alert('Đã xuất dữ liệu thành công!')" class="px-4 py-2 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-large font-medium transition-colors flex items-center gap-2 shadow-sm">
+                            <i data-lucide="download" class="w-4 h-4"></i>
+                            <span>Xuất CSV</span>
+                        </button>
+                    </div>
+
+                    <!-- Timeline Container -->
+                    <div class="bg-white dark:bg-slate-800 rounded-large border border-slate-200 dark:border-slate-700 shadow-custom p-6 md:p-8">
+                        <h3 class="font-heading text-lg font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-2">
+                            <i data-lucide="clock" class="w-5 h-5 text-slate-400"></i>
+                            Dòng Thời Gian Hoạt Động
+                        </h3>
+                        <div class="space-y-8" id="auditTimelineContainer">
+                            <!-- Timeline items will be rendered here by JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- USERS VIEW (Hidden) -->
+                <div id="usersView" class="view-content hidden">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-lg font-bold text-slate-900 dark:text-white">Danh Sách Người Dùng</h2>
+                        <button class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-large font-medium transition-colors flex items-center gap-2">
+                            <i data-lucide="plus" class="w-4 h-4"></i>
+                            <span>Thêm Mới</span>
+                        </button>
+                    </div>
+                    <div class="bg-white dark:bg-slate-800 rounded-large border border-slate-200 dark:border-slate-700 shadow-custom overflow-hidden">
+                        <div class="p-8 text-center text-slate-500">
+                            <i data-lucide="users" class="w-12 h-12 mx-auto mb-3 text-slate-300"></i>
+                            <p>Chế độ xem người dùng (Nội dung giữ chỗ)</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ROLES VIEW (Hidden) -->
+                <div id="rolesView" class="view-content hidden">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-lg font-bold text-slate-900 dark:text-white">Danh Sách Vai Trò</h2>
+                        <button class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-large font-medium transition-colors flex items-center gap-2">
+                            <i data-lucide="plus" class="w-4 h-4"></i>
+                            <span>Tạo Vai Trò</span>
+                        </button>
+                    </div>
+                    <div class="bg-white dark:bg-slate-800 rounded-large border border-slate-200 dark:border-slate-700 shadow-custom overflow-hidden">
+                        <div class="p-8 text-center text-slate-500">
+                            <i data-lucide="shield" class="w-12 h-12 mx-auto mb-3 text-slate-300"></i>
+                            <p>Chế độ xem vai trò (Nội dung giữ chỗ)</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PERMISSIONS VIEW (Hidden) -->
+                <div id="permissionsView" class="view-content hidden">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-lg font-bold text-slate-900 dark:text-white">Ma Trận Phân Quyền</h2>
+                        <button class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-large font-medium transition-colors flex items-center gap-2">
+                            <i data-lucide="save" class="w-4 h-4"></i>
+                            <span>Lưu Thay Đổi</span>
+                        </button>
+                    </div>
+                    <div class="bg-white dark:bg-slate-800 rounded-large border border-slate-200 dark:border-slate-700 shadow-custom overflow-hidden">
+                        <div class="p-8 text-center text-slate-500">
+                            <i data-lucide="grid" class="w-12 h-12 mx-auto mb-3 text-slate-300"></i>
+                            <p>Chế độ xem ma trận quyền (Nội dung giữ chỗ)</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // MOCK DATA
+        const MOCK_AUDIT_LOGS = [
+            { id: 'a1', eventType: 'login', userId: 'u1', userName: 'Nguyễn Thị Mai', action: 'Người dùng đã đăng nhập', details: { ip: '192.168.1.100', device: 'Chrome on Windows' }, timestamp: 'Vừa xong' },
+            { id: 'a2', eventType: 'permission_change', userId: 'u1', userName: 'Nguyễn Thị Mai', action: 'Đã chỉnh sửa quyền cho vai trò Quản lý nhân sự', details: { role: 'HR Manager', changes: ['Thêm: report.read', 'Xóa: system.config'] }, timestamp: '15 phút trước' },
+            { id: 'a3', eventType: 'user_assignment', userId: 'u1', userName: 'Nguyễn Thị Mai', action: 'Đã gán vai trò Quản lý lương cho Hoàng Thị Hoa', details: { targetUser: 'Hoàng Thị Hoa', role: 'Payroll Manager' }, timestamp: '45 phút trước' },
+            { id: 'a4', eventType: 'role_change', userId: 'u1', userName: 'Nguyễn Thị Mai', action: 'Đã tạo vai trò mới: Quản lý phòng ban', details: { roleName: 'Department Manager', permissions: 5 }, timestamp: '2 giờ trước' },
+            { id: 'a5', eventType: 'login', userId: 'u2', userName: 'Trần Văn Hùng', action: 'Người dùng đã đăng nhập', details: { ip: '192.168.1.105', device: 'Safari on MacOS' }, timestamp: '5 giờ trước' },
+            { id: 'a6', eventType: 'user_assignment', userId: 'u1', userName: 'Nguyễn Thị Mai', action: 'Đã vô hiệu hóa tài khoản: Vũ Văn Đức', details: { targetUser: 'Vũ Văn Đức', reason: 'Nhân viên nghỉ việc' }, timestamp: 'Hôm qua, 15:20' },
+            { id: 'a7', eventType: 'permission_change', userId: 'u1', userName: 'Nguyễn Thị Mai', action: 'Đã cập nhật quyền vai trò Nhân viên', details: { role: 'Employee', changes: ['Thêm: attendance.read'] }, timestamp: 'Hôm qua, 10:15' },
+            { id: 'a8', eventType: 'login', userId: 'u3', userName: 'Lê Thị Lan', action: 'Người dùng đã đăng nhập', details: { ip: '192.168.1.110', device: 'Firefox on Windows' }, timestamp: '14/12/2024' }
+        ];
+
+        let auditLogs = [...MOCK_AUDIT_LOGS];
+        let currentView = 'audit'; // DEFAULT VIEW IS NOW AUDIT
+
+        // VIEW MANAGEMENT
+        function showView(viewName) {
+            currentView = viewName;
+            
+            // Hide all views
+            document.querySelectorAll('.view-content').forEach(v => v.classList.add('hidden'));
+            // Show selected view
+            document.getElementById(`${viewName}View`).classList.remove('hidden');
+            
+            // Update Nav State
+            document.querySelectorAll('.nav-item').forEach(item => {
+                // Reset to default style
+                item.className = 'nav-item flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white rounded-large font-medium transition-colors';
+            });
+            
+            // Set active style
+            const activeNav = document.getElementById(`nav-${viewName}`);
+            if(activeNav) {
+                activeNav.className = 'nav-item flex items-center gap-3 px-3 py-2.5 bg-gradient-to-r from-blue-50 to-blue-100/50 dark:from-blue-900/30 dark:to-blue-900/20 text-blue-700 dark:text-blue-400 rounded-large font-semibold transition-colors shadow-custom';
+            }
+            
+            // Update Header Title
+            const titles = {
+                users: { title: 'Quản Lý Người Dùng', subtitle: 'Quản lý người dùng và phân quyền vai trò' },
+                roles: { title: 'Quản Lý Vai Trò', subtitle: 'Tạo và quản lý vai trò với quyền tùy chỉnh' },
+                permissions: { title: 'Ma Trận Quyền', subtitle: 'Cấu hình quyền vai trò trên tất cả các miền' },
+                audit: { title: 'Nhật Ký Kiểm Toán', subtitle: 'Theo dõi tất cả thay đổi bảo mật và truy cập' }
+            };
+            
+            if(titles[viewName]) {
+                document.getElementById('pageTitle').textContent = titles[viewName].title;
+                document.getElementById('pageSubtitle').textContent = titles[viewName].subtitle;
+            }
+            
+            if (viewName === 'audit') renderAuditLog();
+            
+            lucide.createIcons();
+        }
+
+        // RENDER AUDIT LOG
+        function renderAuditLog() {
+            const container = document.getElementById('auditTimelineContainer');
+            
+            const eventIcons = {
+                login: 'log-in',
+                permission_change: 'key',
+                user_assignment: 'user-check',
+                role_change: 'shield'
+            };
+            
+            const eventColors = {
+                login: 'blue',
+                permission_change: 'amber',
+                user_assignment: 'emerald',
+                role_change: 'purple'
+            };
+            
+            container.innerHTML = auditLogs.map(log => {
+                const icon = eventIcons[log.eventType] || 'file-text';
+                const color = eventColors[log.eventType] || 'slate';
+                
+                // Format details for display
+                let detailsHtml = '';
+                if (log.details) {
+                    if (log.eventType === 'permission_change' && log.details.changes) {
+                        detailsHtml = `
+                            <div class="mt-3 p-3 bg-slate-50 dark:bg-slate-900/50 rounded-small border border-slate-100 dark:border-slate-700">
+                                <p class="text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Thay đổi:</p>
+                                <ul class="list-disc list-inside text-xs text-slate-600 dark:text-slate-400">
+                                    ${log.details.changes.map(c => `<li>${c}</li>`).join('')}
+                                </ul>
+                            </div>
+                        `;
+                    } else if (log.eventType === 'login') {
+                        detailsHtml = `
+                            <div class="mt-2 flex items-center gap-4 text-xs text-slate-500 dark:text-slate-400">
+                                <span class="flex items-center gap-1"><i data-lucide="globe" class="w-3 h-3"></i> ${log.details.ip}</span>
+                                <span class="flex items-center gap-1"><i data-lucide="monitor" class="w-3 h-3"></i> ${log.details.device}</span>
+                            </div>
+                        `;
+                    } else {
+                        detailsHtml = `
+                            <div class="mt-3 p-3 bg-slate-50 dark:bg-slate-900/50 rounded-small border border-slate-100 dark:border-slate-700">
+                                <pre class="text-xs text-slate-600 dark:text-slate-400 whitespace-pre-wrap font-mono">${JSON.stringify(log.details, null, 2).replace(/{|}|"/g, '')}</pre>
+                            </div>
+                        `;
+                    }
+                }
+                
+                return `
+                    <div class="audit-timeline-item relative pl-12 pb-2 group">
+                        <!-- Icon Marker -->
+                        <div class="absolute left-0 top-0 w-10 h-10 bg-${color}-100 dark:bg-${color}-900/30 rounded-full flex items-center justify-center border-4 border-white dark:border-slate-800 z-10 shadow-sm group-hover:scale-110 transition-transform duration-200">
+                            <i data-lucide="${icon}" class="w-5 h-5 text-${color}-600 dark:text-${color}-400"></i>
+                        </div>
+                        
+                        <!-- Content Card -->
+                        <div class="bg-white dark:bg-slate-800 rounded-large p-0 transition-all duration-200">
+                            <div class="flex items-start justify-between mb-1">
+                                <div>
+                                    <h4 class="font-heading text-sm font-bold text-slate-900 dark:text-white">${log.action}</h4>
+                                    <div class="flex items-center gap-2 mt-1">
+                                        <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(log.userName)}&background=random&size=24" class="w-5 h-5 rounded-full" alt="${log.userName}">
+                                        <p class="text-xs font-medium text-slate-600 dark:text-slate-400">${log.userName}</p>
+                                    </div>
+                                </div>
+                                <span class="text-xs font-medium text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-700/50 px-2 py-1 rounded-small whitespace-nowrap">${log.timestamp}</span>
+                            </div>
+                            ${detailsHtml}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            lucide.createIcons();
+        }
+
+        function filterAuditLog() {
+            // Mock filter functionality - just re-render
+            const eventFilter = document.getElementById('auditEventFilter').value;
+            
+            if (eventFilter !== 'all') {
+                auditLogs = MOCK_AUDIT_LOGS.filter(log => log.eventType === eventFilter);
+            } else {
+                auditLogs = [...MOCK_AUDIT_LOGS];
+            }
+            renderAuditLog();
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // CRITICAL: Set 'audit' as the default view
+            showView('audit');
+            lucide.createIcons();
+        });
+    </script>
+</body>
+</html>
