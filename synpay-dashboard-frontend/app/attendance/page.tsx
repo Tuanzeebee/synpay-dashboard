@@ -1,4 +1,4 @@
-import AttendancePayRoll from "@/pages/attendance/AttendancePayroll"
+import AttendancePayRoll from "@/views/attendance/AttendancePayroll"
 
 export default function AttendancePage() {
   return <AttendancePayRoll />

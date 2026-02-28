@@ -256,6 +256,7 @@ export const translations = {
   // User Modal
   'rbac.modal.user.title.add': { vi: 'Thêm Người Dùng', en: 'Add User' },
   'rbac.modal.user.title.edit': { vi: 'Chỉnh Sửa Người Dùng', en: 'Edit User' },
+  'rbac.modal.user.fullName': { vi: 'Họ và Tên', en: 'Full Name' },
   'rbac.modal.user.firstName': { vi: 'Họ', en: 'First Name' },
   'rbac.modal.user.lastName': { vi: 'Tên', en: 'Last Name' },
   'rbac.modal.user.email': { vi: 'Địa Chỉ Email', en: 'Email Address' },

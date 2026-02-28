@@ -1,4 +1,4 @@
-import PayrollManagement from '@/pages/payroll/management/PayrollManagement'
+import PayrollManagement from '@/views/payroll/management/PayrollManagement'
 
 export default function PayrollPage() {
   return <PayrollManagement />

@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="vi" style="height: auto; min-height: 100%;">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HR Nexus - Yêu Cầu Tài Khoản</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link id="heading-font-link" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link id="body-font-link" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        heading: ['var(--font-heading-name)', 'sans-serif'],
+                        body: ['var(--font-body-name)', 'sans-serif'],
+                    },
+                    borderRadius: {
+                        small: 'var(--radius-small)',
+                        large: 'var(--radius-large)',
+                    },
+                    boxShadow: {
+                        custom: 'var(--shadow-custom)',
+                        'custom-hover': 'var(--shadow-custom-hover)',
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        :root {
+            --font-heading-name: 'Inter';
+            --font-body-name: 'Inter';
+            --font-heading: 'Inter', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --letter-spacing-heading: -0.02em;
+            --letter-spacing-body: 0px;
+            --space-base: 1rem;
+            --radius-small: 0.5rem;
+            --radius-large: 0.75rem;
+            --border-width: 1px;
+            --shadow-color: 15 23 42;
+            --shadow-offset-x: 0px;
+            --shadow-offset-y: 4px;
+            --shadow-blur: 24px;
+            --shadow-spread: -4px;
+            --shadow-opacity: 0.12;
+            --shadow-custom: 0 4px 24px -4px rgba(15, 23, 42, 0.12);
+            --shadow-custom-hover: 0 8px 32px -4px rgba(15, 23, 42, 0.18);
+        }
+
+        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-12px); } }
+        @keyframes float2 { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-8px); } }
+        @keyframes fadeSlideUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeSlideRight { from { opacity: 0; transform: translateX(-24px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes successPop { 0% { transform: scale(0.5); opacity: 0; } 70% { transform: scale(1.1); } 100% { transform: scale(1); opacity: 1; } }
+        @keyframes checkDraw { from { stroke-dashoffset: 100; } to { stroke-dashoffset: 0; } }
+
+        .animate-float { animation: float 6s ease-in-out infinite; }
+        .animate-float2 { animation: float2 8s ease-in-out infinite; }
+        .animate-fade-slide-up { animation: fadeSlideUp 0.6s ease-out forwards; }
+        .animate-fade-slide-right { animation: fadeSlideRight 0.6s ease-out forwards; }
+        .animate-success-pop { animation: successPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+
+        .delay-100 { animation-delay: 0.1s; opacity: 0; }
+        .delay-200 { animation-delay: 0.2s; opacity: 0; }
+        .delay-300 { animation-delay: 0.3s; opacity: 0; }
+        .delay-400 { animation-delay: 0.4s; opacity: 0; }
+        .delay-500 { animation-delay: 0.5s; opacity: 0; }
+        .delay-600 { animation-delay: 0.6s; opacity: 0; }
+
+        .input-field { transition: all 0.2s ease; }
+        .input-field:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); outline: none; }
+        .input-field.error { border-color: #ef4444; box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12); }
+        .input-field.success-field { border-color: #10b981; box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12); }
+
+        .btn-primary { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); transition: all 0.2s ease; }
+        .btn-primary:hover:not(:disabled) { background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); transform: translateY(-1px); box-shadow: 0 8px 20px -4px rgba(37, 99, 235, 0.5); }
+        .btn-primary:active:not(:disabled) { transform: translateY(0); }
+        .btn-primary:disabled { opacity: 0.7; cursor: not-allowed; }
+
+        .left-panel { background: linear-gradient(145deg, #1e3a8a 0%, #1d4ed8 40%, #2563eb 70%, #3b82f6 100%); }
+        .glass-card { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.2); }
+        .stat-pill { background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.25); }
+        .grid-dot { background-image: radial-gradient(circle, rgba(255,255,255,0.15) 1px, transparent 1px); background-size: 28px 28px; }
+
+        .step-indicator.active { background: #3b82f6; border-color: #3b82f6; color: white; }
+        .step-indicator.completed { background: #10b981; border-color: #10b981; color: white; }
+        .step-indicator.pending { background: white; border-color: #e2e8f0; color: #94a3b8; }
+        .step-line.completed { background: #10b981; }
+        .step-line.pending { background: #e2e8f0; }
+
+        .role-card { transition: all 0.2s ease; cursor: pointer; }
+        .role-card:hover { border-color: #93c5fd; background: #eff6ff; }
+        .role-card.selected { border-color: #3b82f6; background: #eff6ff; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+
+        .success-overlay { display: none; }
+        .success-overlay.show { display: flex; }
+
+        select.input-field { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; }
+    </style>
+</head>
+<body class="font-body bg-slate-50 text-slate-900" style="height: auto; min-height: 100%;">
+
+<div class="flex flex-col lg:flex-row" style="min-height: 100vh;">
+
+    <!-- ===== LEFT PANEL ===== -->
+    <div class="left-panel relative w-full lg:w-[45%] flex flex-col justify-between p-8 md:p-12 overflow-hidden" style="min-height: 380px;">
+        <div class="grid-dot absolute inset-0 opacity-60"></div>
+        <div class="absolute -top-24 -left-24 w-80 h-80 bg-blue-400 rounded-full opacity-20 blur-3xl"></div>
+        <div class="absolute -bottom-32 -right-16 w-96 h-96 bg-indigo-300 rounded-full opacity-20 blur-3xl"></div>
+
+        <!-- Logo -->
+        <div class="relative z-10 animate-fade-slide-right delay-100">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-white rounded-large flex items-center justify-center shadow-lg">
+                    <span class="font-heading font-black text-blue-600 text-xl">H</span>
+                </div>
+                <span class="font-heading font-bold text-2xl text-white tracking-tight">HR Nexus</span>
+            </div>
+        </div>
+
+        <!-- Center Content -->
+        <div class="relative z-10 my-8 lg:my-0">
+            <div class="animate-fade-slide-right delay-200">
+                <span class="inline-flex items-center gap-2 stat-pill text-blue-100 text-xs font-semibold px-3 py-1.5 rounded-full mb-6">
+                    <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-400"></i>
+                    Yêu cầu được xét duyệt trong 24h
+                </span>
+            </div>
+
+            <div class="animate-fade-slide-right delay-300">
+                <h1 class="font-heading text-4xl md:text-5xl font-extrabold text-white leading-tight mb-4" style="letter-spacing: -0.03em;">
+                    Tham gia cùng<br>
+                    <span class="text-blue-200">đội ngũ của bạn.</span>
+                </h1>
+                <p class="text-blue-100 text-base leading-relaxed max-w-sm opacity-90">
+                    Gửi yêu cầu cấp tài khoản. Quản trị viên sẽ xem xét và kích hoạt quyền truy cập phù hợp với vai trò của bạn.
+                </p>
+            </div>
+
+            <!-- Process Steps -->
+            <div class="mt-10 space-y-4 animate-fade-slide-right delay-400">
+                <div class="flex items-center gap-4">
+                    <div class="w-9 h-9 rounded-full bg-white/20 border border-white/30 flex items-center justify-center shrink-0">
+                        <i data-lucide="file-text" class="w-4 h-4 text-white"></i>
+                    </div>
+                    <div>
+                        <div class="text-white font-semibold text-sm">Điền thông tin yêu cầu</div>
+                        <div class="text-blue-200 text-xs">Cung cấp thông tin cá nhân & vai trò</div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="w-9 h-9 rounded-full bg-white/20 border border-white/30 flex items-center justify-center shrink-0">
+                        <i data-lucide="user-check" class="w-4 h-4 text-white"></i>
+                    </div>
+                    <div>
+                        <div class="text-white font-semibold text-sm">Quản trị viên xét duyệt</div>
+                        <div class="text-blue-200 text-xs">Xem xét và phân quyền phù hợp</div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="w-9 h-9 rounded-full bg-white/20 border border-white/30 flex items-center justify-center shrink-0">
+                        <i data-lucide="mail-check" class="w-4 h-4 text-white"></i>
+                    </div>
+                    <div>
+                        <div class="text-white font-semibold text-sm">Nhận thông tin đăng nhập</div>
+                        <div class="text-blue-200 text-xs">Tài khoản gửi qua email công ty</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Note -->
+        <div class="relative z-10 animate-fade-slide-right delay-500">
+            <div class="glass-card rounded-large p-4 max-w-sm">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 bg-amber-400/20 rounded-full flex items-center justify-center shrink-0">
+                        <i data-lucide="info" class="w-4 h-4 text-amber-300"></i>
+                    </div>
+                    <p class="text-blue-100 text-xs leading-relaxed">
+                        <span class="text-white font-semibold">Lưu ý:</span> Đây là trang dành cho mục đích kiểm thử. Tài khoản thực tế được cấp bởi quản trị viên hệ thống.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== RIGHT PANEL - Register Form ===== -->
+    <div class="w-full lg:w-[55%] flex items-start justify-center bg-white p-6 md:p-10 lg:p-12 overflow-y-auto">
+        <div class="w-full max-w-lg py-4">
+
+            <!-- Mobile Logo -->
+            <div class="flex items-center gap-3 mb-8 lg:hidden">
+                <div class="w-9 h-9 bg-blue-600 rounded-large flex items-center justify-center shadow-sm">
+                    <span class="font-heading font-black text-white text-lg">H</span>
+                </div>
+                <span class="font-heading font-bold text-xl text-slate-900">HR Nexus</span>
+            </div>
+
+            <!-- Header -->
+            <div class="mb-6 animate-fade-slide-up delay-100">
+                <div class="inline-flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-700 text-xs font-semibold px-3 py-1.5 rounded-full mb-4">
+                    <i data-lucide="flask-conical" class="w-3.5 h-3.5"></i>
+                    Chế độ kiểm thử — Không gửi dữ liệu thật
+                </div>
+                <h2 class="font-heading text-3xl font-bold text-slate-900 mb-2" style="letter-spacing: -0.02em;">Yêu Cầu Tài Khoản</h2>
+                <p class="text-slate-500 text-sm">Điền đầy đủ thông tin bên dưới. Quản trị viên sẽ xét duyệt và cấp quyền truy cập.</p>
+            </div>
+
+            <!-- Step Indicator -->
+            <div class="flex items-center mb-8 animate-fade-slide-up delay-200">
+                <div class="flex items-center gap-2">
+                    <div id="step1-indicator" class="step-indicator active w-8 h-8 rounded-full border-2 flex items-center justify-center text-xs font-bold transition-all">1</div>
+                    <span id="step1-label" class="text-xs font-semibold text-blue-600 hidden sm:block">Thông tin cá nhân</span>
+                </div>
+                <div id="line1" class="step-line pending flex-1 h-0.5 mx-3 transition-all duration-500"></div>
+                <div class="flex items-center gap-2">
+                    <div id="step2-indicator" class="step-indicator pending w-8 h-8 rounded-full border-2 flex items-center justify-center text-xs font-bold transition-all">2</div>
+                    <span id="step2-label" class="text-xs font-semibold text-slate-400 hidden sm:block">Vai trò & Phòng ban</span>
+                </div>
+                <div id="line2" class="step-line pending flex-1 h-0.5 mx-3 transition-all duration-500"></div>
+                <div class="flex items-center gap-2">
+                    <div id="step3-indicator" class="step-indicator pending w-8 h-8 rounded-full border-2 flex items-center justify-center text-xs font-bold transition-all">3</div>
+                    <span id="step3-label" class="text-xs font-semibold text-slate-400 hidden sm:block">Xác nhận</span>
+                </div>
+            </div>
+
+            <!-- ===== STEP 1: Personal Info ===== -->
+            <div id="step1" class="animate-fade-slide-up delay-300">
+                <div class="space-y-4">
+                    <!-- Full Name -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">Họ <span class="text-red-500">*</span></label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                                    <i data-lucide="user" class="w-4 h-4 text-slate-400"></i>
+                                </div>
+                                <input id="lastName" type="text" placeholder="Nguyễn" class="input-field w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-large text-slate-900 text-sm placeholder-slate-400 focus:bg-white">
+                            </div>
+                            <p id="lastNameErr" class="hidden text-xs text-red-500 mt-1 flex items-center gap-1"><i data-lucide="alert-circle" class="w-3 h-3"></i> Vui lòng nhập họ</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">Tên <span class="text-red-500">*</span></label>
+                            <input id="firstName" type="text" placeholder="Văn An" class="input-field w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-large text-slate-900 text-sm placeholder-slate-400 focus:bg-white">
+                            <p id="firstNameErr" class="hidden text-xs text-red-500 mt-1 flex items-center gap-1"><i data-lucide="alert-circle" class="w-3 h-3"></i> Vui lòng nhập tên</p>
+                        </div>
+                    </div>
+
+                    <!-- Work Email -->
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Email Công Ty <span class="text-red-500">*</span></label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                                <i data-lucide="mail" class="w-4 h-4 text-slate-400"></i>
+                            </div>
+                            <input id="workEmail" type="email" placeholder="ten.ho@company.com" class="input-field w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-large text-slate-900 text-sm placeholder-slate-400 focus:bg-white">
+                        </div>
+                        <p id="emailErr" class="hidden text-xs text-red-500 mt-1">Vui lòng nhập email hợp lệ</p>
+                        <p class="text-xs text-slate-400 mt-1.5">Sử dụng email công ty để xác minh danh tính</p>
+                    </div>
+
+                    <!-- Phone -->
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Số Điện Thoại</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                                <i data-lucide="phone" class="w-4 h-4 text-slate-400"></i>
+                            </div>
+                            <input id="phone" type="tel" placeholder="0912 345 678" class="input-field w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-large text-slate-900 text-sm placeholder-slate-400 focus:bg-white">
+                        </div>
+                    </div>
+
+                    <!-- Employee ID -->
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Mã Nhân Viên <span class="text-red-500">*</span></label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                                <i data-lucide="badge" class="w-4 h-4 text-slate-400"></i>
+                            </div>
+                            <input id="empId" type="text" placeholder="NV-2024-001" class="input-field w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-large text-slate-900 text-sm placeholder-slate-400 focus:bg-white">
+                        </div>
+                        <p id="empIdErr" class="hidden text-xs text-red-500 mt-1">Vui lòng nhập mã nhân viên</p>
+                        <p class="text-xs text-slate-400 mt-1.5">Mã nhân viên do phòng HR cung cấp khi onboarding</p>
+                    </div>
+
+                    <button onclick="goToStep(2)" class="btn-primary w-full text-white font-semibold py-3.5 px-6 rounded-large text-sm flex items-center justify-center gap-2 shadow-custom mt-2">
+                        <span>Tiếp Theo</span>
+                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ===== STEP 2: Role & Department ===== -->
+            <div id="step2" class="hidden animate-fade-slide-up">
+                <div class="space-y-5">
+                    <!-- Department -->
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Phòng Ban <span class="text-red-500">*</span></label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                                <i data-lucide="building-2" class="w-4 h-4 text-slate-400"></i>
+                            </div>
+                            <select id="department" class="input-field w-full pl-10 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-large text-slate-900 text-sm focus:bg-white">
+                                <option value="">-- Chọn phòng ban --</option>
+                                <option value="engineering">Kỹ Thuật & Công Nghệ</option>
+                                <option value="sales">Kinh Doanh</option>
+                                <option value="marketing">Marketing</option>
+                                <option value="hr">Nhân Sự (HR)</option>
+                                <option value="finance">Tài Chính & Kế Toán</option>
+                                <option value="support">Hỗ Trợ Khách Hàng</option>
+                                <option value="operations">Vận Hành</option>
+                                <option value="legal">Pháp Lý</option>
+                            </select>
+                        </div>
+                        <p id="deptErr" class="hidden text-xs text-red-500 mt-1">Vui lòng chọn phòng ban</p>
+                    </div>
+
+                    <!-- Position -->
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Chức Vụ <span class="text-red-500">*</span></label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                                <i data-lucide="briefcase" class="w-4 h-4 text-slate-400"></i>
+                            </div>
+                            <input id="position" type="text" placeholder="VD: Senior Developer, HR Manager..." class="input-field w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-large text-slate-900 text-sm placeholder-slate-400 focus:bg-white">
+                        </div>
+                        <p id="positionErr" class="hidden text-xs text-red-500 mt-1">Vui lòng nhập chức vụ</p>
+                    </div>
+
+                    <!-- Access Role -->
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-3">Vai Trò Truy Cập Yêu Cầu <span class="text-red-500">*</span></label>
+                        <div class="grid grid-cols-1 gap-3" id="roleCards">
+                            <div class="role-card border-2 border-slate-200 rounded-large p-4 flex items-start gap-3" onclick="selectRole(this, 'viewer')">
+                                <div class="w-9 h-9 bg-slate-100 rounded-large flex items-center justify-center shrink-0 mt-0.5">
+                                    <i data-lucide="eye" class="w-4 h-4 text-slate-500"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="flex items-center justify-between">
+                                        <span class="font-semibold text-slate-900 text-sm">Người Xem (Viewer)</span>
+                                        <span class="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-medium">Cơ bản</span>
+                                    </div>
+                                    <p class="text-xs text-slate-500 mt-1">Chỉ xem báo cáo và thông tin nhân sự. Không thể chỉnh sửa dữ liệu.</p>
+                                </div>
+                            </div>
+                            <div class="role-card border-2 border-slate-200 rounded-large p-4 flex items-start gap-3" onclick="selectRole(this, 'hr_staff')">
+                                <div class="w-9 h-9 bg-blue-100 rounded-large flex items-center justify-center shrink-0 mt-0.5">
+                                    <i data-lucide="users" class="w-4 h-4 text-blue-600"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="flex items-center justify-between">
+                                        <span class="font-semibold text-slate-900 text-sm">Nhân Viên HR</span>
+                                        <span class="text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full font-medium">Tiêu chuẩn</span>
+                                    </div>
+                                    <p class="text-xs text-slate-500 mt-1">Quản lý nhân viên, chấm công, nghỉ phép. Không truy cập bảng lương.</p>
+                                </div>
+                            </div>
+                            <div class="role-card border-2 border-slate-200 rounded-large p-4 flex items-start gap-3" onclick="selectRole(this, 'payroll_officer')">
+                                <div class="w-9 h-9 bg-emerald-100 rounded-large flex items-center justify-center shrink-0 mt-0.5">
+                                    <i data-lucide="banknote" class="w-4 h-4 text-emerald-600"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="flex items-center justify-between">
+                                        <span class="font-semibold text-slate-900 text-sm">Cán Bộ Lương</span>
+                                        <span class="text-xs bg-emerald-100 text-emerald-600 px-2 py-0.5 rounded-full font-medium">Nâng cao</span>
+                                    </div>
+                                    <p class="text-xs text-slate-500 mt-1">Xử lý bảng lương, phúc lợi và các khoản chi trả. Yêu cầu phê duyệt đặc biệt.</p>
+                                </div>
+                            </div>
+                            <div class="role-card border-2 border-slate-200 rounded-large p-4 flex items-start gap-3" onclick="selectRole(this, 'manager')">
+                                <div class="w-9 h-9 bg-purple-100 rounded-large flex items-center justify-center shrink-0 mt-0.5">
+                                    <i data-lucide="crown" class="w-4 h-4 text-purple-600"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="flex items-center justify-between">
+                                        <span class="font-semibold text-slate-900 text-sm">Quản Lý (Manager)</span>
+                                        <span class="text-xs bg-purple-100 text-purple-600 px-2 py-0.5 rounded-full font-medium">Cao cấp</span>
+                                    </div>
+                                    <p class="text-xs text-slate-500 mt-1">Toàn quyền quản lý nhân sự, phê duyệt và xem báo cáo tổng hợp.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <p id="roleErr" class="hidden text-xs text-red-500 mt-2">Vui lòng chọn vai trò truy cập</p>
+                        <input type="hidden" id="selectedRole" value="">
+                    </div>
+
+                    <div class="flex gap-3 mt-2">
+                        <button onclick="goToStep(1)" class="flex-1 border-2 border-slate-200 text-slate-700 font-semibold py-3 px-6 rounded-large text-sm flex items-center justify-center gap-2 hover:bg-slate-50 transition-all">
+                            <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                            <span>Quay Lại</span>
+                        </button>
+                        <button onclick="goToStep(3)" class="flex-1 btn-primary text-white font-semibold py-3 px-6 rounded-large text-sm flex items-center justify-center gap-2 shadow-custom">
+                            <span>Tiếp Theo</span>
+                            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== STEP 3: Confirmation ===== -->
+            <div id="step3" class="hidden animate-fade-slide-up">
+                <div class="space-y-5">
+                    <!-- Summary Card -->
+                    <div class="bg-slate-50 border border-slate-200 rounded-large p-5">
+                        <h3 class="font-heading font-semibold text-slate-900 text-sm mb-4 flex items-center gap-2">
+                            <i data-lucide="clipboard-list" class="w-4 h-4 text-blue-500"></i>
+                            Xác Nhận Thông Tin
+                        </h3>
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center py-2 border-b border-slate-200">
+                                <span class="text-xs text-slate-500 font-medium">Họ và tên</span>
+                                <span id="confirm-name" class="text-sm font-semibold text-slate-900">—</span>
+                            </div>
+                            <div class="flex justify-between items-center py-2 border-b border-slate-200">
+                                <span class="text-xs text-slate-500 font-medium">Email công ty</span>
+                                <span id="confirm-email" class="text-sm font-semibold text-slate-900">—</span>
+                            </div>
+                            <div class="flex justify-between items-center py-2 border-b border-slate-200">
+                                <span class="text-xs text-slate-500 font-medium">Mã nhân viên</span>
+                                <span id="confirm-empid" class="text-sm font-semibold text-slate-900">—</span>
+                            </div>
+                            <div class="flex justify-between items-center py-2 border-b border-slate-200">
+                                <span class="text-xs text-slate-500 font-medium">Phòng ban</span>
+                                <span id="confirm-dept" class="text-sm font-semibold text-slate-900">—</span>
+                            </div>
+                            <div class="flex justify-between items-center py-2 border-b border-slate-200">
+                                <span class="text-xs text-slate-500 font-medium">Chức vụ</span>
+                                <span id="confirm-position" class="text-sm font-semibold text-slate-900">—</span>
+                            </div>
+                            <div class="flex justify-between items-center py-2">
+                                <span class="text-xs text-slate-500 font-medium">Vai trò yêu cầu</span>
+                                <span id="confirm-role" class="text-sm font-semibold text-slate-900">—</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Note -->
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Ghi Chú Cho Quản Trị Viên</label>
+                        <textarea id="adminNote" rows="3" placeholder="VD: Tôi cần truy cập để xử lý bảng lương tháng 12. Đã được phê duyệt bởi trưởng phòng..." class="input-field w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-large text-slate-900 text-sm placeholder-slate-400 focus:bg-white resize-none"></textarea>
+                    </div>
+
+                    <!-- Test Mode Warning -->
+                    <div class="bg-amber-50 border border-amber-200 rounded-large p-4 flex items-start gap-3">
+                        <i data-lucide="flask-conical" class="w-4 h-4 text-amber-600 shrink-0 mt-0.5"></i>
+                        <div>
+                            <p class="text-amber-800 text-xs font-semibold">Chế Độ Kiểm Thử</p>
+                            <p class="text-amber-700 text-xs mt-0.5">Yêu cầu này sẽ không được gửi thật. Đây là giao diện demo để kiểm tra luồng đăng ký. Trong môi trường thực, yêu cầu sẽ được gửi đến admin@hrnexus.com.</p>
+                        </div>
+                    </div>
+
+                    <!-- Terms -->
+                    <label class="flex items-start gap-3 cursor-pointer group">
+                        <div class="relative mt-0.5">
+                            <input type="checkbox" id="agreeTerms" class="sr-only peer">
+                            <div onclick="toggleTerms()" class="w-5 h-5 border-2 border-slate-300 rounded-small bg-white peer-checked:bg-blue-600 peer-checked:border-blue-600 transition-all flex items-center justify-center cursor-pointer" id="termsBox">
+                                <i data-lucide="check" class="w-3 h-3 text-white opacity-0" id="termsCheck"></i>
+                            </div>
+                        </div>
+                        <span class="text-sm text-slate-600 leading-relaxed">Tôi xác nhận thông tin trên là chính xác và đồng ý với <a href="#" class="text-blue-600 font-semibold hover:underline">Điều Khoản Sử Dụng</a> và <a href="#" class="text-blue-600 font-semibold hover:underline">Chính Sách Bảo Mật</a> của HR Nexus.</span>
+                    </label>
+                    <p id="termsErr" class="hidden text-xs text-red-500 -mt-3">Vui lòng đồng ý với điều khoản để tiếp tục</p>
+
+                    <div class="flex gap-3">
+                        <button onclick="goToStep(2)" class="flex-1 border-2 border-slate-200 text-slate-700 font-semibold py-3 px-6 rounded-large text-sm flex items-center justify-center gap-2 hover:bg-slate-50 transition-all">
+                            <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                            <span>Quay Lại</span>
+                        </button>
+                        <button onclick="submitRequest()" id="submitBtn" class="flex-1 btn-primary text-white font-semibold py-3 px-6 rounded-large text-sm flex items-center justify-center gap-2 shadow-custom">
+                            <i data-lucide="send" class="w-4 h-4" id="submitIcon"></i>
+                            <span id="submitText">Gửi Yêu Cầu</span>
+                            <svg id="submitSpinner" class="hidden animate-spin w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 22 6.477 22 12h-4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Back to Login -->
+            <div class="mt-8 text-center animate-fade-slide-up delay-500">
+                <p class="text-sm text-slate-500">
+                    Đã có tài khoản?
+                    <a href="#" class="font-semibold text-blue-600 hover:text-blue-800 transition-colors ml-1">Đăng nhập ngay</a>
+                </p>
+            </div>
+
+            <!-- Security Note -->
+            <div class="mt-4 flex items-center justify-center gap-2 text-xs text-slate-400">
+                <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-500"></i>
+                <span>Kết nối được mã hóa SSL 256-bit</span>
+                <span class="text-slate-300">•</span>
+                <span>Tuân thủ ISO 27001</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== SUCCESS OVERLAY ===== -->
+<div id="successOverlay" class="success-overlay fixed inset-0 bg-white/95 backdrop-blur-sm z-50 flex-col items-center justify-center p-8">
+    <div class="text-center max-w-md">
+        <div class="w-24 h-24 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6 animate-success-pop">
+            <svg class="w-12 h-12 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 6L9 17l-5-5" stroke-dasharray="100" stroke-dashoffset="100" style="animation: checkDraw 0.6s ease 0.4s forwards;"/>
+            </svg>
+        </div>
+        <h2 class="font-heading text-3xl font-bold text-slate-900 mb-3" style="letter-spacing: -0.02em;">Yêu Cầu Đã Gửi!</h2>
+        <p class="text-slate-500 text-base mb-2">Yêu cầu tài khoản của bạn đã được ghi nhận thành công.</p>
+        <p class="text-slate-400 text-sm mb-8">Quản trị viên sẽ xem xét và phản hồi qua email trong vòng <span class="font-semibold text-slate-600">24 giờ làm việc</span>.</p>
+
+        <div class="bg-slate-50 border border-slate-200 rounded-large p-5 text-left mb-8">
+            <div class="flex items-center gap-3 mb-3">
+                <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                    <i data-lucide="clock" class="w-4 h-4 text-blue-600"></i>
+                </div>
+                <span class="font-semibold text-slate-900 text-sm">Các bước tiếp theo</span>
+            </div>
+            <div class="space-y-2.5 pl-11">
+                <div class="flex items-center gap-2 text-sm text-slate-600">
+                    <div class="w-1.5 h-1.5 bg-blue-400 rounded-full shrink-0"></div>
+                    Kiểm tra email để nhận xác nhận yêu cầu
+                </div>
+                <div class="flex items-center gap-2 text-sm text-slate-600">
+                    <div class="w-1.5 h-1.5 bg-blue-400 rounded-full shrink-0"></div>
+                    Admin xét duyệt và phân quyền phù hợp
+                </div>
+                <div class="flex items-center gap-2 text-sm text-slate-600">
+                    <div class="w-1.5 h-1.5 bg-blue-400 rounded-full shrink-0"></div>
+                    Nhận thông tin đăng nhập qua email công ty
+                </div>
+            </div>
+        </div>
+
+        <div class="flex gap-3 justify-center">
+            <button onclick="resetForm()" class="border-2 border-slate-200 text-slate-700 font-semibold py-3 px-6 rounded-large text-sm hover:bg-slate-50 transition-all flex items-center gap-2">
+                <i data-lucide="plus" class="w-4 h-4"></i>
+                Gửi Yêu Cầu Khác
+            </button>
+            <a href="#" class="btn-primary text-white font-semibold py-3 px-6 rounded-large text-sm flex items-center gap-2 shadow-custom">
+                <i data-lucide="log-in" class="w-4 h-4"></i>
+                Về Trang Đăng Nhập
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+    lucide.createIcons();
+
+    let currentStep = 1;
+    let termsChecked = false;
+    let selectedRoleValue = '';
+
+    const deptLabels = {
+        'engineering': 'Kỹ Thuật & Công Nghệ',
+        'sales': 'Kinh Doanh',
+        'marketing': 'Marketing',
+        'hr': 'Nhân Sự (HR)',
+        'finance': 'Tài Chính & Kế Toán',
+        'support': 'Hỗ Trợ Khách Hàng',
+        'operations': 'Vận Hành',
+        'legal': 'Pháp Lý'
+    };
+
+    const roleLabels = {
+        'viewer': 'Người Xem (Viewer)',
+        'hr_staff': 'Nhân Viên HR',
+        'payroll_officer': 'Cán Bộ Lương',
+        'manager': 'Quản Lý (Manager)'
+    };
+
+    function selectRole(card, role) {
+        document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
+        card.classList.add('selected');
+        selectedRoleValue = role;
+        document.getElementById('selectedRole').value = role;
+        document.getElementById('roleErr').classList.add('hidden');
+    }
+
+    function toggleTerms() {
+        termsChecked = !termsChecked;
+        const box = document.getElementById('termsBox');
+        const check = document.getElementById('termsCheck');
+        if (termsChecked) {
+            box.classList.add('bg-blue-600', 'border-blue-600');
+            box.classList.remove('border-slate-300');
+            check.style.opacity = '1';
+        } else {
+            box.classList.remove('bg-blue-600', 'border-blue-600');
+            box.classList.add('border-slate-300');
+            check.style.opacity = '0';
+        }
+    }
+
+    function validateStep1() {
+        let valid = true;
+        const lastName = document.getElementById('lastName').value.trim();
+        const firstName = document.getElementById('firstName').value.trim();
+        const email = document.getElementById('workEmail').value.trim();
+        const empId = document.getElementById('empId').value.trim();
+
+        if (!lastName) {
+            document.getElementById('lastNameErr').classList.remove('hidden');
+            document.getElementById('lastName').classList.add('error');
+            valid = false;
+        } else {
+            document.getElementById('lastNameErr').classList.add('hidden');
+            document.getElementById('lastName').classList.remove('error');
+        }
+
+        if (!firstName) {
+            document.getElementById('firstNameErr').classList.remove('hidden');
+            document.getElementById('firstName').classList.add('error');
+            valid = false;
+        } else {
+            document.getElementById('firstNameErr').classList.add('hidden');
+            document.getElementById('firstName').classList.remove('error');
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!email || !emailRegex.test(email)) {
+            document.getElementById('emailErr').classList.remove('hidden');
+            document.getElementById('workEmail').classList.add('error');
+            valid = false;
+        } else {
+            document.getElementById('emailErr').classList.add('hidden');
+            document.getElementById('workEmail').classList.remove('error');
+        }
+
+        if (!empId) {
+            document.getElementById('empIdErr').classList.remove('hidden');
+            document.getElementById('empId').classList.add('error');
+            valid = false;
+        } else {
+            document.getElementById('empIdErr').classList.add('hidden');
+            document.getElementById('empId').classList.remove('error');
+        }
+
+        return valid;
+    }
+
+    function validateStep2() {
+        let valid = true;
+        const dept = document.getElementById('department').value;
+        const position = document.getElementById('position').value.trim();
+
+        if (!dept) {
+            document.getElementById('deptErr').classList.remove('hidden');
+            document.getElementById('department').classList.add('error');
+            valid = false;
+        } else {
+            document.getElementById('deptErr').classList.add('hidden');
+            document.getElementById('department').classList.remove('error');
+        }
+
+        if (!position) {
+            document.getElementById('positionErr').classList.remove('hidden');
+            document.getElementById('position').classList.add('error');
+            valid = false;
+        } else {
+            document.getElementById('positionErr').classList.add('hidden');
+            document.getElementById('position').classList.remove('error');
+        }
+
+        if (!selectedRoleValue) {
+            document.getElementById('roleErr').classList.remove('hidden');
+            valid = false;
+        } else {
+            document.getElementById('roleErr').classList.add('hidden');
+        }
+
+        return valid;
+    }
+
+    function goToStep(step) {
+        if (step === 2 && currentStep === 1) {
+            if (!validateStep1()) return;
+        }
+        if (step === 3 && currentStep === 2) {
+            if (!validateStep2()) return;
+            populateConfirmation();
+        }
+
+        document.getElementById('step' + currentStep).classList.add('hidden');
+        document.getElementById('step' + step).classList.remove('hidden');
+
+        // Update step indicators
+        for (let i = 1; i <= 3; i++) {
+            const ind = document.getElementById('step' + i + '-indicator');
+            const lbl = document.getElementById('step' + i + '-label');
+            if (i < step) {
+                ind.className = 'step-indicator completed w-8 h-8 rounded-full border-2 flex items-center justify-center text-xs font-bold transition-all';
+                ind.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+                if (lbl) lbl.className = 'text-xs font-semibold text-emerald-600 hidden sm:block';
+            } else if (i === step) {
+                ind.className = 'step-indicator active w-8 h-8 rounded-full border-2 flex items-center justify-center text-xs font-bold transition-all';
+                ind.textContent = i;
+                if (lbl) lbl.className = 'text-xs font-semibold text-blue-600 hidden sm:block';
+            } else {
+                ind.className = 'step-indicator pending w-8 h-8 rounded-full border-2 flex items-center justify-center text-xs font-bold transition-all';
+                ind.textContent = i;
+                if (lbl) lbl.className = 'text-xs font-semibold text-slate-400 hidden sm:block';
+            }
+        }
+
+        // Update lines
+        for (let i = 1; i <= 2; i++) {
+            const line = document.getElementById('line' + i);
+            if (i < step) {
+                line.className = 'step-line completed flex-1 h-0.5 mx-3 transition-all duration-500';
+            } else {
+                line.className = 'step-line pending flex-1 h-0.5 mx-3 transition-all duration-500';
+            }
+        }
+
+        currentStep = step;
+        lucide.createIcons();
+    }
+
+    function populateConfirmation() {
+        const lastName = document.getElementById('lastName').value.trim();
+        const firstName = document.getElementById('firstName').value.trim();
+        const email = document.getElementById('workEmail').value.trim();
+        const empId = document.getElementById('empId').value.trim();
+        const dept = document.getElementById('department').value;
+        const position = document.getElementById('position').value.trim();
+
+        document.getElementById('confirm-name').textContent = lastName + ' ' + firstName;
+        document.getElementById('confirm-email').textContent = email;
+        document.getElementById('confirm-empid').textContent = empId;
+        document.getElementById('confirm-dept').textContent = deptLabels[dept] || dept;
+        document.getElementById('confirm-position').textContent = position;
+        document.getElementById('confirm-role').textContent = roleLabels[selectedRoleValue] || selectedRoleValue;
+    }
+
+    function submitRequest() {
+        if (!termsChecked) {
+            document.getElementById('termsErr').classList.remove('hidden');
+            return;
+        }
+        document.getElementById('termsErr').classList.add('hidden');
+
+        const btn = document.getElementById('submitBtn');
+        const icon = document.getElementById('submitIcon');
+        const text = document.getElementById('submitText');
+        const spinner = document.getElementById('submitSpinner');
+
+        btn.disabled = true;
+        icon.classList.add('hidden');
+        spinner.classList.remove('hidden');
+        text.textContent = 'Đang gửi...';
+
+        setTimeout(() => {
+            document.getElementById('successOverlay').classList.add('show');
+            lucide.createIcons();
+        }, 2000);
+    }
+
+    function resetForm() {
+        document.getElementById('successOverlay').classList.remove('show');
+        document.getElementById('lastName').value = '';
+        document.getElementById('firstName').value = '';
+        document.getElementById('workEmail').value = '';
+        document.getElementById('phone').value = '';
+        document.getElementById('empId').value = '';
+        document.getElementById('department').value = '';
+        document.getElementById('position').value = '';
+        document.getElementById('adminNote').value = '';
+        selectedRoleValue = '';
+        termsChecked = false;
+        document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
+        const box = document.getElementById('termsBox');
+        box.classList.remove('bg-blue-600', 'border-blue-600');
+        box.classList.add('border-slate-300');
+        document.getElementById('termsCheck').style.opacity = '0';
+
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.disabled = false;
+        document.getElementById('submitIcon').classList.remove('hidden');
+        document.getElementById('submitSpinner').classList.add('hidden');
+        document.getElementById('submitText').textContent = 'Gửi Yêu Cầu';
+
+        goToStep(1);
+        currentStep = 1;
+    }
+</script>
+</body>
+</html>

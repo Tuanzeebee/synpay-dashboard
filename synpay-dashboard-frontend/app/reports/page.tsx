@@ -1,4 +1,4 @@
-import ReportsAnalytics from '@/pages/reports/analytics/ReportsAnalytics'
+import ReportsAnalytics from '@/views/reports/analytics/ReportsAnalytics'
 
 export default function ReportsPage() {
   return <ReportsAnalytics />

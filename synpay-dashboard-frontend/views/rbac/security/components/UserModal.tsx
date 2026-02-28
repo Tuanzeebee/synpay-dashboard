@@ -18,22 +18,19 @@ type Props = {
 }
 
 export default function UserModal({ isOpen, user, roles, language, onClose, onSave }: Props) {
-  const [firstName, setFirstName] = useState('')
-  const [lastName, setLastName] = useState('')
+  const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [selectedRoleIds, setSelectedRoleIds] = useState<string[]>([])
   const [status, setStatus] = useState<'active' | 'inactive'>('active')
 
   useEffect(() => {
     if (user) {
-      setFirstName(user.firstName)
-      setLastName(user.lastName)
+      setFullName(`${user.firstName} ${user.lastName}`.trim())
       setEmail(user.email)
       setSelectedRoleIds(user.roleIds)
       setStatus(user.status)
     } else {
-      setFirstName('')
-      setLastName('')
+      setFullName('')
       setEmail('')
       setSelectedRoleIds([])
       setStatus('active')
@@ -42,6 +39,11 @@ export default function UserModal({ isOpen, user, roles, language, onClose, onSa
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    // Split full name into firstName and lastName
+    const nameParts = fullName.trim().split(/\s+/)
+    const firstName = nameParts[0] || ''
+    const lastName = nameParts.slice(1).join(' ') || ''
+    
     onSave({
       firstName,
       lastName,
@@ -76,31 +78,18 @@ export default function UserModal({ isOpen, user, roles, language, onClose, onSa
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
-                {t('rbac.modal.user.firstName', language)}
-              </label>
-              <Input
-                type="text"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                required
-                className="bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
-                {t('rbac.modal.user.lastName', language)}
-              </label>
-              <Input
-                type="text"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                required
-                className="bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700"
-              />
-            </div>
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+              {t('rbac.modal.user.fullName', language)}
+            </label>
+            <Input
+              type="text"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              required
+              placeholder={language === 'vi' ? 'Nhập họ và tên đầy đủ' : 'Enter full name'}
+              className="bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700"
+            />
           </div>
 
           <div>

@@ -1,4 +1,4 @@
-import DashboardOverview from "@/pages/dashboard/overview/DashboardOverview"
+import DashboardOverview from "@/views/dashboard/overview/DashboardOverview"
 
 export default function DashboardPage() {
   return <DashboardOverview />

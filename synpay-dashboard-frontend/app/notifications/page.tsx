@@ -1,4 +1,4 @@
-import NotificationsManagement from '@/pages/notifications/management/NotificationsManagement'
+import NotificationsManagement from '@/views/notifications/management/NotificationsManagement'
 
 export default function NotificationsPage() {
   return <NotificationsManagement />

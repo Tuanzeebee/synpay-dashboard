@@ -1,1 +1,8 @@
-pip install python-dotenv
+python-dotenv
+pyodbc
+pymysql
+fastapi
+uvicorn[standard]
+httpx
+pyjwt
+python-multipart
