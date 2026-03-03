@@ -260,6 +260,8 @@ export const translations = {
   'rbac.modal.user.firstName': { vi: 'Họ', en: 'First Name' },
   'rbac.modal.user.lastName': { vi: 'Tên', en: 'Last Name' },
   'rbac.modal.user.email': { vi: 'Địa Chỉ Email', en: 'Email Address' },
+  'rbac.modal.user.password': { vi: 'Mật Khẩu', en: 'Password' },
+  'rbac.modal.user.employeeId': { vi: 'Mã Nhân Viên', en: 'Employee ID' },
   'rbac.modal.user.assignRoles': { vi: 'Phân Quyền Vai Trò (Nhiều vai trò)', en: 'Assign Roles (Multiple)' },
   'rbac.modal.user.status': { vi: 'Trạng Thái', en: 'Status' },
   'rbac.modal.user.save': { vi: 'Lưu Người Dùng', en: 'Save User' },

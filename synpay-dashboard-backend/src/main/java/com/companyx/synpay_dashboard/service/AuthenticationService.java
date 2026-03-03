@@ -170,4 +170,33 @@ public class AuthenticationService {
                 .employeeId(account.getEmployeeId())
                 .permissions(permissions);
     }
+
+    /**
+     * Logs out the authenticated user by updating {@code last_logout_at}
+     * and recording an audit entry.
+     *
+     * @param accountId the account id extracted from the JWT
+     * @param ipAddress client IP (forwarded by the gateway)
+     * @param userAgent browser user-agent (forwarded by the gateway)
+     */
+    @Transactional(transactionManager = "authTransactionManager")
+    public void logout(int accountId, String ipAddress, String userAgent) {
+        Account account = accountRepository.findById(accountId).orElse(null);
+
+        if (account == null) {
+            log.warn("Logout failed – account_id={} not found", accountId);
+            return;
+        }
+
+        account.setLastLogoutAt(LocalDateTime.now());
+        accountRepository.save(account);
+
+        auditLogService.log(
+                accountId, "LOGOUT", "account",
+                String.valueOf(accountId),
+                null, null,
+                ipAddress, userAgent);
+
+        log.info("Logout successful – account_id={}", accountId);
+    }
 }

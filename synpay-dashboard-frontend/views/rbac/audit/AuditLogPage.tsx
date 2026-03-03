@@ -1,21 +1,27 @@
 'use client'
 
-import { useState } from 'react'
 import Sidebar from '../../../components/layout/Sidebar'
 import Header from '../../../components/layout/Header'
 import AuditLog from '../security/components/AuditLog'
-import { getMockAuditLogs } from '../security/data'
-import type { AuditLog as AuditLogType } from '../security/types'
+import { useAuditLogs } from '@/hooks/useAuditLogs'
 import { t } from '@/lib/translations'
 import { useLanguage } from '@/components/providers/LanguageProvider'
 
 export default function AuditLogPage() {
   const { language, toggleLanguage } = useLanguage()
-  const [auditLogs, setAuditLogs] = useState<AuditLogType[]>(getMockAuditLogs())
-
-  const handleExportAuditLog = () => {
-    alert(language === 'vi' ? 'Đã xuất nhật ký kiểm toán!' : 'Audit log exported!')
-  }
+  const {
+    data,
+    isLoading,
+    isExporting,
+    error,
+    filter,
+    setFilter,
+    resetFilter,
+    goToPage,
+    refresh,
+    exportCsv,
+    clearError,
+  } = useAuditLogs()
 
   return (
     <div className="flex w-full min-h-screen">
@@ -25,9 +31,7 @@ export default function AuditLogPage() {
         <Header
           language={language}
           onLanguageToggle={toggleLanguage}
-          onRefresh={() => {
-            setAuditLogs(getMockAuditLogs())
-          }}
+          onRefresh={refresh}
           t={(key) => t(key, language)}
         />
 
@@ -38,8 +42,36 @@ export default function AuditLogPage() {
           <p className="text-sm text-slate-600 dark:text-slate-400">{t('rbac.pageSubtitle.audit', language)}</p>
         </div>
 
+        {/* Error banner */}
+        {error && (
+          <div className="mx-4 md:mx-8 mt-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-center justify-between">
+            <p className="text-sm text-red-700 dark:text-red-300">{error}</p>
+            <button
+              onClick={clearError}
+              className="text-red-500 hover:text-red-700 dark:hover:text-red-300 text-sm font-medium"
+            >
+              {language === 'vi' ? 'Đóng' : 'Dismiss'}
+            </button>
+          </div>
+        )}
+
         <div className="flex-1 p-4 md:p-8 overflow-y-auto">
-          <AuditLog auditLogs={auditLogs} language={language} onExport={handleExportAuditLog} />
+          <AuditLog
+            entries={data?.content ?? []}
+            totalElements={data?.totalElements ?? 0}
+            totalPages={data?.totalPages ?? 0}
+            currentPage={data?.page ?? 0}
+            pageSize={data?.size ?? 20}
+            filter={filter}
+            language={language}
+            isLoading={isLoading}
+            isExporting={isExporting}
+            onFilterChange={setFilter}
+            onResetFilter={resetFilter}
+            onGoToPage={goToPage}
+            onExport={exportCsv}
+            onRefresh={refresh}
+          />
         </div>
       </main>
     </div>

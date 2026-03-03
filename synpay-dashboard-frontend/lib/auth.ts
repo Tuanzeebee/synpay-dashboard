@@ -144,6 +144,32 @@ export function toAuthUser(email: string, data: LoginResponseData): AuthUser {
 }
 
 /**
+ * Send logout request to the FastAPI gateway.
+ *
+ * Flow: Frontend → POST /api/auth/logout → FastAPI → Spring Boot
+ * Spring Boot updates last_logout_at and creates audit log.
+ *
+ * This is fire-and-forget: even if the API call fails,
+ * the local auth state should still be cleared.
+ */
+export async function logout(): Promise<void> {
+  const token = getStoredToken()
+  if (!token) return
+
+  try {
+    await fetch(`${API_BASE}/api/auth/logout`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    })
+  } catch {
+    // Ignore network errors — local state will be cleared regardless
+  }
+}
+
+/**
  * Return standard Authorization header value for authenticated requests.
  */
 export function authHeader(): Record<string, string> {

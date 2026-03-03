@@ -1,9 +1,9 @@
 package com.companyx.synpay_dashboard.dto.request;
 
+import java.util.Set;
+
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
-
-import java.util.Set;
 
 /**
  * Request body for PUT /internal/users/{id}.
@@ -19,6 +19,8 @@ public class UpdateUserRequest {
 
     private String status;
 
+    private Integer employeeId;
+
     @Size(min = 1, message = "At least one role must be assigned")
     private Set<Integer> roleIds;
 
@@ -32,6 +34,9 @@ public class UpdateUserRequest {
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+
+    public Integer getEmployeeId() { return employeeId; }
+    public void setEmployeeId(Integer employeeId) { this.employeeId = employeeId; }
 
     public Set<Integer> getRoleIds() { return roleIds; }
     public void setRoleIds(Set<Integer> roleIds) { this.roleIds = roleIds; }

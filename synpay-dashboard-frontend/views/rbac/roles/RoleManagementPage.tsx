@@ -1,110 +1,79 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import Sidebar from '../../../components/layout/Sidebar'
 import Header from '../../../components/layout/Header'
-import RoleManagement from '../security/components/RoleManagement'
-import RoleModal from '../security/components/RoleModal'
-import ConfirmModal from '../security/components/ConfirmModal'
-import { getMockRoles, getMockPermissions, getMockAuditLogs } from '../security/data'
-import type { Role, Permission, AuditLog, ConfirmModalData } from '../security/types'
+import RoleManagementTable from './components/RoleManagementTable'
+import RoleFormModal from './components/RoleFormModal'
+import PermissionMatrixModal from './components/PermissionMatrixModal'
+import { useRoles } from '@/hooks/useRoles'
+import type { ApiRoleResponse, CreateRolePayload, UpdateRolePayload, AssignPermissionsPayload } from '@/api/roles'
 import { t } from '@/lib/translations'
 import { useLanguage } from '@/components/providers/LanguageProvider'
 
 export default function RoleManagementPage() {
   const { language, toggleLanguage } = useLanguage()
-  const [roles, setRoles] = useState<Role[]>(getMockRoles())
+  const {
+    roles, isLoading, error, isSaving, selectedRole,
+    refresh, loadDetail, create, update, updatePermissions, clearError,
+  } = useRoles()
 
-  const [permissions] = useState<Permission[]>(getMockPermissions())
-  const [auditLogs, setAuditLogs] = useState<AuditLog[]>(getMockAuditLogs())
-
+  // ── Role form modal state ──────────────────────────────────────
   const [isRoleModalOpen, setIsRoleModalOpen] = useState(false)
-  const [editingRole, setEditingRole] = useState<Role | null>(null)
-  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false)
-  const [confirmModalData, setConfirmModalData] = useState<ConfirmModalData | null>(null)
+  const [editingRole, setEditingRole] = useState<ApiRoleResponse | null>(null)
 
-  const handleCreateRole = () => {
+  // ── Permission modal state ─────────────────────────────────────
+  const [isPermModalOpen, setIsPermModalOpen] = useState(false)
+
+  // ── Handlers ───────────────────────────────────────────────────
+
+  const handleCreateRole = useCallback(() => {
     setEditingRole(null)
     setIsRoleModalOpen(true)
-  }
+  }, [])
 
-  const handleEditRole = (roleId: string) => {
-    const role = roles.find((r) => r.id === roleId)
-    if (role) {
-      setEditingRole(role)
-      setIsRoleModalOpen(true)
+  const handleEditRole = useCallback((role: ApiRoleResponse) => {
+    setEditingRole(role)
+    setIsRoleModalOpen(true)
+  }, [])
+
+  const handleManagePermissions = useCallback(async (role: ApiRoleResponse) => {
+    try {
+      await loadDetail(role.roleId)
+      setIsPermModalOpen(true)
+    } catch {
+      // error is set via hook state
     }
-  }
+  }, [loadDetail])
 
-  const handleSaveRole = (roleData: Omit<Role, 'id' | 'userCount'>) => {
-    if (editingRole) {
-      setRoles((prev) => prev.map((r) => (r.id === editingRole.id ? { ...r, ...roleData } : r)))
-      addAuditLog('role_change', `${language === 'vi' ? 'Đã cập nhật vai trò' : 'Updated role'}: ${roleData.name.vi}`)
-    } else {
-      const newRole: Role = {
-        ...roleData,
-        id: `role_${Date.now()}`,
-        userCount: 0,
+  const handleSaveRole = useCallback(async (
+    payload: CreateRolePayload | UpdateRolePayload,
+    roleId?: number,
+  ) => {
+    try {
+      if (roleId != null) {
+        await update(roleId, payload as UpdateRolePayload)
+      } else {
+        await create(payload as CreateRolePayload)
       }
-      setRoles((prev) => [...prev, newRole])
-      addAuditLog('role_change', `${language === 'vi' ? 'Đã tạo vai trò mới' : 'Created new role'}: ${roleData.name.vi}`)
+      setIsRoleModalOpen(false)
+      setEditingRole(null)
+    } catch {
+      // error is set via hook state
     }
-    setIsRoleModalOpen(false)
-    setEditingRole(null)
-  }
+  }, [create, update])
 
-  const handleCloneRole = (roleId: string) => {
-    const role = roles.find((r) => r.id === roleId)
-    if (!role) return
-
-    const copyText = language === 'vi' ? '(Bản sao)' : '(Copy)'
-    const clonedRole: Role = {
-      ...role,
-      id: `role_${Date.now()}`,
-      name: { vi: `${role.name.vi} ${copyText}`, en: `${role.name.en} ${copyText}` },
-      userCount: 0,
+  const handleSavePermissions = useCallback(async (
+    roleId: number,
+    payload: AssignPermissionsPayload,
+  ) => {
+    try {
+      await updatePermissions(roleId, payload)
+      setIsPermModalOpen(false)
+    } catch {
+      // error is set via hook state
     }
-    setRoles((prev) => [...prev, clonedRole])
-    addAuditLog('role_change', `${language === 'vi' ? 'Đã sao chép vai trò' : 'Cloned role'}: ${role.name.vi}`)
-  }
-
-  const handleDeleteRole = (roleId: string) => {
-    const role = roles.find((r) => r.id === roleId)
-    if (!role) return
-
-    const roleName = language === 'vi' ? role.name.vi : role.name.en
-    showConfirmModal(
-      t('rbac.confirm.delete.role', language),
-      `${language === 'vi' ? 'Bạn có chắc chắn muốn xóa vai trò' : 'Are you sure you want to delete role'} "${roleName}"? ${language === 'vi' ? 'Hành động này không thể hoàn tác.' : 'This action cannot be undone.'}`,
-      () => {
-        setRoles((prev) => prev.filter((r) => r.id !== roleId))
-        addAuditLog('role_change', `${language === 'vi' ? 'Đã xóa vai trò' : 'Deleted role'}: ${roleName}`)
-      }
-    )
-  }
-
-  const addAuditLog = (eventType: AuditLog['eventType'], action: string) => {
-    const newLog: AuditLog = {
-      id: `a${auditLogs.length + 1}`,
-      eventType,
-      userId: 'u1',
-      userName: 'Nguyễn Thị Mai',
-      action: { vi: action, en: action },
-      details: {},
-      timestamp: new Date().toISOString().slice(0, 19).replace('T', ' '),
-    }
-    setAuditLogs((prev) => [newLog, ...prev])
-  }
-
-  const showConfirmModal = (title: string, message: string, callback: () => void) => {
-    setConfirmModalData({ title, message, callback })
-    setIsConfirmModalOpen(true)
-  }
-
-  const closeConfirmModal = () => {
-    setIsConfirmModalOpen(false)
-    setConfirmModalData(null)
-  }
+  }, [updatePermissions])
 
   return (
     <div className="flex w-full min-h-screen">
@@ -114,10 +83,7 @@ export default function RoleManagementPage() {
         <Header
           language={language}
           onLanguageToggle={toggleLanguage}
-          onRefresh={() => {
-            setRoles(getMockRoles())
-            setAuditLogs(getMockAuditLogs())
-          }}
+          onRefresh={refresh}
           t={(key) => t(key, language)}
         />
 
@@ -128,35 +94,49 @@ export default function RoleManagementPage() {
           <p className="text-sm text-slate-600 dark:text-slate-400">{t('rbac.pageSubtitle.roles', language)}</p>
         </div>
 
+        {/* Error banner */}
+        {error && (
+          <div className="mx-4 md:mx-8 mt-4 px-4 py-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 flex items-center justify-between">
+            <span className="text-sm text-red-700 dark:text-red-300">{error}</span>
+            <button
+              onClick={clearError}
+              className="text-red-500 hover:text-red-700 dark:hover:text-red-300 text-sm font-medium"
+            >
+              {language === 'vi' ? 'Đóng' : 'Dismiss'}
+            </button>
+          </div>
+        )}
+
         <div className="flex-1 p-4 md:p-8 overflow-y-auto">
-          <RoleManagement
+          <RoleManagementTable
             roles={roles}
-            permissions={permissions}
+            isLoading={isLoading}
             language={language}
             onCreateRole={handleCreateRole}
             onEditRole={handleEditRole}
-            onCloneRole={handleCloneRole}
-            onDeleteRole={handleDeleteRole}
+            onManagePermissions={handleManagePermissions}
           />
         </div>
       </main>
 
-      <RoleModal
+      {/* Create / Edit Role Modal */}
+      <RoleFormModal
         isOpen={isRoleModalOpen}
         role={editingRole}
+        isSaving={isSaving}
         language={language}
-        onClose={() => {
-          setIsRoleModalOpen(false)
-          setEditingRole(null)
-        }}
+        onClose={() => { setIsRoleModalOpen(false); setEditingRole(null) }}
         onSave={handleSaveRole}
       />
 
-      <ConfirmModal
-        isOpen={isConfirmModalOpen}
-        data={confirmModalData}
+      {/* Permission Assignment Modal */}
+      <PermissionMatrixModal
+        isOpen={isPermModalOpen}
+        role={selectedRole}
+        isSaving={isSaving}
         language={language}
-        onClose={closeConfirmModal}
+        onClose={() => setIsPermModalOpen(false)}
+        onSave={handleSavePermissions}
       />
     </div>
   )

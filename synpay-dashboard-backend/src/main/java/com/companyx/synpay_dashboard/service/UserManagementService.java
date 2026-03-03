@@ -124,7 +124,7 @@ public class UserManagementService {
         account.setEmail(request.getEmail());
         account.setPasswordHash(passwordEncoder.encode(request.getPassword()));
         account.setEmployeeId(request.getEmployeeId());
-        account.setStatus("active");
+        account.setStatus(request.getStatus() != null ? request.getStatus() : "active");
         account = accountRepository.saveAndFlush(account);
 
         // Assign roles
@@ -143,10 +143,12 @@ public class UserManagementService {
         Account saved = accountRepository.findByIdWithRoles(account.getAccountId())
                 .orElseThrow();
 
-        // Audit
-        auditLogService.log(actorAccountId, "CREATE", "user",
+        // Audit – USER_CREATE
+        Map<String, Object> newSnapshot = toAuditSnapshot(saved);
+        newSnapshot.put("result", "SUCCESS");
+        auditLogService.log(actorAccountId, "USER_CREATE", "user",
                 saved.getAccountId().toString(), null,
-                toAuditSnapshot(saved), ipAddress, userAgent);
+                newSnapshot, ipAddress, userAgent);
 
         log.info("User created: accountId={} email={} by actor={}",
                 saved.getAccountId(), saved.getEmail(), actorAccountId);
@@ -186,6 +188,11 @@ public class UserManagementService {
             account.setStatus(request.getStatus());
         }
 
+        // Update employee_id
+        if (request.getEmployeeId() != null) {
+            account.setEmployeeId(request.getEmployeeId());
+        }
+
         accountRepository.saveAndFlush(account);
 
         // Update role assignments
@@ -195,6 +202,11 @@ public class UserManagementService {
             if (roles.size() != requestedRoleIds.size()) {
                 throw new BusinessException("One or more role IDs are invalid");
             }
+
+            // Capture old role IDs for ROLE_ASSIGN audit
+            List<Integer> oldRoleIds = account.getAccountRoles().stream()
+                    .map(ar -> ar.getRole().getRoleId())
+                    .toList();
 
             accountRoleRepository.deleteAllByAccountId(accountId);
             accountRoleRepository.flush();
@@ -206,6 +218,16 @@ public class UserManagementService {
                 ar.setAssignedBy(actorAccountId);
                 accountRoleRepository.saveAndFlush(ar);
             }
+
+            // Audit – ROLE_ASSIGN (separate entry for role changes)
+            Map<String, Object> roleAuditOld = new LinkedHashMap<>();
+            roleAuditOld.put("roleIds", oldRoleIds);
+            Map<String, Object> roleAuditNew = new LinkedHashMap<>();
+            roleAuditNew.put("roleIds", requestedRoleIds);
+            roleAuditNew.put("result", "SUCCESS");
+            auditLogService.log(actorAccountId, "ROLE_ASSIGN", "user",
+                    accountId.toString(), roleAuditOld,
+                    roleAuditNew, ipAddress, userAgent);
         }
 
         // Clear L1 cache so the JPQL fetch join returns fresh data
@@ -214,10 +236,12 @@ public class UserManagementService {
         // Reload for response
         Account updated = accountRepository.findByIdWithRoles(accountId).orElseThrow();
 
-        // Audit
-        auditLogService.log(actorAccountId, "UPDATE", "user",
+        // Audit – USER_UPDATE
+        Map<String, Object> newSnapshot = toAuditSnapshot(updated);
+        newSnapshot.put("result", "SUCCESS");
+        auditLogService.log(actorAccountId, "USER_UPDATE", "user",
                 accountId.toString(), oldSnapshot,
-                toAuditSnapshot(updated), ipAddress, userAgent);
+                newSnapshot, ipAddress, userAgent);
 
         log.info("User updated: accountId={} by actor={}", accountId, actorAccountId);
 

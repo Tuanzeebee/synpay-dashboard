@@ -8,12 +8,12 @@ credential validation, RBAC resolution, and JWT generation.
 
 import logging
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Depends, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, EmailStr, Field
 
-from dependencies import get_client_ip
-from spring_client import get_client
+from dependencies import extract_token, get_client_ip
+from spring_client import get_client, forward_request
 
 logger = logging.getLogger("routes.auth")
 
@@ -91,5 +91,35 @@ async def login(body: LoginBody, request: Request):
         body.email,
         response.status_code,
     )
+
+    return _spring_response(response)
+
+
+# ── POST /api/auth/logout ────────────────────────────────────────
+
+@router.post("/logout")
+async def logout(request: Request, token: str = Depends(extract_token)):
+    """
+    Log out the current user.
+
+    This endpoint requires a valid JWT in the Authorization header.
+    It forwards the logout request to Spring Boot, which:
+      - Updates last_logout_at on the account
+      - Records an audit log entry (LOGOUT)
+    """
+    client_ip = get_client_ip(request)
+    user_agent = request.headers.get("User-Agent")
+
+    logger.info("Logout attempt from %s", client_ip)
+
+    response = await forward_request(
+        method="POST",
+        path="/internal/auth/logout",
+        token=token,
+        forwarded_for=client_ip,
+        user_agent=user_agent,
+    )
+
+    logger.info("Logout result → %d", response.status_code)
 
     return _spring_response(response)

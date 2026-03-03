@@ -18,9 +18,21 @@ public final class PermissionConstants {
     public static final String ROLE_WRITE = "role.write";
 
     // ---- Permission Management ----
-    public static final String PERMISSION_READ  = "permission.read";
-    public static final String PERMISSION_WRITE = "permission.write";
+    public static final String PERMISSION_READ   = "permission.read";
+    public static final String PERMISSION_WRITE  = "permission.write";
+    public static final String PERMISSION_ASSIGN = "permission.assign";
+
+    // ---- Permission Matrix ----
+    public static final String PERMISSION_MATRIX_READ  = "permission_matrix.read";
+    public static final String PERMISSION_MATRIX_WRITE = "permission_matrix.write";
+
+    // ---- Employee Management ----
+    public static final String EMPLOYEE_READ           = "employee.read";
+    public static final String EMPLOYEE_WRITE          = "employee.write";
+    public static final String EMPLOYEE_DISABLE        = "employee.disable";
+    public static final String EMPLOYEE_ASSIGN_ACCOUNT = "employee.assign_account";
 
     // ---- Audit Log ----
-    public static final String AUDIT_READ = "audit.read";
+    public static final String AUDIT_READ       = "audit.read";
+    public static final String AUDIT_LOG_EXPORT = "audit.export";
 }

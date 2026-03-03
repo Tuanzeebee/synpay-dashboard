@@ -1,6 +1,7 @@
 'use client'
 
 import { memo, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
@@ -25,6 +26,7 @@ import {
 } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { useState, useEffect } from 'react'
+import { useAuth } from '@/components/providers/AuthProvider'
 
 type Language = 'vi' | 'en'
 
@@ -38,6 +40,13 @@ interface HeaderProps {
 
 function Header({ language = 'vi', onLanguageToggle, onRefresh, onMenuToggle, t }: HeaderProps) {
   const { theme, setTheme } = useTheme()
+  const router = useRouter()
+  const { logout, user } = useAuth()
+
+  const handleLogout = useCallback(async () => {
+    await logout()
+    router.replace('/login')
+  }, [logout, router])
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
@@ -127,7 +136,7 @@ function Header({ language = 'vi', onLanguageToggle, onRefresh, onMenuToggle, t 
                 Account Settings
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-red-600">
+              <DropdownMenuItem className="text-red-600" onClick={handleLogout}>
                 <LogOut className="w-4 h-4 mr-2" />
                 Logout
               </DropdownMenuItem>

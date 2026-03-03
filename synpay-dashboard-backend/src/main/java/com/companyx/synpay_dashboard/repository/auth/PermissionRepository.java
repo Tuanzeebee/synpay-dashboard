@@ -1,12 +1,14 @@
 package com.companyx.synpay_dashboard.repository.auth;
 
-import com.companyx.synpay_dashboard.entity.auth.Permission;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
+import com.companyx.synpay_dashboard.entity.auth.Permission;
 
 @Repository
 public interface PermissionRepository extends JpaRepository<Permission, Integer> {
@@ -21,4 +23,7 @@ public interface PermissionRepository extends JpaRepository<Permission, Integer>
                    "WHERE ar.account_id = :accountId",
            nativeQuery = true)
     List<String> findEnabledPermissionKeysByAccountId(@Param("accountId") Integer accountId);
+
+    /** Find a permission by its unique key (e.g. "user.read"). */
+    Optional<Permission> findByKey(String key);
 }

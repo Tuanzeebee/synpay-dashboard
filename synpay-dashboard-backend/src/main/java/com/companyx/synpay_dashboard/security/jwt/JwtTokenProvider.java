@@ -115,7 +115,9 @@ public class JwtTokenProvider {
                 ? Integer.valueOf(empIdRaw.toString())
                 : null;
 
-        return new GatewayPrincipal(accountId, employeeId, email);
+        String role = claims.get("role", String.class);
+
+        return new GatewayPrincipal(accountId, employeeId, email, role);
     }
 
     /**

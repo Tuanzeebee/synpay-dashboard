@@ -14,6 +14,7 @@ import {
   type LoginRequest,
   type LoginResponseData,
   login as apiLogin,
+  logout as apiLogout,
   toAuthUser,
   storeAuth,
   clearAuth,
@@ -38,7 +39,7 @@ interface AuthContextType {
   /** Login with email + password. Throws AuthError on failure. */
   login: (request: LoginRequest) => Promise<LoginResponseData>
   /** Clear auth state and redirect to login */
-  logout: () => void
+  logout: () => Promise<void>
   /** Check if current user has a specific permission */
   hasPermission: (key: string) => boolean
   /** Check if current user has any of the given permissions */
@@ -76,7 +77,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return data
   }, [])
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
+    await apiLogout()
     clearAuth()
     setToken(null)
     setUser(null)

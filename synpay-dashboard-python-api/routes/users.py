@@ -23,6 +23,7 @@ class CreateUserBody(BaseModel):
     password: str = Field(..., min_length=8, max_length=128)
     employee_id: int = Field(..., alias="employeeId")
     role_ids: list[int] = Field(..., min_length=1, alias="roleIds")
+    status: str | None = None
 
     model_config = {"populate_by_name": True}
 
@@ -31,6 +32,7 @@ class UpdateUserBody(BaseModel):
     email: EmailStr | None = None
     password: str | None = Field(None, min_length=8, max_length=128)
     status: str | None = None
+    employee_id: int | None = Field(None, alias="employeeId")
     role_ids: list[int] | None = Field(None, min_length=1, alias="roleIds")
 
     model_config = {"populate_by_name": True}
@@ -110,6 +112,7 @@ async def create_user(
             "password": body.password,
             "employeeId": body.employee_id,
             "roleIds": body.role_ids,
+            **(  {"status": body.status} if body.status is not None else {}),
         },
         forwarded_for=get_client_ip(request),
         user_agent=request.headers.get("User-Agent"),
@@ -138,6 +141,8 @@ async def update_user(
         payload["password"] = body.password
     if body.status is not None:
         payload["status"] = body.status
+    if body.employee_id is not None:
+        payload["employeeId"] = body.employee_id
     if body.role_ids is not None:
         payload["roleIds"] = body.role_ids
 

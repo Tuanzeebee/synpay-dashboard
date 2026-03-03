@@ -14,6 +14,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from spring_client import close_client
 from routes.auth import router as auth_router
 from routes.users import router as users_router
+from routes.roles import router as roles_router
+from routes.permission_matrix import router as permission_matrix_router
+from routes.audit_logs import router as audit_logs_router
+from routes.employees import router as employees_router
 
 logging.basicConfig(
     level=logging.INFO,
@@ -48,6 +52,10 @@ app.add_middleware(
 # ── Routes ────────────────────────────────────────────────────────
 app.include_router(auth_router)
 app.include_router(users_router)
+app.include_router(roles_router)
+app.include_router(permission_matrix_router)
+app.include_router(audit_logs_router)
+app.include_router(employees_router)
 
 
 @app.get("/health", tags=["Health"])

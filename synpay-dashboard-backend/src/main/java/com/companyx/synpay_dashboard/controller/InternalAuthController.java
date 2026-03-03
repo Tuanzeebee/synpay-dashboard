@@ -1,6 +1,8 @@
 package com.companyx.synpay_dashboard.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -9,6 +11,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.companyx.synpay_dashboard.dto.request.LoginRequest;
 import com.companyx.synpay_dashboard.dto.response.ApiResponse;
 import com.companyx.synpay_dashboard.dto.response.LoginResponse;
+import com.companyx.synpay_dashboard.security.GatewayAuthenticationToken;
+import com.companyx.synpay_dashboard.security.GatewayPrincipal;
 import com.companyx.synpay_dashboard.service.AuthenticationService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -55,6 +59,29 @@ public class InternalAuthController {
                 userAgent);
 
         return ResponseEntity.ok(ApiResponse.success(loginResponse, "Login successful"));
+    }
+
+    /**
+     * Log out the current authenticated user.
+     * <p>
+     * This endpoint requires a valid JWT in the Authorization header.
+     * It updates {@code last_logout_at} on the account and records an audit log entry.
+     *
+     * @param httpRequest servlet request (for IP / user-agent and principal extraction)
+     * @return success message
+     */
+    @PostMapping("/logout")
+    public ResponseEntity<ApiResponse<Void>> logout(HttpServletRequest httpRequest) {
+        String ipAddress = resolveIpAddress(httpRequest);
+        String userAgent = httpRequest.getHeader("User-Agent");
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth instanceof GatewayAuthenticationToken gatewayAuth) {
+            GatewayPrincipal principal = gatewayAuth.getPrincipal();
+            authenticationService.logout(principal.getAccountId(), ipAddress, userAgent);
+        }
+
+        return ResponseEntity.ok(ApiResponse.success(null, "Logout successful"));
     }
 
     private String resolveIpAddress(HttpServletRequest request) {

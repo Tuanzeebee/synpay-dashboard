@@ -1,55 +1,20 @@
 'use client'
 
-import { useState } from 'react'
 import Sidebar from '../../../components/layout/Sidebar'
 import Header from '../../../components/layout/Header'
 import PermissionMatrix from '../security/components/PermissionMatrix'
-import { getMockRoles, getMockPermissions, getMockAuditLogs } from '../security/data'
-import type { Role, Permission, AuditLog } from '../security/types'
+import { usePermissionMatrix } from '@/hooks/usePermissionMatrix'
 import { t } from '@/lib/translations'
 import { useLanguage } from '@/components/providers/LanguageProvider'
+import { Loader2, AlertCircle, RefreshCw } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 
 export default function PermissionMatrixPage() {
   const { language, toggleLanguage } = useLanguage()
-  const [roles, setRoles] = useState<Role[]>(getMockRoles())
-
-  const [permissions] = useState<Permission[]>(getMockPermissions())
-  const [auditLogs, setAuditLogs] = useState<AuditLog[]>(getMockAuditLogs())
-
-  const handleTogglePermission = (roleId: string, permissionId: string) => {
-    setRoles((prev) =>
-      prev.map((role) => {
-        if (role.id === roleId) {
-          const hasPermission = role.permissionIds.includes(permissionId)
-          return {
-            ...role,
-            permissionIds: hasPermission
-              ? role.permissionIds.filter((p) => p !== permissionId)
-              : [...role.permissionIds, permissionId],
-          }
-        }
-        return role
-      })
-    )
-  }
-
-  const handleSavePermissionChanges = () => {
-    alert(language === 'vi' ? 'Đã lưu thay đổi quyền thành công!' : 'Permission changes saved successfully!')
-    addAuditLog('permission_change', language === 'vi' ? 'Đã lưu thay đổi ma trận quyền' : 'Saved permission matrix changes')
-  }
-
-  const addAuditLog = (eventType: AuditLog['eventType'], action: string) => {
-    const newLog: AuditLog = {
-      id: `a${auditLogs.length + 1}`,
-      eventType,
-      userId: 'u1',
-      userName: 'Nguyễn Thị Mai',
-      action: { vi: action, en: action },
-      details: {},
-      timestamp: new Date().toISOString().slice(0, 19).replace('T', ' '),
-    }
-    setAuditLogs((prev) => [newLog, ...prev])
-  }
+  const {
+    matrix, isLoading, isSaving, error, hasChanges, pendingCount,
+    refresh, localToggle, saveChanges, discardChanges, clearError,
+  } = usePermissionMatrix()
 
   return (
     <div className="flex w-full min-h-screen">
@@ -59,10 +24,7 @@ export default function PermissionMatrixPage() {
         <Header
           language={language}
           onLanguageToggle={toggleLanguage}
-          onRefresh={() => {
-            setRoles(getMockRoles())
-            setAuditLogs(getMockAuditLogs())
-          }}
+          onRefresh={refresh}
           t={(key) => t(key, language)}
         />
 
@@ -74,13 +36,53 @@ export default function PermissionMatrixPage() {
         </div>
 
         <div className="flex-1 p-4 md:p-8 overflow-y-auto">
-          <PermissionMatrix
-            roles={roles}
-            permissions={permissions}
-            language={language}
-            onTogglePermission={handleTogglePermission}
-            onSaveChanges={handleSavePermissionChanges}
-          />
+          {/* Error Banner */}
+          {error && (
+            <div className="mb-6 flex items-center gap-3 rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 px-4 py-3">
+              <AlertCircle className="w-5 h-5 text-red-500 shrink-0" />
+              <p className="text-sm text-red-700 dark:text-red-300 flex-1">{error}</p>
+              <button onClick={clearError} className="text-red-500 hover:text-red-700 text-sm font-medium">
+                {language === 'vi' ? 'Đóng' : 'Dismiss'}
+              </button>
+            </div>
+          )}
+
+          {/* Loading State */}
+          {isLoading && (
+            <div className="flex flex-col items-center justify-center py-24 gap-3">
+              <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+              <p className="text-sm text-slate-500 dark:text-slate-400">
+                {language === 'vi' ? 'Đang tải ma trận quyền...' : 'Loading permission matrix...'}
+              </p>
+            </div>
+          )}
+
+          {/* Empty State (loaded but no data) */}
+          {!isLoading && !matrix && !error && (
+            <div className="flex flex-col items-center justify-center py-24 gap-4">
+              <p className="text-sm text-slate-500 dark:text-slate-400">
+                {language === 'vi' ? 'Không có dữ liệu ma trận quyền.' : 'No permission matrix data available.'}
+              </p>
+              <Button variant="outline" size="sm" onClick={refresh}>
+                <RefreshCw className="w-4 h-4 mr-2" />
+                {language === 'vi' ? 'Thử lại' : 'Retry'}
+              </Button>
+            </div>
+          )}
+
+          {/* Matrix */}
+          {!isLoading && matrix && (
+            <PermissionMatrix
+              matrix={matrix}
+              language={language}
+              isSaving={isSaving}
+              hasChanges={hasChanges}
+              pendingCount={pendingCount}
+              onTogglePermission={localToggle}
+              onSaveChanges={saveChanges}
+              onDiscardChanges={discardChanges}
+            />
+          )}
         </div>
       </main>
     </div>

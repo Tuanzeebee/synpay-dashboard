@@ -1,11 +1,11 @@
 package com.companyx.synpay_dashboard.dto.request;
 
+import java.util.Set;
+
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-
-import java.util.Set;
 
 /**
  * Request body for POST /internal/users
@@ -27,6 +27,8 @@ public class CreateUserRequest {
     @Size(min = 1, message = "At least one role must be assigned")
     private Set<Integer> roleIds;
 
+    private String status;
+
     // ----- Getters & Setters -----
 
     public String getEmail() { return email; }
@@ -40,4 +42,7 @@ public class CreateUserRequest {
 
     public Set<Integer> getRoleIds() { return roleIds; }
     public void setRoleIds(Set<Integer> roleIds) { this.roleIds = roleIds; }
+
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
 }

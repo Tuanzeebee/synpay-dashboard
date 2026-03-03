@@ -1,13 +1,14 @@
 package com.companyx.synpay_dashboard.repository.auth;
 
-import com.companyx.synpay_dashboard.entity.auth.Account;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-import java.util.Optional;
+import com.companyx.synpay_dashboard.entity.auth.Account;
 
 @Repository
 public interface AccountRepository extends JpaRepository<Account, Integer> {
@@ -27,4 +28,6 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
            "LEFT JOIN FETCH ar.role " +
            "WHERE a.accountId = :id")
     Optional<Account> findByIdWithRoles(@Param("id") Integer id);
+
+    Optional<Account> findByEmployeeId(Integer employeeId);
 }

@@ -3,121 +3,103 @@
 import { useState } from 'react'
 import Sidebar from '../../../components/layout/Sidebar'
 import Header from '../../../components/layout/Header'
-import UserManagement from '../security/components/UserManagement'
-import UserModal from '../security/components/UserModal'
+import UserManagementTable from './components/UserManagementTable'
+import UserFormModal from './components/UserFormModal'
 import ConfirmModal from '../security/components/ConfirmModal'
-import { getMockUsers, getMockRoles, getMockAuditLogs } from '../security/data'
-import type { User, Role, AuditLog, ConfirmModalData } from '../security/types'
+import { useUsers } from '@/hooks/useUsers'
+import { useRoles } from '@/hooks/useRoles'
+import { useRequireAuth } from '@/hooks/useRequireAuth'
+import type { ApiUserResponse, CreateUserPayload, UpdateUserPayload } from '@/api/users'
+import type { ConfirmModalData } from '../security/types'
 import { t } from '@/lib/translations'
 import { useLanguage } from '@/components/providers/LanguageProvider'
+import { AlertCircle, RefreshCw, Loader2 } from 'lucide-react'
 
 export default function UserManagementPage() {
   const { language, toggleLanguage } = useLanguage()
-  const [users, setUsers] = useState<User[]>(getMockUsers())
+  const auth = useRequireAuth()
 
-  const [roles] = useState<Role[]>(getMockRoles())
-  const [auditLogs, setAuditLogs] = useState<AuditLog[]>(getMockAuditLogs())
+  const {
+    users,
+    isLoading,
+    error,
+    isSaving,
+    refresh,
+    create,
+    update,
+    toggleStatus,
+    clearError,
+  } = useUsers()
 
+  // Fetch all roles from the Roles API (not derived from existing users)
+  const { roles: allRoles } = useRoles()
+  const availableRoles = allRoles.map((r) => ({
+    roleId: r.roleId,
+    code: r.code,
+    name: r.name,
+  }))
+
+  // Modal state
   const [isUserModalOpen, setIsUserModalOpen] = useState(false)
-  const [editingUser, setEditingUser] = useState<User | null>(null)
+  const [editingUser, setEditingUser] = useState<ApiUserResponse | null>(null)
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false)
   const [confirmModalData, setConfirmModalData] = useState<ConfirmModalData | null>(null)
+  const [modalError, setModalError] = useState<string | null>(null)
+
+  // ── Handlers ──────────────────────────────────────────────────
 
   const handleAddUser = () => {
     setEditingUser(null)
+    setModalError(null)
     setIsUserModalOpen(true)
   }
 
-  const handleEditUser = (userId: string) => {
-    const user = users.find((u) => u.id === userId)
+  const handleEditUser = (accountId: number) => {
+    const user = users.find((u) => u.accountId === accountId)
     if (user) {
       setEditingUser(user)
+      setModalError(null)
       setIsUserModalOpen(true)
     }
   }
 
-  const handleSaveUser = (userData: Omit<User, 'id' | 'createdAt'>) => {
-    if (editingUser) {
-      setUsers((prev) =>
-        prev.map((u) => (u.id === editingUser.id ? { ...u, ...userData } : u))
-      )
-      addAuditLog(
-        'user_assignment',
-        `${language === 'vi' ? 'Đã cập nhật người dùng' : 'Updated user'}: ${userData.firstName} ${userData.lastName}`
-      )
-    } else {
-      const newUser: User = {
-        ...userData,
-        id: `u${users.length + 1}`,
-        createdAt: new Date().toISOString().slice(0, 10),
+  const handleSaveUser = async (payload: CreateUserPayload | UpdateUserPayload) => {
+    try {
+      setModalError(null)
+      if (editingUser) {
+        await update(editingUser.accountId, payload as UpdateUserPayload)
+      } else {
+        await create(payload as CreateUserPayload)
       }
-      setUsers((prev) => [...prev, newUser])
-      addAuditLog(
-        'user_assignment',
-        `${language === 'vi' ? 'Đã tạo người dùng mới' : 'Created new user'}: ${userData.firstName} ${userData.lastName}`
-      )
+      setIsUserModalOpen(false)
+      setEditingUser(null)
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Operation failed'
+      setModalError(message)
     }
-    setIsUserModalOpen(false)
-    setEditingUser(null)
   }
 
-  const handleToggleUserStatus = (userId: string) => {
-    const user = users.find((u) => u.id === userId)
+  const handleToggleUserStatus = (accountId: number) => {
+    const user = users.find((u) => u.accountId === accountId)
     if (!user) return
 
     const newStatus = user.status === 'active' ? 'inactive' : 'active'
     const actionText =
       newStatus === 'active'
-        ? language === 'vi'
-          ? 'kích hoạt'
-          : 'activate'
-        : language === 'vi'
-          ? 'vô hiệu hóa'
-          : 'disable'
+        ? language === 'vi' ? 'kích hoạt' : 'activate'
+        : language === 'vi' ? 'vô hiệu hóa' : 'deactivate'
 
     showConfirmModal(
       t('rbac.confirm.changeStatus', language),
-      `${language === 'vi' ? 'Bạn có chắc chắn muốn' : 'Are you sure you want to'} ${actionText} ${user.firstName} ${user.lastName}?`,
-      () => {
-        setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, status: newStatus } : u)))
-        addAuditLog(
-          'user_assignment',
-          `${language === 'vi' ? 'Đã' : ''} ${actionText} ${language === 'en' ? 'user' : 'người dùng'}: ${user.firstName} ${user.lastName}`
-        )
+      `${language === 'vi' ? 'Bạn có chắc chắn muốn' : 'Are you sure you want to'} ${actionText} ${user.email}?`,
+      async () => {
+        try {
+          await toggleStatus(user)
+        } catch {
+          // error displayed via hook's error state
+        }
       }
     )
-  }
-
-  const handleResetPassword = (userId: string) => {
-    const user = users.find((u) => u.id === userId)
-    if (!user) return
-
-    showConfirmModal(
-      t('rbac.confirm.resetPassword', language),
-      `${language === 'vi' ? 'Gửi liên kết đặt lại mật khẩu đến' : 'Send password reset link to'} ${user.email}?`,
-      () => {
-        alert(
-          `${language === 'vi' ? 'Đã gửi email đặt lại mật khẩu đến' : 'Password reset email sent to'} ${user.email}`
-        )
-        addAuditLog(
-          'user_assignment',
-          `${language === 'vi' ? 'Đã gửi email đặt lại mật khẩu cho' : 'Sent password reset for'}: ${user.email}`
-        )
-      }
-    )
-  }
-
-  const addAuditLog = (eventType: AuditLog['eventType'], action: string) => {
-    const newLog: AuditLog = {
-      id: `a${auditLogs.length + 1}`,
-      eventType,
-      userId: 'u1',
-      userName: 'Nguyễn Thị Mai',
-      action: { vi: action, en: action },
-      details: {},
-      timestamp: new Date().toISOString().slice(0, 19).replace('T', ' '),
-    }
-    setAuditLogs((prev) => [newLog, ...prev])
   }
 
   const showConfirmModal = (title: string, message: string, callback: () => void) => {
@@ -130,6 +112,9 @@ export default function UserManagementPage() {
     setConfirmModalData(null)
   }
 
+  // Guard: still loading auth
+  if (auth.isLoading) return null
+
   return (
     <div className="flex w-full min-h-screen">
       <Sidebar language={language} t={(key) => t(key, language)} activeRoute="/rbac/users" />
@@ -138,10 +123,7 @@ export default function UserManagementPage() {
         <Header
           language={language}
           onLanguageToggle={toggleLanguage}
-          onRefresh={() => {
-            setUsers(getMockUsers())
-            setAuditLogs(getMockAuditLogs())
-          }}
+          onRefresh={refresh}
           t={(key) => t(key, language)}
         />
 
@@ -153,26 +135,58 @@ export default function UserManagementPage() {
         </div>
 
         <div className="flex-1 p-4 md:p-8 overflow-y-auto">
-          <UserManagement
-            users={users}
-            roles={roles}
-            language={language}
-            onAddUser={handleAddUser}
-            onEditUser={handleEditUser}
-            onToggleStatus={handleToggleUserStatus}
-            onResetPassword={handleResetPassword}
-          />
+          {/* Global error banner */}
+          {error && (
+            <div className="mb-6 flex items-center gap-3 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+              <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0" />
+              <p className="text-sm text-red-700 dark:text-red-300 flex-1">{error}</p>
+              <button
+                onClick={clearError}
+                className="text-red-600 dark:text-red-400 hover:underline text-sm font-medium"
+              >
+                {language === 'vi' ? 'Đóng' : 'Dismiss'}
+              </button>
+              <button
+                onClick={refresh}
+                className="text-red-600 dark:text-red-400 hover:underline text-sm font-medium flex items-center gap-1"
+              >
+                <RefreshCw className="w-3.5 h-3.5" />
+                {language === 'vi' ? 'Thử lại' : 'Retry'}
+              </button>
+            </div>
+          )}
+
+          {/* Loading state */}
+          {isLoading ? (
+            <div className="flex items-center justify-center py-20">
+              <Loader2 className="w-8 h-8 text-blue-600 dark:text-blue-400 animate-spin" />
+              <span className="ml-3 text-slate-600 dark:text-slate-400">
+                {language === 'vi' ? 'Đang tải...' : 'Loading...'}
+              </span>
+            </div>
+          ) : (
+            <UserManagementTable
+              users={users}
+              language={language}
+              onAddUser={handleAddUser}
+              onEditUser={handleEditUser}
+              onToggleStatus={handleToggleUserStatus}
+            />
+          )}
         </div>
       </main>
 
-      <UserModal
+      <UserFormModal
         isOpen={isUserModalOpen}
         user={editingUser}
-        roles={roles}
+        availableRoles={availableRoles}
         language={language}
+        isSaving={isSaving}
+        error={modalError}
         onClose={() => {
           setIsUserModalOpen(false)
           setEditingUser(null)
+          setModalError(null)
         }}
         onSave={handleSaveUser}
       />

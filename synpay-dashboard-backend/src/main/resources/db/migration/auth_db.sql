@@ -59,9 +59,12 @@ DROP TABLE IF EXISTS `audit_log`;
 CREATE TABLE `audit_log`  (
   `audit_id` bigint NOT NULL AUTO_INCREMENT,
   `actor_account_id` int NOT NULL,
+  `actor_email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
+  `actor_role` varchar(80) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
   `action` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `resource` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `resource_id` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
+  `action_description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL,
   `old_value` json NULL,
   `new_value` json NULL,
   `ip_address` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
@@ -69,7 +72,10 @@ CREATE TABLE `audit_log`  (
   `created_at` datetime NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`audit_id`) USING BTREE,
   INDEX `idx_actor`(`actor_account_id` ASC) USING BTREE,
-  INDEX `idx_resource`(`resource` ASC, `resource_id` ASC) USING BTREE
+  INDEX `idx_actor_email`(`actor_email` ASC) USING BTREE,
+  INDEX `idx_action`(`action` ASC) USING BTREE,
+  INDEX `idx_resource`(`resource` ASC, `resource_id` ASC) USING BTREE,
+  INDEX `idx_created_at`(`created_at` ASC) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
@@ -87,7 +93,7 @@ CREATE TABLE `permission`  (
   `updated_at` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`permission_id`) USING BTREE,
   UNIQUE INDEX `key`(`key` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 11 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 16 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for role
