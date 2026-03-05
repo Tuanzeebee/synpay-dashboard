@@ -196,3 +196,10 @@ export async function assignEmployeeAccount(
     body: JSON.stringify(payload),
   })
 }
+
+/** Delete an employee by ID. Requires employee.write. */
+export async function deleteEmployee(id: number): Promise<void> {
+  return request<void>(`/api/employees/${id}`, {
+    method: 'DELETE',
+  })
+}

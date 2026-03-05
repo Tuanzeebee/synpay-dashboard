@@ -9,6 +9,8 @@ import Header from '@/components/layout/Header'
 import { useDebounce } from '@/hooks'
 import { useLanguage } from '@/components/providers/LanguageProvider'
 import { useEmployees } from '@/hooks/useEmployees'
+import { useDepartments } from '@/hooks/useDepartments'
+import { usePositions } from '@/hooks/usePositions'
 import type {
   ApiEmployeeResponse,
   CreateEmployeePayload,
@@ -69,37 +71,6 @@ const emptyForm: FormData = {
   status: '',
 }
 
-// ── Hard-coded department / position lists ────────────────────────
-// In a full implementation these would be fetched from the API.
-// The IDs here must match the Departments and Positions tables in SQL Server.
-
-const DEPARTMENTS = [
-  { id: 1, name: 'Engineering' },
-  { id: 2, name: 'Sales' },
-  { id: 3, name: 'Marketing' },
-  { id: 4, name: 'HR' },
-  { id: 5, name: 'Finance' },
-  { id: 6, name: 'Support' },
-] as const
-
-const POSITIONS = [
-  { id: 1, name: 'Senior Developer' },
-  { id: 2, name: 'Sales Manager' },
-  { id: 3, name: 'Marketing Specialist' },
-  { id: 4, name: 'Tech Lead' },
-  { id: 5, name: 'HR Manager' },
-  { id: 6, name: 'Accountant' },
-  { id: 7, name: 'Support Lead' },
-  { id: 8, name: 'DevOps Engineer' },
-  { id: 9, name: 'Content Writer' },
-  { id: 10, name: 'Sales Director' },
-  { id: 11, name: 'Recruiter' },
-  { id: 12, name: 'Frontend Developer' },
-  { id: 13, name: 'Financial Analyst' },
-  { id: 14, name: 'Customer Support' },
-  { id: 15, name: 'SEO Specialist' },
-] as const
-
 const PAGE_SIZE = 10
 
 // ============================================================================
@@ -143,18 +114,39 @@ const calculateTenure = (hireDate: string | null | undefined): string => {
 
 const StatusBadge = memo(({ status }: { status: string }) => {
   switch (status) {
-    case 'Active':
+    case 'Đang làm việc':
       return (
         <Badge className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/30">
           <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-1.5" />
           Đang làm việc
         </Badge>
       )
-    case 'Inactive':
+    case 'Nghỉ việc':
       return (
         <Badge className="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700">
           <span className="w-1.5 h-1.5 bg-slate-400 rounded-full mr-1.5" />
           Nghỉ việc
+        </Badge>
+      )
+    case 'Nghỉ phép':
+      return (
+        <Badge className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30">
+          <span className="w-1.5 h-1.5 bg-blue-500 rounded-full mr-1.5" />
+          Nghỉ phép
+        </Badge>
+      )
+    case 'Thử việc':
+      return (
+        <Badge className="bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/30">
+          <span className="w-1.5 h-1.5 bg-amber-500 rounded-full mr-1.5 animate-pulse" />
+          Thử việc
+        </Badge>
+      )
+    case 'Thực tập':
+      return (
+        <Badge className="bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 hover:bg-purple-100 dark:hover:bg-purple-900/30">
+          <span className="w-1.5 h-1.5 bg-purple-500 rounded-full mr-1.5" />
+          Thực tập
         </Badge>
       )
     default:
@@ -202,8 +194,13 @@ export default function EmployeeManagement() {
     create,
     update,
     changeStatus,
+    remove: removeEmployee,
     clearError,
   } = useEmployees({ page: 0, size: PAGE_SIZE })
+
+  // ── Departments & Positions from API ───────────────────────
+  const { departments } = useDepartments({ page: 0, size: 100 })
+  const { positions } = usePositions({ page: 0, size: 100 })
 
   // ── Local UI state ─────────────────────────────────────────
   const [searchInput, setSearchInput] = useState('')
@@ -217,6 +214,7 @@ export default function EmployeeManagement() {
   const [showProfileDrawer, setShowProfileDrawer] = useState(false)
   const [showFormModal, setShowFormModal] = useState(false)
   const [showDeactivateModal, setShowDeactivateModal] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [formMode, setFormMode] = useState<FormMode>('create')
   const [formData, setFormData] = useState<FormData>(emptyForm)
   const [formError, setFormError] = useState<string | null>(null)
@@ -238,9 +236,9 @@ export default function EmployeeManagement() {
 
   // ── Stats (derived from current page data + server total) ──
   const stats = useMemo(() => {
-    const active = employees.filter((e) => e.status === 'Active').length
-    const inactive = employees.filter((e) => e.status === 'Inactive').length
-    const pending = employees.filter((e) => e.status !== 'Active' && e.status !== 'Inactive').length
+    const active = employees.filter((e) => e.status === 'Đang làm việc').length
+    const inactive = employees.filter((e) => e.status === 'Nghỉ việc').length
+    const pending = employees.filter((e) => e.status !== 'Đang làm việc' && e.status !== 'Nghỉ việc').length
     return { total: totalElements, active, inactive, pending }
   }, [employees, totalElements])
 
@@ -285,6 +283,12 @@ export default function EmployeeManagement() {
   const openDeactivateModal = useCallback((emp: ApiEmployeeResponse) => {
     setSelectedEmployee(emp)
     setShowDeactivateModal(true)
+    setShowProfileDrawer(false)
+  }, [])
+
+  const openDeleteModal = useCallback((emp: ApiEmployeeResponse) => {
+    setSelectedEmployee(emp)
+    setShowDeleteModal(true)
     setShowProfileDrawer(false)
   }, [])
 
@@ -356,13 +360,25 @@ export default function EmployeeManagement() {
   const handleDeactivate = useCallback(async () => {
     if (!selectedEmployee) return
     try {
-      await changeStatus(selectedEmployee.employeeId, 'Inactive')
+      await changeStatus(selectedEmployee.employeeId, 'Nghỉ việc')
       setShowDeactivateModal(false)
       setSelectedEmployee(null)
     } catch {
       // error captured by hook state
     }
   }, [selectedEmployee, changeStatus])
+
+  // ── Delete employee ────────────────────────────────────────
+  const handleDeleteEmployee = useCallback(async () => {
+    if (!selectedEmployee) return
+    try {
+      await removeEmployee(selectedEmployee.employeeId)
+      setShowDeleteModal(false)
+      setSelectedEmployee(null)
+    } catch {
+      // error captured by hook state
+    }
+  }, [selectedEmployee, removeEmployee])
 
   // ── Display page (1-indexed for UI) ────────────────────────
   const displayPage = page + 1
@@ -510,7 +526,7 @@ export default function EmployeeManagement() {
                     className="px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
                   >
                     <option value="">Tất cả phòng ban</option>
-                    {DEPARTMENTS.map((d) => (
+                    {departments.map((d) => (
                       <option key={d.id} value={d.id}>
                         {d.name}
                       </option>
@@ -523,9 +539,11 @@ export default function EmployeeManagement() {
                     className="px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
                   >
                     <option value="">Tất cả trạng thái</option>
-                    <option value="Active">Đang làm việc</option>
-                    <option value="Inactive">Nghỉ việc</option>
-                    <option value="Pending">Chờ xử lý</option>
+                    <option value="Đang làm việc">Đang làm việc</option>
+                    <option value="Nghỉ việc">Nghỉ việc</option>
+                    <option value="Nghỉ phép">Nghỉ phép</option>
+                    <option value="Thử việc">Thử việc</option>
+                    <option value="Thực tập">Thực tập</option>
                   </select>
 
                   <Button variant="outline" onClick={handleClearFilters}>
@@ -652,7 +670,7 @@ export default function EmployeeManagement() {
                             >
                               <Edit2 className="w-4 h-4" />
                             </Button>
-                            {employee.status === 'Active' && (
+                            {employee.status === 'Đang làm việc' && (
                               <Button
                                 variant="ghost"
                                 size="icon"
@@ -660,11 +678,22 @@ export default function EmployeeManagement() {
                                   e.stopPropagation()
                                   openDeactivateModal(employee)
                                 }}
-                                className="text-slate-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400"
+                                className="text-slate-400 dark:text-slate-500 hover:text-amber-600 dark:hover:text-amber-400"
                               >
-                                <Trash2 className="w-4 h-4" />
+                                <AlertTriangle className="w-4 h-4" />
                               </Button>
                             )}
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                openDeleteModal(employee)
+                              }}
+                              className="text-slate-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
                           </div>
                         </td>
                       </tr>
@@ -751,7 +780,7 @@ export default function EmployeeManagement() {
             className="absolute inset-0 bg-black/50 backdrop-blur-sm"
             onClick={() => setShowProfileDrawer(false)}
           />
-          <div className="ml-auto w-full md:w-[600px] bg-white dark:bg-slate-800 shadow-2xl overflow-y-auto animate-in slide-in-from-right">
+          <div className="relative ml-auto w-full md:w-[600px] bg-white dark:bg-slate-800 shadow-2xl overflow-y-auto animate-in slide-in-from-right">
             <div className="sticky top-0 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 px-6 py-4 flex items-center justify-between z-10">
               <h2 className="text-xl font-bold text-slate-900 dark:text-white">
                 Hồ Sơ Nhân Viên
@@ -851,16 +880,24 @@ export default function EmployeeManagement() {
                   <Edit2 className="w-4 h-4 mr-2" />
                   Chỉnh Sửa
                 </Button>
-                {detailEmployee.status === 'Active' && (
+                {detailEmployee.status === 'Đang làm việc' && (
                   <Button
                     variant="outline"
                     onClick={() => openDeactivateModal(detailEmployee)}
-                    className="border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+                    className="border-amber-200 dark:border-amber-800 text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20"
                   >
-                    <Trash2 className="w-4 h-4 mr-2" />
+                    <AlertTriangle className="w-4 h-4 mr-2" />
                     Vô hiệu hóa
                   </Button>
                 )}
+                <Button
+                  variant="outline"
+                  onClick={() => openDeleteModal(detailEmployee)}
+                  className="border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Xóa
+                </Button>
               </div>
             </div>
           </div>
@@ -1001,7 +1038,7 @@ export default function EmployeeManagement() {
                       className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
                     >
                       <option value="">Chọn phòng ban</option>
-                      {DEPARTMENTS.map((d) => (
+                      {departments.map((d) => (
                         <option key={d.id} value={d.id}>
                           {d.name}
                         </option>
@@ -1021,7 +1058,7 @@ export default function EmployeeManagement() {
                       className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
                     >
                       <option value="">Chọn chức vụ</option>
-                      {POSITIONS.map((p) => (
+                      {positions.map((p) => (
                         <option key={p.id} value={p.id}>
                           {p.name}
                         </option>
@@ -1094,8 +1131,8 @@ export default function EmployeeManagement() {
           <div className="relative bg-white dark:bg-slate-800 rounded-lg shadow-2xl w-full max-w-md animate-in zoom-in-95">
             <div className="p-6">
               <div className="flex items-start gap-4">
-                <div className="flex-shrink-0 w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center">
-                  <AlertTriangle className="w-6 h-6 text-red-600 dark:text-red-400" />
+                <div className="flex-shrink-0 w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center">
+                  <AlertTriangle className="w-6 h-6 text-amber-600 dark:text-amber-400" />
                 </div>
                 <div className="flex-1">
                   <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">
@@ -1119,6 +1156,49 @@ export default function EmployeeManagement() {
                 <Button variant="destructive" onClick={handleDeactivate} disabled={isSaving}>
                   {isSaving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                   Vô Hiệu Hóa
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── Delete Confirmation Modal ────────────────────────── */}
+      {showDeleteModal && selectedEmployee && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => setShowDeleteModal(false)}
+          />
+          <div className="relative bg-white dark:bg-slate-800 rounded-lg shadow-2xl w-full max-w-md animate-in zoom-in-95">
+            <div className="p-6">
+              <div className="flex items-start gap-4">
+                <div className="flex-shrink-0 w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center">
+                  <Trash2 className="w-6 h-6 text-red-600 dark:text-red-400" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">
+                    Xác Nhận Xóa Nhân Viên
+                  </h3>
+                  <p className="text-sm text-slate-600 dark:text-slate-400 mb-2">
+                    Bạn có chắc chắn muốn xóa nhân viên &quot;{selectedEmployee.fullName}&quot; (#{selectedEmployee.employeeId})?
+                  </p>
+                  <p className="text-sm text-red-600 dark:text-red-400 font-medium">
+                    Hành động này không thể hoàn tác. Toàn bộ dữ liệu của nhân viên sẽ bị xóa vĩnh viễn.
+                  </p>
+                </div>
+              </div>
+              <div className="flex justify-end gap-3 mt-6">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowDeleteModal(false)}
+                  disabled={isSaving}
+                >
+                  Hủy
+                </Button>
+                <Button variant="destructive" onClick={handleDeleteEmployee} disabled={isSaving}>
+                  {isSaving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                  Xóa Nhân Viên
                 </Button>
               </div>
             </div>

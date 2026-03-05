@@ -140,7 +140,7 @@ public class EmployeeService {
         employee.setHireDate(request.getHireDate());
         employee.setDepartment(department);
         employee.setPosition(position);
-        employee.setStatus(request.getStatus() != null ? request.getStatus() : "ACTIVE");
+        employee.setStatus(request.getStatus() != null ? request.getStatus() : "Đang làm việc");
 
         employee = employeeRepository.saveAndFlush(employee);
 
@@ -322,6 +322,26 @@ public class EmployeeService {
         response.setAccountEmail(account.getEmail());
         response.setAccountStatus(account.getStatus());
         return response;
+    }
+
+    // ── Delete employee ──────────────────────────────────────────
+
+    @Transactional(transactionManager = "hrTransactionManager")
+    public void deleteEmployee(Integer employeeId,
+                               Integer actorAccountId,
+                               String ipAddress,
+                               String userAgent) {
+        Employee employee = employeeRepository.findByIdWithDetails(employeeId)
+                .orElseThrow(() -> new ResourceNotFoundException("Employee", employeeId));
+
+        Map<String, Object> oldSnapshot = toAuditSnapshot(employee);
+
+        employeeRepository.delete(employee);
+
+        auditLogService.log(actorAccountId, "EMPLOYEE_DELETE", "employee",
+                employeeId.toString(), oldSnapshot, null, ipAddress, userAgent);
+
+        log.info("Employee deleted: employeeId={} by actor={}", employeeId, actorAccountId);
     }
 
     // ── Private helpers ──────────────────────────────────────────

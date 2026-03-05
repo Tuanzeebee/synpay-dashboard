@@ -7,6 +7,7 @@ import {
   createEmployee,
   updateEmployee,
   changeEmployeeStatus,
+  deleteEmployee,
   type ApiEmployeeResponse,
   type ApiEmployeePageResponse,
   type CreateEmployeePayload,
@@ -42,6 +43,8 @@ interface UseEmployeesReturn extends UseEmployeesState {
   update: (id: number, payload: UpdateEmployeePayload) => Promise<void>
   /** Change employee status */
   changeStatus: (id: number, status: string) => Promise<void>
+  /** Delete an employee */
+  remove: (id: number) => Promise<void>
   /** Clear the current error */
   clearError: () => void
 }
@@ -169,6 +172,25 @@ export function useEmployees(initialParams?: EmployeeListParams): UseEmployeesRe
     }
   }, [refresh])
 
+  // ── Delete employee ────────────────────────────────────────
+
+  const remove = useCallback(async (id: number) => {
+    setState((s) => ({ ...s, isSaving: true, error: null }))
+    try {
+      await deleteEmployee(id)
+      if (mountedRef.current) {
+        setState((s) => ({ ...s, isSaving: false }))
+        await refresh()
+      }
+    } catch (err) {
+      if (mountedRef.current) {
+        const message = err instanceof Error ? err.message : 'Không thể xóa nhân viên'
+        setState((s) => ({ ...s, isSaving: false, error: message }))
+      }
+      throw err
+    }
+  }, [refresh])
+
   // ── Clear error ────────────────────────────────────────────
 
   const clearError = useCallback(() => {
@@ -183,6 +205,7 @@ export function useEmployees(initialParams?: EmployeeListParams): UseEmployeesRe
     create,
     update,
     changeStatus,
+    remove,
     clearError,
   }
 }

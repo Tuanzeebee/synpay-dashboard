@@ -35,6 +35,16 @@ public enum ActionType {
     EMPLOYEE_STATUS_CHANGE,
     EMPLOYEE_ASSIGN_ACCOUNT,
 
+    // ── Department Management ────────────────────────────────────
+    DEPARTMENT_CREATE,
+    DEPARTMENT_UPDATE,
+    DEPARTMENT_STATUS_CHANGE,
+
+    // ── Position Management ──────────────────────────────────────
+    POSITION_CREATE,
+    POSITION_UPDATE,
+    POSITION_STATUS_CHANGE,
+
     // ── Data & System ────────────────────────────────────────────
     DATA_EXPORT,
     SYSTEM_CONFIG;

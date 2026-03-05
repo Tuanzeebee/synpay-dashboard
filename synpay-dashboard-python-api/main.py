@@ -18,6 +18,8 @@ from routes.roles import router as roles_router
 from routes.permission_matrix import router as permission_matrix_router
 from routes.audit_logs import router as audit_logs_router
 from routes.employees import router as employees_router
+from routes.departments import router as departments_router
+from routes.positions import router as positions_router
 
 logging.basicConfig(
     level=logging.INFO,
@@ -56,6 +58,8 @@ app.include_router(roles_router)
 app.include_router(permission_matrix_router)
 app.include_router(audit_logs_router)
 app.include_router(employees_router)
+app.include_router(departments_router)
+app.include_router(positions_router)
 
 
 @app.get("/health", tags=["Health"])

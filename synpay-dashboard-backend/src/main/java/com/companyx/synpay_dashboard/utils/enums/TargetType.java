@@ -14,6 +14,8 @@ public enum TargetType {
     PERMISSION("permission"),
     PERMISSION_MATRIX("permission_matrix"),
     EMPLOYEE("employee"),
+    DEPARTMENT("department"),
+    POSITION("position"),
     PAYROLL("payroll"),
     SYSTEM("system");
 

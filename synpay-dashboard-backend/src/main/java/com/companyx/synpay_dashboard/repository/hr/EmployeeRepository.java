@@ -21,4 +21,16 @@ public interface EmployeeRepository extends JpaRepository<Employee, Integer>,
            "LEFT JOIN FETCH e.position " +
            "WHERE e.employeeId = :id")
     Optional<Employee> findByIdWithDetails(@Param("id") Integer id);
+
+    long countByDepartmentDepartmentIdAndStatusNot(Integer departmentId, String status);
+
+    long countByPositionPositionIdAndStatusNot(Integer positionId, String status);
+
+    @Query("SELECT COUNT(e) FROM Employee e WHERE e.department.departmentId = :deptId AND e.status IN :activeStatuses")
+    long countActiveByDepartmentId(@Param("deptId") Integer departmentId,
+                                   @Param("activeStatuses") java.util.List<String> activeStatuses);
+
+    @Query("SELECT COUNT(e) FROM Employee e WHERE e.position.positionId = :posId AND e.status IN :activeStatuses")
+    long countActiveByPositionId(@Param("posId") Integer positionId,
+                                 @Param("activeStatuses") java.util.List<String> activeStatuses);
 }

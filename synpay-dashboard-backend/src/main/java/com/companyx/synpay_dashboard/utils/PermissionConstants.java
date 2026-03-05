@@ -35,4 +35,12 @@ public final class PermissionConstants {
     // ---- Audit Log ----
     public static final String AUDIT_READ       = "audit.read";
     public static final String AUDIT_LOG_EXPORT = "audit.export";
+
+    // ---- Department Management ----
+    public static final String DEPARTMENT_READ  = "department.read";
+    public static final String DEPARTMENT_WRITE = "department.write";
+
+    // ---- Position Management ----
+    public static final String POSITION_READ  = "position.read";
+    public static final String POSITION_WRITE = "position.write";
 }

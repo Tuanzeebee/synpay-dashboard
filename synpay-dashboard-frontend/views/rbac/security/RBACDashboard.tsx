@@ -197,21 +197,10 @@ export default function RBACDashboard() {
   }
 
   // Permission Matrix handlers
-  const handleTogglePermission = (roleId: string, permissionId: string) => {
-    setRoles((prev) =>
-      prev.map((role) => {
-        if (role.id === roleId) {
-          const hasPermission = role.permissionIds.includes(permissionId)
-          return {
-            ...role,
-            permissionIds: hasPermission
-              ? role.permissionIds.filter((p) => p !== permissionId)
-              : [...role.permissionIds, permissionId],
-          }
-        }
-        return role
-      })
-    )
+  const handleTogglePermission = (roleId: number, domain: string, action: string, enabled: boolean) => {
+    // This handler is called by PermissionMatrix when a checkbox is toggled.
+    // The actual save is deferred to handleSavePermissionChanges.
+    console.log(`Toggle permission: role=${roleId}, ${domain}.${action} => ${enabled}`)
   }
 
   const handleSavePermissionChanges = () => {
@@ -350,17 +339,15 @@ export default function RBACDashboard() {
           )}
 
           {currentView === 'permissions' && (
-            <PermissionMatrix
-              roles={roles}
-              permissions={permissions}
-              language={language}
-              onTogglePermission={handleTogglePermission}
-              onSaveChanges={handleSavePermissionChanges}
-            />
+            <div className="p-8 text-center text-slate-500">
+              <p>Permission matrix has moved to <a href="/rbac/permissions" className="text-blue-600 underline">/rbac/permissions</a></p>
+            </div>
           )}
 
           {currentView === 'audit' && (
-            <AuditLog auditLogs={auditLogs} language={language} onExport={handleExportAuditLog} />
+            <div className="p-8 text-center text-slate-500">
+              <p>Audit logs have moved to <a href="/rbac/audit" className="text-blue-600 underline">/rbac/audit</a></p>
+            </div>
           )}
         </div>
       </main>

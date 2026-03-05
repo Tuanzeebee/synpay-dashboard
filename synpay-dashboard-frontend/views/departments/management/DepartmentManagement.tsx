@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import { Button } from '@/components/ui/button'
-import { RefreshCw } from 'lucide-react'
+import { RefreshCw, AlertCircle, X } from 'lucide-react'
 import Sidebar from '@/components/layout/Sidebar'
 import Header from '@/components/layout/Header'
 import StatsCards from './components/StatsCards'
@@ -10,8 +10,11 @@ import DepartmentsList from './components/DepartmentsList'
 import PositionsList from './components/PositionsList'
 import DepartmentFormModal from './components/DepartmentFormModal'
 import PositionFormModal from './components/PositionFormModal'
+import DeleteConfirmModal from './components/DeleteConfirmModal'
 import { useLanguage } from '@/components/providers/LanguageProvider'
-import type { Department, Position, DepartmentStats } from './types'
+import { useDepartments } from '@/hooks/useDepartments'
+import { usePositions } from '@/hooks/usePositions'
+import type { Department, Position, DepartmentStats, DepartmentFormData, PositionFormData } from './types'
 
 export default function DepartmentManagement() {
   const { language, toggleLanguage, t: translate } = useLanguage()
@@ -19,267 +22,51 @@ export default function DepartmentManagement() {
   const [showPositionModal, setShowPositionModal] = useState(false)
   const [selectedDepartment, setSelectedDepartment] = useState<Department | null>(null)
   const [selectedPosition, setSelectedPosition] = useState<Position | null>(null)
+  const [deleteTarget, setDeleteTarget] = useState<{ type: 'department' | 'position'; item: Department | Position } | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
 
-  // Mock data - replace with actual API calls
-  const [stats] = useState<DepartmentStats>({
-    totalDepartments: 8,
-    totalPositions: 24,
-    totalEmployees: 156,
-    syncPercentage: 100,
-    lastSyncTime: '5 phút trước',
-  })
+  // ── API hooks ────────────────────────────────────────────────
 
-  const [departments, setDepartments] = useState<Department[]>([
-    {
-      id: '1',
-      name: 'Phòng Kỹ Thuật',
-      code: 'ENG',
-      description: 'Phát triển sản phẩm và công nghệ',
-      status: 'active',
-      syncStatus: 'synced',
-      employeeCount: 32,
-      positionCount: 6,
-      createdAt: '2024-01-01',
-      updatedAt: '2024-01-29',
-    },
-    {
-      id: '2',
-      name: 'Phòng Kinh Doanh',
-      code: 'SALES',
-      description: 'Bán hàng và phát triển thị trường',
-      status: 'active',
-      syncStatus: 'synced',
-      employeeCount: 28,
-      positionCount: 5,
-      createdAt: '2024-01-01',
-      updatedAt: '2024-01-29',
-    },
-    {
-      id: '3',
-      name: 'Phòng Marketing',
-      code: 'MKT',
-      description: 'Truyền thông và tiếp thị',
-      status: 'active',
-      syncStatus: 'synced',
-      employeeCount: 18,
-      positionCount: 4,
-      createdAt: '2024-01-01',
-      updatedAt: '2024-01-29',
-    },
-    {
-      id: '4',
-      name: 'Phòng Nhân Sự',
-      code: 'HR',
-      description: 'Quản lý nguồn nhân lực',
-      status: 'active',
-      syncStatus: 'synced',
-      employeeCount: 12,
-      positionCount: 3,
-      createdAt: '2024-01-01',
-      updatedAt: '2024-01-29',
-    },
-    {
-      id: '5',
-      name: 'Phòng Tài Chính',
-      code: 'FIN',
-      description: 'Kế toán và tài chính',
-      status: 'active',
-      syncStatus: 'synced',
-      employeeCount: 15,
-      positionCount: 3,
-      createdAt: '2024-01-01',
-      updatedAt: '2024-01-29',
-    },
-    {
-      id: '6',
-      name: 'Phòng Vận Hành',
-      code: 'OPS',
-      description: 'Quản lý hoạt động và quy trình',
-      status: 'active',
-      syncStatus: 'synced',
-      employeeCount: 20,
-      positionCount: 4,
-      createdAt: '2024-01-01',
-      updatedAt: '2024-01-29',
-    },
-    {
-      id: '7',
-      name: 'Phòng Chăm Sóc Khách Hàng',
-      code: 'CS',
-      description: 'Hỗ trợ và dịch vụ khách hàng',
-      status: 'active',
-      syncStatus: 'pending',
-      employeeCount: 22,
-      positionCount: 4,
-      createdAt: '2024-01-01',
-      updatedAt: '2024-01-29',
-    },
-    {
-      id: '8',
-      name: 'Phòng Nghiên Cứu & Phát Triển',
-      code: 'RD',
-      description: 'Nghiên cứu và phát triển',
-      status: 'active',
-      syncStatus: 'synced',
-      employeeCount: 9,
-      positionCount: 2,
-      createdAt: '2024-01-01',
-      updatedAt: '2024-01-29',
-    },
-  ])
+  const {
+    departments,
+    totalElements: totalDepartments,
+    isLoading: isLoadingDepts,
+    isSaving: isSavingDept,
+    error: deptError,
+    refresh: refreshDepts,
+    create: createDept,
+    update: updateDept,
+    remove: removeDept,
+    clearError: clearDeptError,
+  } = useDepartments({ page: 0, size: 100 })
 
-  const [positions, setPositions] = useState<Position[]>([
-    {
-      id: '1',
-      name: 'Senior Software Engineer',
-      code: 'DEV01',
-      level: 'senior',
-      departmentId: '1',
-      departmentName: 'Phòng Kỹ Thuật',
-      description: 'Phát triển phần mềm cấp cao',
-      status: 'active',
-      syncStatus: 'synced',
-      employeeCount: 8,
-      createdAt: '2024-01-01',
-      updatedAt: '2024-01-29',
-    },
-    {
-      id: '2',
-      name: 'Junior Developer',
-      code: 'DEV02',
-      level: 'junior',
-      departmentId: '1',
-      departmentName: 'Phòng Kỹ Thuật',
-      description: 'Phát triển phần mềm cơ bản',
-      status: 'active',
-      syncStatus: 'synced',
-      employeeCount: 12,
-      createdAt: '2024-01-01',
-      updatedAt: '2024-01-29',
-    },
-    {
-      id: '3',
-      name: 'Tech Lead',
-      code: 'DEV03',
-      level: 'lead',
-      departmentId: '1',
-      departmentName: 'Phòng Kỹ Thuật',
-      description: 'Dẫn dắt nhóm kỹ thuật',
-      status: 'active',
-      syncStatus: 'synced',
-      employeeCount: 3,
-      createdAt: '2024-01-01',
-      updatedAt: '2024-01-29',
-    },
-    {
-      id: '4',
-      name: 'DevOps Engineer',
-      code: 'DEV04',
-      level: 'mid',
-      departmentId: '1',
-      departmentName: 'Phòng Kỹ Thuật',
-      description: 'Quản lý hạ tầng và triển khai',
-      status: 'active',
-      syncStatus: 'synced',
-      employeeCount: 5,
-      createdAt: '2024-01-01',
-      updatedAt: '2024-01-29',
-    },
-    {
-      id: '5',
-      name: 'Sales Manager',
-      code: 'SALES01',
-      level: 'manager',
-      departmentId: '2',
-      departmentName: 'Phòng Kinh Doanh',
-      description: 'Quản lý đội ngũ bán hàng',
-      status: 'active',
-      syncStatus: 'synced',
-      employeeCount: 4,
-      createdAt: '2024-01-01',
-      updatedAt: '2024-01-29',
-    },
-    {
-      id: '6',
-      name: 'Sales Executive',
-      code: 'SALES02',
-      level: 'mid',
-      departmentId: '2',
-      departmentName: 'Phòng Kinh Doanh',
-      description: 'Nhân viên kinh doanh',
-      status: 'active',
-      syncStatus: 'synced',
-      employeeCount: 18,
-      createdAt: '2024-01-01',
-      updatedAt: '2024-01-29',
-    },
-    {
-      id: '7',
-      name: 'Marketing Manager',
-      code: 'MKT01',
-      level: 'manager',
-      departmentId: '3',
-      departmentName: 'Phòng Marketing',
-      description: 'Quản lý marketing',
-      status: 'active',
-      syncStatus: 'synced',
-      employeeCount: 3,
-      createdAt: '2024-01-01',
-      updatedAt: '2024-01-29',
-    },
-    {
-      id: '8',
-      name: 'Content Writer',
-      code: 'MKT02',
-      level: 'mid',
-      departmentId: '3',
-      departmentName: 'Phòng Marketing',
-      description: 'Viết nội dung',
-      status: 'active',
-      syncStatus: 'synced',
-      employeeCount: 10,
-      createdAt: '2024-01-01',
-      updatedAt: '2024-01-29',
-    },
-    {
-      id: '9',
-      name: 'HR Manager',
-      code: 'HR01',
-      level: 'manager',
-      departmentId: '4',
-      departmentName: 'Phòng Nhân Sự',
-      description: 'Quản lý nhân sự',
-      status: 'active',
-      syncStatus: 'synced',
-      employeeCount: 2,
-      createdAt: '2024-01-01',
-      updatedAt: '2024-01-29',
-    },
-    {
-      id: '10',
-      name: 'Customer Support',
-      code: 'CS02',
-      level: 'mid',
-      departmentId: '7',
-      departmentName: 'Phòng Chăm Sóc Khách Hàng',
-      description: 'Nhân viên hỗ trợ',
-      status: 'active',
-      syncStatus: 'pending',
-      employeeCount: 16,
-      createdAt: '2024-01-01',
-      updatedAt: '2024-01-29',
-    },
-  ])
+  const {
+    positions,
+    totalElements: totalPositions,
+    isLoading: isLoadingPos,
+    isSaving: isSavingPos,
+    error: posError,
+    refresh: refreshPos,
+    create: createPos,
+    update: updatePos,
+    remove: removePos,
+    clearError: clearPosError,
+  } = usePositions({ page: 0, size: 100 })
 
-  const handleRefresh = useCallback(() => {
-    // Implement refresh logic
-    console.log('Refresh data')
-  }, [])
+  // ── Derived stats ────────────────────────────────────────────
 
-  const handleSync = useCallback(() => {
-    // Implement sync logic
-    console.log('Sync with external system')
-  }, [])
+  const stats = useMemo<DepartmentStats>(() => ({
+    totalDepartments,
+    totalPositions,
+  }), [totalDepartments, totalPositions])
+
+  // ── Refresh ──────────────────────────────────────────────────
+
+  const handleRefresh = useCallback(async () => {
+    await Promise.all([refreshDepts(), refreshPos()])
+  }, [refreshDepts, refreshPos])
+
+  // ── Department handlers ──────────────────────────────────────
 
   const handleAddDepartment = useCallback(() => {
     setSelectedDepartment(null)
@@ -291,39 +78,22 @@ export default function DepartmentManagement() {
     setShowDepartmentModal(true)
   }, [])
 
-  const handleDeleteDepartment = useCallback((dept: Department) => {
-    if (confirm(language === 'vi' ? `Xóa phòng ban "${dept.name}"?` : `Delete department "${dept.name}"?`)) {
-      setDepartments(prev => prev.filter((d) => d.id !== dept.id))
-    }
-  }, [language])
-
-  const handleSaveDepartment = useCallback((data: Partial<Department>) => {
-    if (selectedDepartment) {
-      // Edit existing — functional updater avoids stale closure
-      setDepartments(prev =>
-        prev.map((d) =>
-          d.id === selectedDepartment.id
-            ? { ...d, ...data, updatedAt: new Date().toISOString(), syncStatus: 'pending' as const }
-            : d
-        )
-      )
-    } else {
-      // Add new
-      const newDept: Department = {
-        id: String(Date.now()),
-        name: data.name || '',
-        code: data.code || '',
-        description: data.description || '',
-        status: data.status || 'active',
-        syncStatus: 'pending',
-        employeeCount: 0,
-        positionCount: 0,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+  const handleSaveDepartment = useCallback(async (data: DepartmentFormData) => {
+    try {
+      if (selectedDepartment) {
+        await updateDept(selectedDepartment.id, {
+          departmentName: data.name,
+        })
+      } else {
+        await createDept({
+          departmentName: data.name,
+        })
       }
-      setDepartments(prev => [...prev, newDept])
-    }
-  }, [selectedDepartment])
+      setShowDepartmentModal(false)
+    } catch { /* error handled by hook, modal stays open */ }
+  }, [selectedDepartment, createDept, updateDept])
+
+  // ── Position handlers ────────────────────────────────────────
 
   const handleAddPosition = useCallback(() => {
     setSelectedPosition(null)
@@ -335,44 +105,52 @@ export default function DepartmentManagement() {
     setShowPositionModal(true)
   }, [])
 
-  const handleDeletePosition = useCallback((pos: Position) => {
-    if (confirm(language === 'vi' ? `Xóa chức vụ "${pos.name}"?` : `Delete position "${pos.name}"?`)) {
-      setPositions(prev => prev.filter((p) => p.id !== pos.id))
-    }
-  }, [language])
-
-  const handleSavePosition = useCallback((data: Partial<Position>) => {
-    if (selectedPosition) {
-      // Edit existing — functional updater avoids stale closure
-      setPositions(prev =>
-        prev.map((p) =>
-          p.id === selectedPosition.id
-            ? { ...p, ...data, updatedAt: new Date().toISOString(), syncStatus: 'pending' as const }
-            : p
-        )
-      )
-    } else {
-      // Add new
-      const newPos: Position = {
-        id: String(Date.now()),
-        name: data.name || '',
-        code: data.code || '',
-        level: data.level || 'mid',
-        departmentId: data.departmentId || '',
-        departmentName: data.departmentName || '',
-        description: data.description || '',
-        status: data.status || 'active',
-        syncStatus: 'pending',
-        employeeCount: 0,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+  const handleSavePosition = useCallback(async (data: PositionFormData) => {
+    try {
+      if (selectedPosition) {
+        await updatePos(selectedPosition.id, {
+          positionName: data.name,
+        })
+      } else {
+        await createPos({
+          positionName: data.name,
+        })
       }
-      setPositions(prev => [...prev, newPos])
-    }
-  }, [selectedPosition])
+      setShowPositionModal(false)
+    } catch { /* error handled by hook, modal stays open */ }
+  }, [selectedPosition, createPos, updatePos])
+
+  // ── Delete handlers ──────────────────────────────────────────
+
+  const handleDeleteDepartment = useCallback((dept: Department) => {
+    setDeleteTarget({ type: 'department', item: dept })
+  }, [])
+
+  const handleDeletePosition = useCallback((pos: Position) => {
+    setDeleteTarget({ type: 'position', item: pos })
+  }, [])
+
+  const handleConfirmDelete = useCallback(async () => {
+    if (!deleteTarget) return
+    setIsDeleting(true)
+    try {
+      if (deleteTarget.type === 'department') {
+        await removeDept(deleteTarget.item.id)
+      } else {
+        await removePos(deleteTarget.item.id)
+      }
+      setDeleteTarget(null)
+    } catch { /* error handled by hook */ }
+    setIsDeleting(false)
+  }, [deleteTarget, removeDept, removePos])
+
+  // ── Aggregate state ──────────────────────────────────────────
+
+  const error = deptError || posError
+  const isLoading = isLoadingDepts || isLoadingPos
 
   return (
-    <div className="flex min-h-screen bg-slate-50 dark:bg-slate-900">{/* Sidebar */}
+    <div className="flex min-h-screen bg-slate-50 dark:bg-slate-900">
       {/* Sidebar */}
       <Sidebar language={language} t={translate} activeRoute="/departments" />
 
@@ -395,15 +173,32 @@ export default function DepartmentManagement() {
               </p>
             </div>
             <Button
-              onClick={handleSync}
+              onClick={handleRefresh}
               variant="outline"
+              disabled={isLoading}
               className="text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 border-blue-200 dark:border-blue-800"
             >
-              <RefreshCw className="w-4 h-4 mr-2" />
-              <span className="hidden sm:inline">{language === 'vi' ? 'Đồng Bộ' : 'Sync'}</span>
+              <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+              <span className="hidden sm:inline">{language === 'vi' ? 'Làm Mới' : 'Refresh'}</span>
             </Button>
           </div>
         </div>
+
+        {/* Error Banner */}
+        {error && (
+          <div className="mx-4 md:mx-8 mt-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-center gap-2 text-sm text-red-700 dark:text-red-400">
+            <AlertCircle className="w-4 h-4 flex-shrink-0" />
+            <span className="flex-1">{error}</span>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6"
+              onClick={() => { clearDeptError(); clearPosError() }}
+            >
+              <X className="w-3 h-3" />
+            </Button>
+          </div>
+        )}
 
         {/* Content */}
         <div className="flex-1 p-4 md:p-8 overflow-y-auto">
@@ -412,16 +207,18 @@ export default function DepartmentManagement() {
           {/* Split Panel Layout */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <DepartmentsList
-              departments={departments}
+              departments={departments as Department[]}
               language={language}
+              isLoading={isLoadingDepts}
               onAdd={handleAddDepartment}
               onEdit={handleEditDepartment}
               onDelete={handleDeleteDepartment}
             />
 
             <PositionsList
-              positions={positions}
+              positions={positions as Position[]}
               language={language}
+              isLoading={isLoadingPos}
               onAdd={handleAddPosition}
               onEdit={handleEditPosition}
               onDelete={handleDeletePosition}
@@ -437,6 +234,7 @@ export default function DepartmentManagement() {
         onSave={handleSaveDepartment}
         department={selectedDepartment}
         language={language}
+        isSaving={isSavingDept}
       />
 
       <PositionFormModal
@@ -444,8 +242,31 @@ export default function DepartmentManagement() {
         onClose={() => setShowPositionModal(false)}
         onSave={handleSavePosition}
         position={selectedPosition}
-        departments={departments}
         language={language}
+        isSaving={isSavingPos}
+      />
+
+      <DeleteConfirmModal
+        isOpen={deleteTarget !== null}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={handleConfirmDelete}
+        title={
+          deleteTarget?.type === 'department'
+            ? (language === 'vi' ? 'Xóa Phòng Ban' : 'Delete Department')
+            : (language === 'vi' ? 'Xóa Chức Vụ' : 'Delete Position')
+        }
+        message={
+          deleteTarget?.type === 'department'
+            ? (language === 'vi'
+              ? 'Bạn có chắc chắn muốn xóa phòng ban này? Hành động này không thể hoàn tác.'
+              : 'Are you sure you want to delete this department? This action cannot be undone.')
+            : (language === 'vi'
+              ? 'Bạn có chắc chắn muốn xóa chức vụ này? Hành động này không thể hoàn tác.'
+              : 'Are you sure you want to delete this position? This action cannot be undone.')
+        }
+        itemName={deleteTarget?.item.name ?? ''}
+        language={language}
+        isDeleting={isDeleting}
       />
     </div>
   )

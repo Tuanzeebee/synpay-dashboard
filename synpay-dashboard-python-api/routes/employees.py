@@ -260,3 +260,25 @@ async def assign_account(
         user_agent=request.headers.get("User-Agent"),
     )
     return _spring_response(response)
+
+
+# -- DELETE /api/employees/{employee_id} -----------------------------------
+
+@router.delete("/{employee_id}")
+async def delete_employee(
+    employee_id: int,
+    request: Request,
+    token: str = Depends(extract_token),
+):
+    """
+    Delete an employee by ID.
+    Forwards to: DELETE /internal/employees/{id}
+    """
+    response = await forward_request(
+        "DELETE",
+        f"/internal/employees/{employee_id}",
+        token,
+        forwarded_for=get_client_ip(request),
+        user_agent=request.headers.get("User-Agent"),
+    )
+    return _spring_response(response)

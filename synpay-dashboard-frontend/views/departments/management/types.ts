@@ -1,47 +1,37 @@
 /**
  * Department & Position Management Types
+ *
+ * These types represent the UI models mapped from the API DTOs.
+ * The mapping is performed by useDepartments / usePositions hooks.
  */
 
-export type DepartmentStatus = 'active' | 'inactive'
-export type SyncStatus = 'synced' | 'pending'
-export type PositionLevel = 'junior' | 'mid' | 'senior' | 'lead' | 'manager'
-
 export interface Department {
-  id: string
+  id: number
   name: string
-  code: string
-  description: string
-  status: DepartmentStatus
-  syncStatus: SyncStatus
-  employeeCount: number
-  positionCount: number
-  managerId?: string
-  managerName?: string
-  createdAt: string
-  updatedAt: string
+  createdAt: string | null
+  updatedAt: string | null
 }
 
 export interface Position {
-  id: string
+  id: number
   name: string
-  code: string
-  level: PositionLevel
-  departmentId: string
-  departmentName: string
-  description: string
-  status: DepartmentStatus
-  syncStatus: SyncStatus
-  employeeCount: number
-  createdAt: string
-  updatedAt: string
+  createdAt: string | null
+  updatedAt: string | null
 }
 
 export interface DepartmentStats {
   totalDepartments: number
   totalPositions: number
-  totalEmployees: number
-  syncPercentage: number
-  lastSyncTime: string
+}
+
+/** Form data emitted by DepartmentFormModal */
+export interface DepartmentFormData {
+  name: string
+}
+
+/** Form data emitted by PositionFormModal */
+export interface PositionFormData {
+  name: string
 }
 
 // Required by Next.js Pages Router — this file is not a page

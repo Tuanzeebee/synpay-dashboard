@@ -407,9 +407,9 @@ export default function AuditLog({
                     )}
 
                     {/* Old / New value diff */}
-                    {(entry.oldValue || entry.newValue) && (
+                    {!!(entry.oldValue || entry.newValue) && (
                       <div className="mt-3 p-3 bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-slate-100 dark:border-slate-700">
-                        {entry.oldValue && (
+                        {!!entry.oldValue && (
                           <div className="mb-2">
                             <p className="text-xs font-semibold text-red-600 dark:text-red-400 mb-0.5">
                               {language === 'vi' ? 'Giá trị cũ:' : 'Old value:'}
@@ -419,7 +419,7 @@ export default function AuditLog({
                             </pre>
                           </div>
                         )}
-                        {entry.newValue && (
+                        {!!entry.newValue && (
                           <div>
                             <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 mb-0.5">
                               {language === 'vi' ? 'Giá trị mới:' : 'New value:'}
