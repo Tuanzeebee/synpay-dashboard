@@ -82,7 +82,7 @@ async def list_employees(
     status: str | None = Query(None),
     keyword: str | None = Query(None),
     page: int = Query(0, ge=0),
-    size: int = Query(20, ge=1, le=100),
+    size: int = Query(20, ge=1, le=200),
     token: str = Depends(extract_token),
 ):
     """

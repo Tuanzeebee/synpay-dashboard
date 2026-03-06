@@ -41,7 +41,7 @@ export default function DepartmentTable({ data, language = 'vi' }: Props) {
     { employees: 0, totalSalary: 0, leaveDays: 0 }
   )
 
-  const avgSalary = totals.totalSalary / totals.employees
+  const avgSalary = totals.employees > 0 ? totals.totalSalary / totals.employees : 0
 
   return (
     <Card className="shadow-md">

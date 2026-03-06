@@ -35,9 +35,13 @@ export default function ReportsCharts({
   language = 'vi',
 }: Props) {
   // Simple bar chart using CSS for demo - in production use recharts
-  const maxDeptEmployees = Math.max(...departments.map((d) => d.employees))
-  const maxLeave = Math.max(...leaveTypes.map((l) => l.days))
-  const maxPerformance = Math.max(...performance.map((p) => p.score))
+  const maxDeptEmployees = departments.length > 0 ? Math.max(...departments.map((d) => d.employees)) : 1
+  const maxLeave = leaveTypes.length > 0 ? Math.max(...leaveTypes.map((l) => l.days), 1) : 1
+  const maxPerformance = performance.length > 0 ? Math.max(...performance.map((p) => p.score)) : 1
+  const maxSalaryTrend = salaryTrend.length > 0 ? Math.max(...salaryTrend.map((d) => d.amount), 0.1) : 1
+  const maxDividend = dividends.length > 0 ? Math.max(...dividends.map((d) => d.amount), 0.1) : 1
+  const minAttendance = attendance.length > 0 ? Math.min(...attendance.map((d) => d.rate)) : 0
+  const maxAttendance = attendance.length > 0 ? Math.max(...attendance.map((d) => d.rate)) : 100
 
   const colors = {
     blue: '#3b82f6',
@@ -151,7 +155,7 @@ export default function ReportsCharts({
         <div className="h-80">
           <div className="flex items-end justify-between h-full gap-2">
             {salaryTrend.map((data) => {
-              const height = (data.amount / 8.5) * 100
+              const height = Math.min((data.amount / (maxSalaryTrend * 1.1)) * 100, 100)
               return (
                 <div key={data.month} className="flex-1 flex flex-col items-center gap-2">
                   <div className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
@@ -221,7 +225,9 @@ export default function ReportsCharts({
           </div>
           <div className="h-64 flex items-end justify-between gap-2">
             {attendance.map((data) => {
-              const height = ((data.rate - 90) / 10) * 100
+              const range = maxAttendance - minAttendance || 10
+              const floor = Math.max(minAttendance - 2, 0)
+              const height = Math.max(((data.rate - floor) / (maxAttendance - floor + 2)) * 100, 5)
               return (
                 <div key={data.month} className="flex-1 flex flex-col items-center gap-2">
                   <div className="text-xs font-semibold text-cyan-600 dark:text-cyan-400">{data.rate}%</div>
@@ -255,7 +261,7 @@ export default function ReportsCharts({
           </div>
           <div className="h-64 flex items-end justify-between gap-4">
             {dividends.map((data) => {
-              const height = (data.amount / 2.2) * 100
+              const height = Math.min((data.amount / (maxDividend * 1.1)) * 100, 100)
               return (
                 <div key={data.quarter} className="flex-1 flex flex-col items-center gap-2">
                   <div className="text-xs font-semibold text-purple-600 dark:text-purple-400">

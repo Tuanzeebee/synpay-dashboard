@@ -1,0 +1,321 @@
+
+<!DOCTYPE html>
+<html lang="vi" style="height: auto; min-height: 100%;">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hồ Sơ Của Tôi - HR Nexus</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link id="heading-font-link" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link id="body-font-link" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --font-heading-name: 'Inter';
+            --font-body-name: 'Inter';
+            --font-heading: 'Inter', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --letter-spacing-heading: 0px;
+            --letter-spacing-body: 0px;
+            --space-base: 1rem;
+            --radius-small: 0.375rem;
+            --radius-large: 0.75rem;
+            --border-width: 1px;
+            --shadow-color: 15 23 42;
+            --shadow-offset-x: 0px;
+            --shadow-offset-y: 4px;
+            --shadow-blur: 16px;
+            --shadow-spread: 0px;
+            --shadow-opacity: 0.08;
+            --shadow-custom: 0px 4px 16px rgba(15,23,42,0.08);
+            --shadow-custom-hover: 0px 8px 24px rgba(15,23,42,0.14);
+        }
+        body { font-family: var(--font-body); transition: background-color 0.3s ease, color 0.3s ease; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .dark ::-webkit-scrollbar-thumb { background: #475569; }
+        .dark ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+        .dropdown-menu { display: none; opacity: 0; transform: translateY(-10px); transition: opacity 0.2s ease, transform 0.2s ease; }
+        .dropdown-menu.show { display: block; opacity: 1; transform: translateY(0); }
+        .theme-toggle { transition: transform 0.3s ease; }
+        .theme-toggle:hover { transform: rotate(20deg); }
+        
+        /* Custom styles for read-only inputs */
+        input[readonly] {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        
+        @keyframes fadeSlideIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-in { animation: fadeSlideIn 0.4s ease-out forwards; }
+    </style>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { heading: ['var(--font-heading-name)', 'sans-serif'], body: ['var(--font-body-name)', 'sans-serif'] },
+                    borderRadius: { small: 'var(--radius-small)', large: 'var(--radius-large)' },
+                    boxShadow: { custom: 'var(--shadow-custom)', 'custom-hover': 'var(--shadow-custom-hover)' }
+                }
+            }
+        }
+    </script>
+</head>
+<body style="height: auto; min-height: 100%;" class="bg-slate-50 dark:bg-slate-900 transition-colors duration-300 font-body">
+
+<div class="flex">
+    <!-- Sidebar (Preserved from previous design) -->
+    <aside class="w-64 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex-col hidden lg:flex transition-colors duration-300" style="min-height: 100vh;">
+        <div class="p-6 border-b border-slate-100 dark:border-slate-700">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-blue-600 dark:bg-blue-500 rounded-lg flex items-center justify-center text-white font-bold text-lg">H</div>
+                <span class="font-bold text-xl text-slate-800 dark:text-white">HR Nexus</span>
+            </div>
+        </div>
+        <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
+            <div class="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-4 px-2">Menu Chính</div>
+            <a href="#" class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white rounded-large font-medium transition-colors">
+                <i data-lucide="layout-dashboard" class="w-5 h-5"></i><span>Bảng Điều Khiển</span>
+            </a>
+            <a href="#" class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white rounded-large font-medium transition-colors">
+                <i data-lucide="users" class="w-5 h-5"></i><span>Nhân Viên</span>
+            </a>
+            <a href="#" class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white rounded-large font-medium transition-colors">
+                <i data-lucide="calendar-check" class="w-5 h-5"></i><span>Chấm Công</span>
+            </a>
+            <a href="#" class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white rounded-large font-medium transition-colors">
+                <i data-lucide="banknote" class="w-5 h-5"></i><span>Bảng Lương</span>
+            </a>
+            <div class="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-4 px-2 pt-6">Cài Đặt</div>
+            <a href="#" class="flex items-center gap-3 px-3 py-2.5 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-large font-medium transition-colors">
+                <i data-lucide="user-circle" class="w-5 h-5"></i><span>Hồ Sơ Của Tôi</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col min-w-0">
+        <!-- Header -->
+        <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-20 transition-colors duration-300">
+            <div class="px-4 md:px-8 py-4 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <button class="text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 lg:hidden">
+                        <i data-lucide="menu" class="w-6 h-6"></i>
+                    </button>
+                    <div class="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+                        <span class="text-slate-900 dark:text-white font-medium text-lg">Hồ Sơ Cá Nhân</span>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="toggleTheme()" class="theme-toggle p-2 text-slate-400 dark:text-slate-300 hover:text-slate-600 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg transition-colors">
+                        <i data-lucide="sun" class="w-5 h-5 hidden dark:block"></i>
+                        <i data-lucide="moon" class="w-5 h-5 block dark:hidden"></i>
+                    </button>
+                    <div class="relative">
+                        <button onclick="toggleDropdown()" class="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+                            <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="Profile" class="w-9 h-9 rounded-full border-2 border-slate-200 dark:border-slate-600">
+                            <div class="hidden md:block text-left">
+                                <p class="text-sm font-semibold text-slate-900 dark:text-white">Alex Morgan</p>
+                            </div>
+                            <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 dark:text-slate-500 hidden md:block"></i>
+                        </button>
+                        <div id="userDropdown" class="dropdown-menu absolute right-0 mt-2 w-56 bg-white dark:bg-slate-800 rounded-large shadow-custom-hover border border-slate-200 dark:border-slate-700 py-2 z-50">
+                            <a href="#" class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+                                <i data-lucide="log-out" class="w-4 h-4"></i><span>Đăng Xuất</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Page Content -->
+        <div class="flex-1 p-4 md:p-8 max-w-5xl mx-auto w-full">
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-in">
+                
+                <!-- Left Column: Profile Card (Static Info) -->
+                <div class="lg:col-span-1">
+                    <div class="bg-white dark:bg-slate-800 rounded-large border border-slate-200 dark:border-slate-700 shadow-custom p-6 text-center sticky top-24">
+                        <div class="relative inline-block mb-4">
+                            <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="Alex Morgan" class="w-32 h-32 rounded-full border-4 border-slate-50 dark:border-slate-700 object-cover mx-auto">
+                            <div class="absolute bottom-1 right-1 w-5 h-5 bg-emerald-500 border-2 border-white dark:border-slate-800 rounded-full" title="Đang hoạt động"></div>
+                        </div>
+                        
+                        <h2 class="text-xl font-bold text-slate-900 dark:text-white mb-1">Alex Morgan</h2>
+                        <p class="text-slate-500 dark:text-slate-400 text-sm font-medium mb-4">Giám Đốc Nhân Sự</p>
+                        
+                        <div class="flex items-center justify-center gap-2 mb-6">
+                            <span class="px-3 py-1 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-semibold rounded-full">#NV-0042</span>
+                            <span class="px-3 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-xs font-semibold rounded-full">Chính Thức</span>
+                        </div>
+
+                        <div class="border-t border-slate-100 dark:border-slate-700 pt-4 text-left">
+                            <p class="text-xs text-slate-400 dark:text-slate-500 mb-3 text-center">Thông tin này được quản lý bởi Admin</p>
+                            
+                            <div class="space-y-3">
+                                <div class="flex justify-between items-center text-sm">
+                                    <span class="text-slate-500 dark:text-slate-400">Phòng Ban</span>
+                                    <span class="font-medium text-slate-900 dark:text-white">Nhân Sự (HR)</span>
+                                </div>
+                                <div class="flex justify-between items-center text-sm">
+                                    <span class="text-slate-500 dark:text-slate-400">Ngày Vào Làm</span>
+                                    <span class="font-medium text-slate-900 dark:text-white">15/03/2021</span>
+                                </div>
+                                <div class="flex justify-between items-center text-sm">
+                                    <span class="text-slate-500 dark:text-slate-400">Quản Lý Trực Tiếp</span>
+                                    <span class="font-medium text-slate-900 dark:text-white">Sarah Connor</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Editable Form -->
+                <div class="lg:col-span-2">
+                    <div class="bg-white dark:bg-slate-800 rounded-large border border-slate-200 dark:border-slate-700 shadow-custom">
+                        <div class="p-6 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center">
+                            <div>
+                                <h3 class="font-semibold text-slate-900 dark:text-white text-lg">Thông Tin Cá Nhân</h3>
+                                <p class="text-sm text-slate-500 dark:text-slate-400">Cập nhật thông tin liên hệ của bạn</p>
+                            </div>
+                            <button class="p-2 text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors" title="Trợ giúp">
+                                <i data-lucide="help-circle" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                        
+                        <form class="p-6 space-y-6">
+                            <!-- Editable Section -->
+                            <div class="space-y-4">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <div class="w-8 h-8 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                                        <i data-lucide="pencil" class="w-4 h-4"></i>
+                                    </div>
+                                    <h4 class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wide">Thông Tin Có Thể Chỉnh Sửa</h4>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div class="md:col-span-2">
+                                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Email Cá Nhân <span class="text-red-500">*</span></label>
+                                        <div class="relative">
+                                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                <i data-lucide="mail" class="w-4 h-4 text-slate-400"></i>
+                                            </div>
+                                            <input type="email" value="alex.morgan.personal@gmail.com" class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-small text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all shadow-sm">
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Số Điện Thoại <span class="text-red-500">*</span></label>
+                                        <div class="relative">
+                                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                <i data-lucide="phone" class="w-4 h-4 text-slate-400"></i>
+                                            </div>
+                                            <input type="tel" value="+84 912 345 678" class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-small text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all shadow-sm">
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Ngày Sinh</label>
+                                        <div class="relative">
+                                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                <i data-lucide="calendar" class="w-4 h-4 text-slate-400"></i>
+                                            </div>
+                                            <input type="date" value="1990-06-15" class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-small text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all shadow-sm">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="border-t border-slate-100 dark:border-slate-700 my-6"></div>
+
+                            <!-- Locked Section -->
+                            <div class="space-y-4">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <div class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-500 dark:text-slate-400">
+                                        <i data-lucide="lock" class="w-4 h-4"></i>
+                                    </div>
+                                    <h4 class="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Thông Tin Bị Khóa (Chỉ Xem)</h4>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div class="md:col-span-2">
+                                        <label class="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-1.5">Họ và Tên</label>
+                                        <div class="relative">
+                                            <input type="text" value="Alex Morgan" readonly class="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-small text-sm text-slate-500 dark:text-slate-400 focus:outline-none select-none">
+                                            <i data-lucide="lock" class="w-3 h-3 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2"></i>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-1.5">Chức Danh</label>
+                                        <div class="relative">
+                                            <input type="text" value="Giám Đốc Nhân Sự" readonly class="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-small text-sm text-slate-500 dark:text-slate-400 focus:outline-none select-none">
+                                            <i data-lucide="lock" class="w-3 h-3 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2"></i>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-1.5">Email Công Ty</label>
+                                        <div class="relative">
+                                            <input type="text" value="alex.morgan@hrnexus.com" readonly class="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-small text-sm text-slate-500 dark:text-slate-400 focus:outline-none select-none">
+                                            <i data-lucide="lock" class="w-3 h-3 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="text-xs text-slate-400 dark:text-slate-500 italic mt-2">* Để thay đổi thông tin bị khóa, vui lòng liên hệ bộ phận IT hoặc Admin.</p>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-700">
+                                <button type="button" class="px-5 py-2.5 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-small transition-colors">Hủy Bỏ</button>
+                                <button type="button" class="px-5 py-2.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 rounded-small shadow-sm transition-colors flex items-center gap-2">
+                                    <i data-lucide="save" class="w-4 h-4"></i> Lưu Thay Đổi
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+</div>
+
+<script>
+    lucide.createIcons();
+
+    function toggleTheme() {
+        const html = document.documentElement;
+        html.classList.toggle('dark');
+        localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
+        lucide.createIcons();
+    }
+
+    function initTheme() {
+        const savedTheme = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+            document.documentElement.classList.add('dark');
+        }
+    }
+    initTheme();
+
+    function toggleDropdown() {
+        const dropdown = document.getElementById('userDropdown');
+        dropdown.classList.toggle('show');
+    }
+
+    document.addEventListener('click', function(event) {
+        const dropdown = document.getElementById('userDropdown');
+        const button = event.target.closest('button[onclick="toggleDropdown()"]');
+        if (!button && !dropdown.contains(event.target)) {
+            dropdown.classList.remove('show');
+        }
+    });
+</script>
+</body>
+</html>

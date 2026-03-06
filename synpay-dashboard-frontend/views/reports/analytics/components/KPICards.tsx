@@ -15,9 +15,12 @@ export default function KPICards({ data, language = 'vi' }: Props) {
 
   const formatCurrency = (num: number): string => {
     if (language === 'vi') {
-      return `${formatNumber(num)} tỷ`
+      if (num >= 1000) return `${formatNumber(num / 1000)} tỷ`
+      return `${formatNumber(num)} triệu`
     }
-    return `$${formatNumber(num * 0.33)}M`
+    // Convert triệu VND → USD (approx)
+    if (num >= 1000) return `$${formatNumber(num * 0.00033)}M`
+    return `$${formatNumber(num * 0.033)}K`
   }
 
   const formatAvgSalary = (num: number): string => {

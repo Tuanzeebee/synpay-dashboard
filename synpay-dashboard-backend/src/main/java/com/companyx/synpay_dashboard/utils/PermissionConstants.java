@@ -43,4 +43,22 @@ public final class PermissionConstants {
     // ---- Position Management ----
     public static final String POSITION_READ  = "position.read";
     public static final String POSITION_WRITE = "position.write";
+
+    // ---- Payroll Management ----
+    public static final String PAYROLL_READ    = "payroll.read";
+    public static final String PAYROLL_WRITE   = "payroll.write";
+    public static final String PAYROLL_APPROVE = "payroll.approve";
+    public static final String PAYROLL_EXPORT  = "payroll.export";
+
+    // ---- Attendance Management ----
+    public static final String ATTENDANCE_READ    = "attendance.read";
+    public static final String ATTENDANCE_WRITE   = "attendance.write";
+    public static final String ATTENDANCE_APPROVE = "attendance.approve";
+    public static final String ATTENDANCE_EXPORT  = "attendance.export";
+
+    // ---- Reports & Analytics ----
+    public static final String REPORT_VIEW_DASHBOARD = "report.view_dashboard";
+    public static final String REPORT_VIEW_HR        = "report.view_hr";
+    public static final String REPORT_VIEW_PAYROLL   = "report.view_payroll";
+    public static final String REPORT_EXPORT         = "report.export";
 }

@@ -1,5 +1,6 @@
 'use client'
 
+import type { GetServerSideProps } from 'next'
 import { useState, useCallback, useMemo, memo } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
@@ -452,3 +453,8 @@ const SecurityNote = memo(() => (
   </div>
 ))
 SecurityNote.displayName = 'SecurityNote'
+
+// Prevent static prerendering — redirect to App Router login
+export const getServerSideProps: GetServerSideProps = async () => {
+  return { redirect: { destination: '/login', permanent: true } }
+}

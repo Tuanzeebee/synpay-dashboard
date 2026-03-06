@@ -14,6 +14,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.companyx.synpay_dashboard.dto.response.AuditLogPageResponse;
 import com.companyx.synpay_dashboard.dto.response.AuditLogResponse;
@@ -68,6 +70,7 @@ public class AuditLogService {
      * @param ipAddress      client IP forwarded by the gateway
      * @param userAgent      browser user-agent forwarded by the gateway
      */
+    @Transactional(transactionManager = "authTransactionManager", propagation = Propagation.REQUIRES_NEW)
     public void log(Integer actorAccountId,
                     String action,
                     String resource,

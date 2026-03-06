@@ -8,8 +8,7 @@ import ReportsFiltersBar from './components/ReportsFiltersBar'
 import ReportsCharts from './components/ReportsCharts'
 import DepartmentTable from './components/DepartmentTable'
 import { ReportsFilter } from './types'
-import { getMockReportsData } from './data'
-import { Language, t } from '@/lib/translations'
+import { useReports } from '@/hooks/useReports'
 import { useLanguage } from '@/components/providers/LanguageProvider'
 
 // Polyfill for requestIdleCallback (Safari doesn't support it)
@@ -19,39 +18,60 @@ const safeRequestIdleCallback = typeof requestIdleCallback === 'function'
 
 export default function ReportsAnalytics() {
   const { language, toggleLanguage, t: translate } = useLanguage()
-  const [data] = useState(() => getMockReportsData())
   const [filters, setFilters] = useState<ReportsFilter>({
     department: 'all',
     period: 'month',
     startDate: '2024-01-01',
-    endDate: '2024-12-31',
+    endDate: new Date().toISOString().slice(0, 10),
+  })
+
+  const { data, isLoading, error, refresh, loadReports, exportData } = useReports({
+    department: filters.department,
+    startDate: filters.startDate,
+    endDate: filters.endDate,
   })
 
   const handleApplyFilters = useCallback(() => {
-    console.log('Applying filters:', filters)
-    // In production, would fetch filtered data from API with caching
-  }, [filters])
+    loadReports({
+      department: filters.department,
+      startDate: filters.startDate,
+      endDate: filters.endDate,
+    })
+  }, [filters, loadReports])
 
   const handleExportCSV = useCallback(() => {
-    console.log('Exporting CSV...')
-    // Create export in background without blocking UI
-    safeRequestIdleCallback(() => {
-      alert(language === 'vi' ? 'Đang xuất file CSV...' : 'Exporting CSV file...')
+    exportData({
+      department: filters.department,
+      startDate: filters.startDate,
+      endDate: filters.endDate,
+    }).then((exportedData) => {
+      // Convert to CSV
+      const headers = ['Department', 'Employees', 'Total Salary', 'Avg Salary', 'Leave Days', 'Performance']
+      const rows = exportedData.departments.map((d) =>
+        [d.name, d.employees, d.totalSalary, d.avgSalary, d.leaveDays, d.performance].join(',')
+      )
+      const csv = [headers.join(','), ...rows].join('\n')
+      const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `reports_${filters.startDate}_${filters.endDate}.csv`
+      link.click()
+      URL.revokeObjectURL(url)
+    }).catch(() => {
+      alert(language === 'vi' ? 'Không thể xuất dữ liệu. Vui lòng thử lại.' : 'Failed to export data. Please try again.')
     })
-  }, [language])
+  }, [filters, exportData, language])
 
   const handleExportPDF = useCallback(() => {
-    console.log('Exporting PDF...')
-    // Create export in background without blocking UI
     safeRequestIdleCallback(() => {
-      alert(language === 'vi' ? 'Đang xuất file PDF...' : 'Exporting PDF file...')
+      alert(language === 'vi' ? 'Tính năng xuất PDF đang phát triển...' : 'PDF export is under development...')
     })
   }, [language])
 
   const handleRefresh = useCallback(() => {
-    console.log('Refreshing data...')
-    // Would invalidate cache and refetch
-  }, [])
+    refresh()
+  }, [refresh])
 
   return (
     <div className="flex w-full min-h-screen">
@@ -84,20 +104,39 @@ export default function ReportsAnalytics() {
         />
 
         <div className="flex-1 p-4 md:p-8 overflow-y-auto">
-          <KPICards data={data.kpis} language={language} />
+          {error && (
+            <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+              <p className="text-sm text-red-700 dark:text-red-400">{error}</p>
+            </div>
+          )}
 
-          <ReportsCharts
-            departments={data.departments}
-            salaryTrend={data.salaryTrend}
-            statusDistribution={data.statusDistribution}
-            leaveTypes={data.leaveTypes}
-            attendance={data.attendance}
-            dividends={data.dividends}
-            performance={data.performance}
-            language={language}
-          />
+          {isLoading ? (
+            <div className="flex items-center justify-center py-20">
+              <div className="flex flex-col items-center gap-3">
+                <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                <span className="text-sm text-slate-500 dark:text-slate-400">
+                  {language === 'vi' ? 'Đang tải dữ liệu báo cáo...' : 'Loading report data...'}
+                </span>
+              </div>
+            </div>
+          ) : (
+            <>
+              <KPICards data={data.kpis} language={language} />
 
-          <DepartmentTable data={data.departments} language={language} />
+              <ReportsCharts
+                departments={data.departments}
+                salaryTrend={data.salaryTrend}
+                statusDistribution={data.statusDistribution}
+                leaveTypes={data.leaveTypes}
+                attendance={data.attendance}
+                dividends={data.dividends}
+                performance={data.performance}
+                language={language}
+              />
+
+              <DepartmentTable data={data.departments} language={language} />
+            </>
+          )}
         </div>
       </main>
     </div>

@@ -26,12 +26,14 @@ import com.companyx.synpay_dashboard.entity.auth.Account;
 import com.companyx.synpay_dashboard.entity.hr.Department;
 import com.companyx.synpay_dashboard.entity.hr.Employee;
 import com.companyx.synpay_dashboard.entity.hr.Position;
+import com.companyx.synpay_dashboard.entity.payroll.EmployeePayroll;
 import com.companyx.synpay_dashboard.exceptions.BusinessException;
 import com.companyx.synpay_dashboard.exceptions.ResourceNotFoundException;
 import com.companyx.synpay_dashboard.repository.auth.AccountRepository;
 import com.companyx.synpay_dashboard.repository.hr.DepartmentRepository;
 import com.companyx.synpay_dashboard.repository.hr.EmployeeRepository;
 import com.companyx.synpay_dashboard.repository.hr.PositionRepository;
+import com.companyx.synpay_dashboard.repository.payroll.EmployeePayrollRepository;
 
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
@@ -47,17 +49,20 @@ public class EmployeeService {
     private final PositionRepository positionRepository;
     private final AccountRepository accountRepository;
     private final AuditLogService auditLogService;
+    private final EmployeePayrollRepository employeePayrollRepository;
 
     public EmployeeService(EmployeeRepository employeeRepository,
                            DepartmentRepository departmentRepository,
                            PositionRepository positionRepository,
                            AccountRepository accountRepository,
-                           AuditLogService auditLogService) {
+                           AuditLogService auditLogService,
+                           EmployeePayrollRepository employeePayrollRepository) {
         this.employeeRepository = employeeRepository;
         this.departmentRepository = departmentRepository;
         this.positionRepository = positionRepository;
         this.accountRepository = accountRepository;
         this.auditLogService = auditLogService;
+        this.employeePayrollRepository = employeePayrollRepository;
     }
 
     // ── List with pagination & filters ───────────────────────────
@@ -144,6 +149,9 @@ public class EmployeeService {
 
         employee = employeeRepository.saveAndFlush(employee);
 
+        // Sync to payroll database
+        syncToPayroll(employee);
+
         // Audit log
         Map<String, Object> newSnapshot = toAuditSnapshot(employee);
         newSnapshot.put("result", "SUCCESS");
@@ -209,6 +217,9 @@ public class EmployeeService {
 
         employeeRepository.saveAndFlush(employee);
 
+        // Sync to payroll database
+        syncToPayroll(employee);
+
         // Audit log
         Map<String, Object> newSnapshot = toAuditSnapshot(employee);
         newSnapshot.put("result", "SUCCESS");
@@ -241,6 +252,9 @@ public class EmployeeService {
 
         employee.setStatus(newStatus);
         employeeRepository.saveAndFlush(employee);
+
+        // Sync to payroll database
+        syncToPayroll(employee);
 
         // Audit log
         Map<String, Object> oldSnapshot = Map.of(
@@ -379,6 +393,28 @@ public class EmployeeService {
 
             return cb.and(predicates.toArray(new Predicate[0]));
         };
+    }
+
+    // ── Sync employee data to payroll database ────────────────
+
+    private void syncToPayroll(Employee employee) {
+        try {
+            EmployeePayroll ep = employeePayrollRepository.findById(employee.getEmployeeId())
+                    .orElse(new EmployeePayroll());
+            ep.setEmployeeId(employee.getEmployeeId());
+            ep.setFullName(employee.getFullName());
+            ep.setDepartmentId(employee.getDepartment() != null
+                    ? employee.getDepartment().getDepartmentId() : null);
+            ep.setPositionId(employee.getPosition() != null
+                    ? employee.getPosition().getPositionId() : null);
+            ep.setStatus(employee.getStatus());
+            ep.setSyncedAt(java.time.LocalDateTime.now());
+            employeePayrollRepository.saveAndFlush(ep);
+            log.info("Synced employee to payroll DB: employeeId={}", employee.getEmployeeId());
+        } catch (Exception ex) {
+            log.error("Failed to sync employee to payroll DB: employeeId={}, error={}",
+                    employee.getEmployeeId(), ex.getMessage(), ex);
+        }
     }
 
     private EmployeeResponse toListResponse(Employee employee) {

@@ -1,30 +1,50 @@
-import { PayrollData } from '../types'
+import type { SalaryItem } from '../types'
 import { Card } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { AlertCircle, Edit } from 'lucide-react'
+import { Edit } from 'lucide-react'
 
 type Props = {
-  data: PayrollData[]
-  onRowClick: (employeeId: string) => void
-  onAdjustClick: (employeeId: string) => void
+  data: SalaryItem[]
+  isLoading?: boolean
+  onRowClick: (salaryId: number) => void
+  onAdjustClick: (salaryId: number) => void
   t: (key: string) => string
 }
 
-export default function PayrollTable({ data, onRowClick, onAdjustClick, t }: Props) {
+export default function PayrollTable({ data, isLoading, onRowClick, onAdjustClick, t }: Props) {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount)
   }
 
-  const getAttendanceColor = (rate: number) => {
-    if (rate >= 95) return 'text-emerald-600 dark:text-emerald-400'
-    if (rate >= 85) return 'text-blue-600 dark:text-blue-400'
-    if (rate >= 75) return 'text-amber-600 dark:text-amber-400'
-    return 'text-red-600 dark:text-red-400'
-  }
-
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').substring(0, 2)
+  }
+
+  if (isLoading) {
+    return (
+      <Card>
+        <div className="p-6 border-b border-slate-200 dark:border-slate-700">
+          <h2 className="text-lg font-bold text-slate-900 dark:text-white">{t('table.title')}</h2>
+        </div>
+        <div className="p-12 text-center text-slate-500 dark:text-slate-400">
+          <div className="animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-4" />
+          Đang tải dữ liệu...
+        </div>
+      </Card>
+    )
+  }
+
+  if (data.length === 0) {
+    return (
+      <Card>
+        <div className="p-6 border-b border-slate-200 dark:border-slate-700">
+          <h2 className="text-lg font-bold text-slate-900 dark:text-white">{t('table.title')}</h2>
+        </div>
+        <div className="p-12 text-center text-slate-500 dark:text-slate-400">
+          Không tìm thấy dữ liệu lương.
+        </div>
+      </Card>
+    )
   }
 
   return (
@@ -32,6 +52,7 @@ export default function PayrollTable({ data, onRowClick, onAdjustClick, t }: Pro
       <div className="p-6 border-b border-slate-200 dark:border-slate-700">
         <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
           <span>{t('table.title')}</span>
+          <span className="text-sm font-normal text-slate-500">({data.length} bản ghi)</span>
         </h2>
       </div>
       <div className="overflow-x-auto">
@@ -56,9 +77,6 @@ export default function PayrollTable({ data, onRowClick, onAdjustClick, t }: Pro
               <th className="px-6 py-3 text-right text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                 {t('table.netSalary')}
               </th>
-              <th className="px-6 py-3 text-center text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                {t('table.attendance')}
-              </th>
               <th className="px-6 py-3 text-right text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                 {t('table.actions')}
               </th>
@@ -67,71 +85,61 @@ export default function PayrollTable({ data, onRowClick, onAdjustClick, t }: Pro
           <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
             {data.map((item) => (
               <tr
-                key={item.employee.id}
-                onClick={() => onRowClick(item.employee.id)}
-                className={`cursor-pointer hover:bg-blue-50/50 dark:hover:bg-blue-900/10 transition-colors ${
-                  item.payroll.hasAnomaly ? 'bg-amber-50 dark:bg-amber-900/10' : ''
-                }`}
+                key={item.salaryId}
+                onClick={() => onRowClick(item.salaryId)}
+                className="cursor-pointer hover:bg-blue-50/50 dark:hover:bg-blue-900/10 transition-colors"
               >
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-white font-semibold text-sm">
-                      {getInitials(item.employee.fullName)}
+                      {getInitials(item.employeeName)}
                     </div>
                     <div>
-                      <div className="font-medium text-slate-900 dark:text-white flex items-center gap-2">
-                        {item.employee.fullName}
-                        {item.payroll.hasAnomaly && (
-                          <AlertCircle className="w-4 h-4 text-amber-500 animate-pulse" />
-                        )}
+                      <div className="font-medium text-slate-900 dark:text-white">
+                        {item.employeeName}
                       </div>
-                      <div className="text-xs text-slate-500 dark:text-slate-400">{item.employee.position}</div>
+                      <div className="text-xs text-slate-500 dark:text-slate-400">{item.positionName}</div>
                     </div>
                   </div>
                 </td>
                 <td className="px-6 py-4">
-                  <span className="text-sm text-slate-600 dark:text-slate-300">{item.employee.department}</span>
+                  <span className="text-sm text-slate-600 dark:text-slate-300">{item.departmentName}</span>
                 </td>
                 <td className="px-6 py-4 text-right">
                   <span className="text-sm font-medium text-slate-900 dark:text-white">
-                    {formatCurrency(item.payroll.baseSalary)}
+                    {formatCurrency(item.baseSalary)}
                   </span>
                 </td>
                 <td className="px-6 py-4 text-right">
                   <span className="text-sm font-medium text-emerald-600 dark:text-emerald-400">
-                    {formatCurrency(item.payroll.bonus)}
+                    {formatCurrency(item.bonus)}
                   </span>
                 </td>
                 <td className="px-6 py-4 text-right">
                   <span className="text-sm font-medium text-red-600 dark:text-red-400">
-                    {formatCurrency(item.payroll.deductions)}
+                    {formatCurrency(item.deductions)}
                   </span>
                 </td>
                 <td className="px-6 py-4 text-right">
                   <span className="text-sm font-bold text-blue-600 dark:text-blue-400">
-                    {formatCurrency(item.payroll.netSalary)}
+                    {formatCurrency(item.netSalary)}
                   </span>
                 </td>
-                <td className="px-6 py-4 text-center">
-                  <div className="flex items-center justify-center gap-2">
-                    <span className={`text-sm font-semibold ${getAttendanceColor(item.attendance.attendanceRate)}`}>
-                      {item.attendance.attendanceRate.toFixed(1)}%
-                    </span>
-                  </div>
-                </td>
                 <td className="px-6 py-4 text-right">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      onAdjustClick(item.employee.id)
-                    }}
-                    className="hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400"
-                    title="Điều chỉnh lương"
-                  >
-                    <Edit className="w-4 h-4" />
-                  </Button>
+                  <div className="flex items-center justify-end gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onAdjustClick(item.salaryId)
+                      }}
+                      className="hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400"
+                      title="Điều chỉnh lương"
+                    >
+                      <Edit className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </td>
               </tr>
             ))}
