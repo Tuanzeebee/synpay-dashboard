@@ -31,6 +31,9 @@ public class LoginResponse {
 
     private List<String> permissions;
 
+    @JsonProperty("refresh_token")
+    private String refreshToken;
+
     public LoginResponse() {}
 
     // ----- Builder-style setters -----
@@ -70,6 +73,11 @@ public class LoginResponse {
         return this;
     }
 
+    public LoginResponse refreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
+        return this;
+    }
+
     // ----- Getters -----
 
     public String getAccessToken() { return accessToken; }
@@ -79,4 +87,5 @@ public class LoginResponse {
     public String getRole() { return role; }
     public Integer getEmployeeId() { return employeeId; }
     public List<String> getPermissions() { return permissions; }
+    public String getRefreshToken() { return refreshToken; }
 }

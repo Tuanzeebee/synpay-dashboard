@@ -139,8 +139,8 @@ export const getMockStatusDistribution = (): StatusDistribution[] => {
   return [
     { status: 'active', count: 312 },
     { status: 'onLeave', count: 18 },
-    { status: 'businessTrip', count: 8 },
-    { status: 'suspended', count: 4 },
+    { status: 'probation', count: 8 },
+    { status: 'intern', count: 4 },
   ]
 }
 

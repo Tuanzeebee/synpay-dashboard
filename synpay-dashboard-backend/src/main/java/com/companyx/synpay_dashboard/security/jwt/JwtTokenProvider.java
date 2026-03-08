@@ -1,9 +1,13 @@
 package com.companyx.synpay_dashboard.security.jwt;
 
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.util.Date;
+import java.util.HexFormat;
 import java.util.List;
+import java.util.UUID;
 
 import javax.crypto.SecretKey;
 
@@ -46,12 +50,15 @@ public class JwtTokenProvider {
 
     private final SecretKey signingKey;
     private final long expirationMs;
+    private final long refreshExpirationMs;
 
     public JwtTokenProvider(
             @Value("${app.jwt.secret}") String secret,
-            @Value("${app.jwt.expiration-ms:3600000}") long expirationMs) {
+            @Value("${app.jwt.expiration-ms:900000}") long expirationMs,
+            @Value("${app.jwt.refresh-expiration-ms:604800000}") long refreshExpirationMs) {
         this.signingKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
         this.expirationMs = expirationMs;
+        this.refreshExpirationMs = refreshExpirationMs;
     }
 
     /**
@@ -133,6 +140,35 @@ public class JwtTokenProvider {
         } catch (JwtException | IllegalArgumentException e) {
             log.debug("JWT validation failed: {}", e.getMessage());
             return false;
+        }
+    }
+
+    // ── Refresh token helpers ────────────────────────────────────
+
+    /**
+     * Returns the configured refresh token expiration in milliseconds.
+     */
+    public long getRefreshExpirationMs() {
+        return refreshExpirationMs;
+    }
+
+    /**
+     * Generates a cryptographically random refresh token (UUID v4).
+     */
+    public String generateRefreshToken() {
+        return UUID.randomUUID().toString();
+    }
+
+    /**
+     * SHA-256 hash of a refresh token for secure database storage.
+     */
+    public static String hashToken(String rawToken) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(rawToken.getBytes(StandardCharsets.UTF_8));
+            return HexFormat.of().formatHex(hash);
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException("SHA-256 not available", e);
         }
     }
 }

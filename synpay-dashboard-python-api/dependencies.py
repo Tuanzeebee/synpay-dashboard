@@ -5,14 +5,17 @@ Dependency helpers shared across routes.
 from fastapi import Header, HTTPException, Request
 
 
-def extract_token(authorization: str = Header(..., alias="Authorization")) -> str:
+def extract_token(authorization: str | None = Header(None, alias="Authorization")) -> str:
     """
     Extract the Bearer token from the Authorization header.
     Raises 401 if the header is missing or malformed.
     """
-    if not authorization.startswith("Bearer "):
-        raise HTTPException(status_code=401, detail="Invalid Authorization header")
-    return authorization.removeprefix("Bearer ").strip()
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Missing or invalid Authorization header")
+    token = authorization.removeprefix("Bearer ").strip()
+    if not token:
+        raise HTTPException(status_code=401, detail="Empty token")
+    return token
 
 
 def get_client_ip(request: Request) -> str:

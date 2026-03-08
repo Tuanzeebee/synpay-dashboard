@@ -38,7 +38,8 @@ spring:
 app:
   jwt:
     secret: synpay-dashboard-jwt-secret-key-2026-must-be-at-least-32-bytes-long
-    expiration-ms: 3600000   # 1 hour
+    expiration-ms: 900000           # 15 minutes (access token)
+    refresh-expiration-ms: 604800000  # 7 days (refresh token)
 
   internal:
     api-key: synpay-internal-gateway-key-2026

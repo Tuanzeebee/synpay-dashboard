@@ -42,6 +42,7 @@ public class SecurityConfig {
                         .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers("/api/**").permitAll()
                         .requestMatchers("/internal/auth/login").permitAll()
+                        .requestMatchers("/internal/auth/refresh").permitAll()
                         .requestMatchers("/internal/**").authenticated()
                         .anyRequest().permitAll()
                 )

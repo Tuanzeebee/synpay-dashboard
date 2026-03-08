@@ -1,7 +1,19 @@
 /**
  * API Service Layer with Caching
- * Provides centralized API calls with automatic caching, deduplication, and error handling
+ * Provides centralized API calls with automatic caching, deduplication,
+ * error handling, and transparent token refresh on 401.
  */
+
+import {
+  authHeader,
+  clearAuth,
+  refreshAccessToken,
+  storeAuth,
+  getStoredUser,
+  toAuthUser,
+  AuthError,
+  setAccessToken,
+} from '@/lib/auth'
 
 interface CacheEntry<T> {
   data: T
@@ -13,6 +25,7 @@ interface RequestConfig {
   ttl?: number // Time to live in milliseconds (default: 5 minutes)
   force?: boolean // Force refresh, bypass cache
   dedupe?: boolean // Deduplicate concurrent requests (default: true)
+  skipAuth?: boolean // Skip attaching Authorization header
 }
 
 class APIService {
@@ -20,6 +33,13 @@ class APIService {
   private pendingRequests = new Map<string, Promise<any>>()
   private readonly DEFAULT_TTL = 5 * 60 * 1000 // 5 minutes
   private readonly MAX_CACHE_SIZE = 100
+
+  // Token refresh coordination
+  private isRefreshing = false
+  private refreshQueue: Array<{
+    resolve: (value: boolean) => void
+    reject: (err: Error) => void
+  }> = []
 
   /**
    * Make a cached API request
@@ -45,7 +65,7 @@ class APIService {
     }
 
     // Make the request
-    const requestPromise = this.makeRequest<T>(url, options)
+    const requestPromise = this.makeRequest<T>(url, options, config)
       .then((data) => {
         this.setCache(cacheKey, data, ttl)
         this.pendingRequests.delete(cacheKey)
@@ -64,26 +84,95 @@ class APIService {
   }
 
   /**
-   * Actual fetch implementation
+   * Actual fetch implementation with automatic 401 → refresh → retry.
    */
-  private async makeRequest<T>(url: string, options: RequestInit): Promise<T> {
-    try {
-      const response = await fetch(url, {
-        headers: {
-          'Content-Type': 'application/json',
-          ...options.headers,
-        },
-        ...options,
-      })
+  private async makeRequest<T>(
+    url: string,
+    options: RequestInit,
+    config: RequestConfig = {},
+    isRetry = false
+  ): Promise<T> {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      ...(options.headers as Record<string, string>),
+    }
 
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+    if (!config.skipAuth) {
+      Object.assign(headers, authHeader())
+    }
+
+    const response = await fetch(url, {
+      ...options,
+      headers,
+      credentials: 'include',
+    })
+
+    // Handle 401 — attempt silent refresh (only once)
+    if (response.status === 401 && !isRetry && !config.skipAuth) {
+      const body = await response.json().catch(() => ({}))
+      const errorCode = body?.error?.code
+
+      if (errorCode === 'TOKEN_EXPIRED') {
+        const refreshed = await this.attemptTokenRefresh()
+        if (refreshed) {
+          return this.makeRequest<T>(url, options, config, true)
+        }
       }
 
-      return await response.json()
-    } catch (error) {
-      console.error(`API request failed: ${url}`, error)
-      throw error
+      // Token is invalid or refresh failed — force re-login
+      clearAuth()
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login?reason=session_expired'
+      }
+      throw new AuthError('Authentication required', 401, errorCode)
+    }
+
+    if (!response.ok) {
+      const errorBody = await response.json().catch(() => null)
+      const message = errorBody?.message ?? errorBody?.error?.message ?? response.statusText
+      throw new AuthError(message, response.status, errorBody?.error?.code)
+    }
+
+    return await response.json()
+  }
+
+  /**
+   * Attempt to refresh the access token via the httpOnly refresh cookie.
+   * Coordinates concurrent callers so only one refresh request is in-flight.
+   */
+  private async attemptTokenRefresh(): Promise<boolean> {
+    if (this.isRefreshing) {
+      return new Promise<boolean>((resolve, reject) => {
+        this.refreshQueue.push({ resolve, reject })
+      })
+    }
+
+    this.isRefreshing = true
+    try {
+      const data = await refreshAccessToken()
+      if (!data) {
+        this.refreshQueue.forEach((q) => q.resolve(false))
+        return false
+      }
+
+      // Update in-memory token
+      setAccessToken(data.access_token)
+
+      // Update stored user with potentially refreshed permissions
+      const currentUser = getStoredUser()
+      if (currentUser) {
+        const updatedUser = toAuthUser(currentUser.email, data)
+        storeAuth(data.access_token, updatedUser)
+      }
+
+      this.refreshQueue.forEach((q) => q.resolve(true))
+      return true
+    } catch {
+      this.refreshQueue.forEach((q) => q.resolve(false))
+      return false
+    } finally {
+      this.refreshQueue = []
+      this.isRefreshing = false
     }
   }
 

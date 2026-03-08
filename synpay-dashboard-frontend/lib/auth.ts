@@ -1,8 +1,9 @@
 /**
  * Authentication API Client & Token Storage
  *
- * Handles communication with the FastAPI gateway for login,
- * and manages JWT token + auth data in localStorage.
+ * - Access token: kept in memory (not localStorage) to mitigate XSS.
+ * - Refresh token: httpOnly cookie managed by the FastAPI gateway.
+ * - User profile: persisted in localStorage for hydration on page reload.
  */
 
 // ── Types ────────────────────────────────────────────────────────
@@ -25,6 +26,7 @@ export interface LoginResponseData {
 export interface ApiEnvelope<T> {
   success: boolean
   message?: string
+  error?: { code: string; message: string }
   data?: T
 }
 
@@ -45,15 +47,21 @@ export interface AuthState {
 // ── Constants ────────────────────────────────────────────────────
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
-const TOKEN_KEY = 'synpay_auth_token'
 const USER_KEY = 'synpay_auth_user'
 
-// ── Token Storage ────────────────────────────────────────────────
+// ── In-Memory Token ──────────────────────────────────────────────
+
+let _accessToken: string | null = null
 
 export function getStoredToken(): string | null {
-  if (typeof window === 'undefined') return null
-  return localStorage.getItem(TOKEN_KEY)
+  return _accessToken
 }
+
+export function setAccessToken(token: string | null): void {
+  _accessToken = token
+}
+
+// ── User Profile Storage (localStorage) ──────────────────────────
 
 export function getStoredUser(): AuthUser | null {
   if (typeof window === 'undefined') return null
@@ -66,12 +74,12 @@ export function getStoredUser(): AuthUser | null {
 }
 
 export function storeAuth(token: string, user: AuthUser): void {
-  localStorage.setItem(TOKEN_KEY, token)
+  _accessToken = token
   localStorage.setItem(USER_KEY, JSON.stringify(user))
 }
 
 export function clearAuth(): void {
-  localStorage.removeItem(TOKEN_KEY)
+  _accessToken = null
   localStorage.removeItem(USER_KEY)
 }
 
@@ -95,22 +103,24 @@ export function hasAllPermissions(user: AuthUser | null, keys: string[]): boolea
 
 export class AuthError extends Error {
   status: number
-  constructor(message: string, status: number) {
+  code?: string
+  constructor(message: string, status: number, code?: string) {
     super(message)
     this.name = 'AuthError'
     this.status = status
+    this.code = code
   }
 }
 
 /**
  * Send login request to the FastAPI gateway.
- *
- * Flow: Frontend → POST /api/auth/login → FastAPI → Spring Boot
+ * The gateway sets the refresh token as an httpOnly cookie automatically.
  */
 export async function login(request: LoginRequest): Promise<LoginResponseData> {
   const response = await fetch(`${API_BASE}/api/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
     body: JSON.stringify(request),
   })
 
@@ -144,13 +154,30 @@ export function toAuthUser(email: string, data: LoginResponseData): AuthUser {
 }
 
 /**
+ * Attempt to refresh the access token using the httpOnly refresh cookie.
+ * Returns the new access token on success, or null if refresh failed.
+ */
+export async function refreshAccessToken(): Promise<LoginResponseData | null> {
+  try {
+    const response = await fetch(`${API_BASE}/api/auth/refresh`, {
+      method: 'POST',
+      credentials: 'include',
+    })
+
+    if (!response.ok) return null
+
+    const body: ApiEnvelope<LoginResponseData> = await response.json()
+    if (!body.success || !body.data) return null
+
+    return body.data
+  } catch {
+    return null
+  }
+}
+
+/**
  * Send logout request to the FastAPI gateway.
- *
- * Flow: Frontend → POST /api/auth/logout → FastAPI → Spring Boot
- * Spring Boot updates last_logout_at and creates audit log.
- *
- * This is fire-and-forget: even if the API call fails,
- * the local auth state should still be cleared.
+ * The gateway clears the refresh token cookie.
  */
 export async function logout(): Promise<void> {
   const token = getStoredToken()
@@ -159,6 +186,7 @@ export async function logout(): Promise<void> {
   try {
     await fetch(`${API_BASE}/api/auth/logout`, {
       method: 'POST',
+      credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,

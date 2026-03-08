@@ -5,6 +5,7 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -50,8 +51,8 @@ public class ReportService {
     private static final Map<String, String> STATUS_MAP = Map.of(
             "Đang làm việc", "active",
             "Nghỉ phép", "onLeave",
-            "Thử việc", "active",      // probation counts as active
-            "Thực tập", "active"        // intern counts as active
+            "Thử việc", "probation",
+            "Thực tập", "intern"
     );
 
     // Department ID → frontend key mapping
@@ -282,7 +283,7 @@ public class ReportService {
             monthlyTotals.merge(key, sal.getNetSalary(), BigDecimal::add);
         }
 
-        // Build trend for all months in range
+        // Build trend for full date range
         List<SalaryTrendResponse> trend = new ArrayList<>();
         LocalDate cursor = startDate.withDayOfMonth(1);
         while (!cursor.isAfter(endDate)) {
@@ -302,11 +303,7 @@ public class ReportService {
     // ========== Status Distribution ==========
 
     private List<StatusDistributionResponse> buildStatusDistribution(List<Employee> employees) {
-        Map<String, Integer> counts = new HashMap<>();
-        counts.put("active", 0);
-        counts.put("onLeave", 0);
-        counts.put("businessTrip", 0);
-        counts.put("suspended", 0);
+        Map<String, Integer> counts = new LinkedHashMap<>();
 
         for (Employee emp : employees) {
             String mapped = STATUS_MAP.getOrDefault(emp.getStatus(), "active");
@@ -320,6 +317,8 @@ public class ReportService {
             item.setCount(entry.getValue());
             result.add(item);
         }
+        // Sort descending by count
+        result.sort((a, b) -> Integer.compare(b.getCount(), a.getCount()));
         return result;
     }
 
@@ -378,6 +377,7 @@ public class ReportService {
             stats[1] += safeInt(a.getAbsentDays());
         }
 
+        // Build trend for full date range
         List<AttendanceRateResponse> result = new ArrayList<>();
         LocalDate cursor = startDate.withDayOfMonth(1);
         while (!cursor.isAfter(endDate)) {

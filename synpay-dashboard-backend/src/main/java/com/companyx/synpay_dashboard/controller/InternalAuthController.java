@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.companyx.synpay_dashboard.dto.request.LoginRequest;
+import com.companyx.synpay_dashboard.dto.request.RefreshRequest;
 import com.companyx.synpay_dashboard.dto.response.ApiResponse;
 import com.companyx.synpay_dashboard.dto.response.LoginResponse;
 import com.companyx.synpay_dashboard.security.GatewayAuthenticationToken;
@@ -82,6 +83,32 @@ public class InternalAuthController {
         }
 
         return ResponseEntity.ok(ApiResponse.success(null, "Logout successful"));
+    }
+
+    /**
+     * Refresh an expired access token using a valid refresh token.
+     * <p>
+     * This endpoint does not require JWT authentication.
+     * It validates the refresh token, rotates it, and issues a new access token.
+     *
+     * @param request     refresh token
+     * @param httpRequest servlet request (for IP / user-agent extraction)
+     * @return new access token + rotated refresh token
+     */
+    @PostMapping("/refresh")
+    public ResponseEntity<ApiResponse<LoginResponse>> refresh(
+            @Valid @RequestBody RefreshRequest request,
+            HttpServletRequest httpRequest) {
+
+        String ipAddress = resolveIpAddress(httpRequest);
+        String userAgent = httpRequest.getHeader("User-Agent");
+
+        LoginResponse loginResponse = authenticationService.refreshAccessToken(
+                request.getRefreshToken(),
+                ipAddress,
+                userAgent);
+
+        return ResponseEntity.ok(ApiResponse.success(loginResponse, "Token refreshed"));
     }
 
     private String resolveIpAddress(HttpServletRequest request) {

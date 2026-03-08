@@ -20,6 +20,8 @@ import {
   clearAuth,
   getStoredToken,
   getStoredUser,
+  setAccessToken,
+  refreshAccessToken,
   hasPermission as checkPermission,
   hasAnyPermission as checkAnyPermission,
   AuthError,
@@ -55,14 +57,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
-  // Hydrate from localStorage on mount
+  // Hydrate from in-memory token + localStorage user on mount.
+  // If no in-memory token exists but user data is in localStorage,
+  // attempt a silent refresh using the httpOnly refresh cookie.
   useEffect(() => {
     const storedToken = getStoredToken()
     const storedUser = getStoredUser()
+
     if (storedToken && storedUser) {
+      // In-memory token already present (e.g. same SPA session)
       setToken(storedToken)
       setUser(storedUser)
+      setIsLoading(false)
+      return
     }
+
+    if (storedUser) {
+      // Page was reloaded — in-memory token lost, try silent refresh
+      refreshAccessToken().then((data) => {
+        if (data) {
+          const refreshedUser = toAuthUser(storedUser.email, data)
+          storeAuth(data.access_token, refreshedUser)
+          setToken(data.access_token)
+          setUser(refreshedUser)
+        } else {
+          clearAuth()
+        }
+      }).catch(() => {
+        clearAuth()
+      }).finally(() => {
+        setIsLoading(false)
+      })
+      return
+    }
+
     setIsLoading(false)
   }, [])
 

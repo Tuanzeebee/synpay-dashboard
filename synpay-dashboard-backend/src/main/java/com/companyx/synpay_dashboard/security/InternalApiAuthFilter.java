@@ -11,7 +11,11 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.companyx.synpay_dashboard.security.jwt.JwtTokenProvider;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -37,11 +41,11 @@ public class InternalApiAuthFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String uri = request.getRequestURI();
-        // Skip non-internal paths and the login endpoint (no JWT required)
         if (!uri.startsWith("/internal/")) {
             return true;
         }
-        return uri.equals("/internal/auth/login");
+        // Skip login and refresh endpoints (no JWT required)
+        return uri.equals("/internal/auth/login") || uri.equals("/internal/auth/refresh");
     }
 
     @Override
@@ -53,7 +57,8 @@ public class InternalApiAuthFilter extends OncePerRequestFilter {
         String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 
         if (authHeader == null || !authHeader.startsWith(BEARER_PREFIX)) {
-            sendUnauthorized(response, "Missing or invalid Authorization header");
+            sendError(response, HttpServletResponse.SC_UNAUTHORIZED,
+                    "TOKEN_MISSING", "Missing or invalid Authorization header");
             return;
         }
 
@@ -67,19 +72,42 @@ public class InternalApiAuthFilter extends OncePerRequestFilter {
             log.debug("Authenticated gateway request – account_id={}", principal.getAccountId());
             filterChain.doFilter(request, response);
 
+        } catch (ExpiredJwtException ex) {
+            log.warn("JWT expired for subject={}", ex.getClaims().getSubject());
+            sendError(response, HttpServletResponse.SC_UNAUTHORIZED,
+                    "TOKEN_EXPIRED", "Access token has expired");
+
+        } catch (SignatureException ex) {
+            log.warn("JWT signature mismatch: {}", ex.getMessage());
+            sendError(response, HttpServletResponse.SC_UNAUTHORIZED,
+                    "TOKEN_INVALID", "Token signature verification failed");
+
+        } catch (MalformedJwtException ex) {
+            log.warn("Malformed JWT: {}", ex.getMessage());
+            sendError(response, HttpServletResponse.SC_UNAUTHORIZED,
+                    "TOKEN_MALFORMED", "Token is not a valid JWT");
+
+        } catch (UnsupportedJwtException ex) {
+            log.warn("Unsupported JWT: {}", ex.getMessage());
+            sendError(response, HttpServletResponse.SC_UNAUTHORIZED,
+                    "TOKEN_INVALID", "Token type is not supported");
+
         } catch (JwtException | IllegalArgumentException ex) {
             log.warn("JWT authentication failed: {}", ex.getMessage());
-            sendUnauthorized(response, "Invalid or expired token");
+            sendError(response, HttpServletResponse.SC_UNAUTHORIZED,
+                    "TOKEN_INVALID", "Invalid authentication token");
         } finally {
             SecurityContextHolder.clearContext();
         }
     }
 
-    private void sendUnauthorized(HttpServletResponse response, String message) throws IOException {
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+    private void sendError(HttpServletResponse response, int status,
+                           String code, String message) throws IOException {
+        response.setStatus(status);
         response.setContentType("application/json");
         response.getWriter().write(
-                "{\"success\":false,\"message\":\"" + message + "\"}"
+                "{\"success\":false,\"error\":{\"code\":\"" + code
+                        + "\",\"message\":\"" + message + "\"}}"
         );
     }
 }

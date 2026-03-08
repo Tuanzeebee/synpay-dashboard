@@ -45,13 +45,18 @@ export const translations = {
   'chart.payrollTrend': { vi: 'Xu Hướng Bảng Lương Hàng Tháng', en: 'Monthly Payroll Trend' },
   
   // Departments
-  'dept.engineering': { vi: 'Kỹ Thuật', en: 'Engineering' },
-  'dept.sales': { vi: 'Kinh Doanh', en: 'Sales' },
-  'dept.marketing': { vi: 'Marketing', en: 'Marketing' },
   'dept.hr': { vi: 'Nhân Sự', en: 'HR' },
   'dept.finance': { vi: 'Tài Chính', en: 'Finance' },
-  'dept.support': { vi: 'Hỗ Trợ', en: 'Support' },
+  'dept.tech': { vi: 'Kỹ Thuật', en: 'Technology' },
+  'dept.sales': { vi: 'Kinh Doanh', en: 'Sales' },
+  'dept.admin': { vi: 'Hành Chính', en: 'Admin' },
+  'dept.marketing': { vi: 'Marketing', en: 'Marketing' },
   'dept.operations': { vi: 'Vận Hành', en: 'Operations' },
+  'dept.maintenance': { vi: 'Bảo Trì', en: 'Maintenance' },
+  'dept.rd': { vi: 'Nghiên Cứu', en: 'R&D' },
+  'dept.customer': { vi: 'Chăm Sóc KH', en: 'Customer Service' },
+  'dept.engineering': { vi: 'Kỹ Thuật', en: 'Engineering' },
+  'dept.support': { vi: 'Hỗ Trợ', en: 'Support' },
   'dept.legal': { vi: 'Pháp Lý', en: 'Legal' },
   
   // Quick Actions
@@ -184,11 +189,11 @@ export const translations = {
   'reports.chart.employeeStatus': { vi: 'Trạng Thái Nhân Viên', en: 'Employee Status' },
   'reports.chart.statusSubtitle': { vi: 'Phân loại theo tình trạng làm việc', en: 'Classification by work status' },
   'reports.chart.salaryTrend': { vi: 'Xu Hướng Lương Theo Tháng', en: 'Monthly Salary Trends' },
-  'reports.chart.salarySubtitle': { vi: 'Tổng chi phí lương 12 tháng gần nhất', en: 'Total payroll costs for last 12 months' },
+  'reports.chart.salarySubtitle': { vi: 'Xu hướng tổng chi phí lương theo tháng', en: 'Monthly payroll cost trend' },
   'reports.chart.leaveTypes': { vi: 'Phân Loại Nghỉ Phép', en: 'Leave Type Distribution' },
   'reports.chart.leaveSubtitle': { vi: 'Theo loại hình nghỉ phép', en: 'By leave category' },
   'reports.chart.attendanceRate': { vi: 'Tỷ Lệ Chuyên Cần Theo Tháng', en: 'Monthly Attendance Rate' },
-  'reports.chart.attendanceSubtitle': { vi: '6 tháng gần nhất', en: 'Last 6 months' },
+  'reports.chart.attendanceSubtitle': { vi: 'Tỷ lệ chuyên cần theo tháng', en: 'Monthly attendance rate' },
   'reports.chart.dividendTrend': { vi: 'Cổ Tức Theo Quý', en: 'Quarterly Dividends' },
   'reports.chart.dividendSubtitle': { vi: '4 quý gần nhất', en: 'Last 4 quarters' },
   'reports.chart.performance': { vi: 'So Sánh Hiệu Suất Phòng Ban', en: 'Department Performance Comparison' },
@@ -204,8 +209,8 @@ export const translations = {
   // Status
   'reports.status.active': { vi: 'Đang Làm Việc', en: 'Active' },
   'reports.status.onLeave': { vi: 'Nghỉ Phép', en: 'On Leave' },
-  'reports.status.businessTrip': { vi: 'Công Tác', en: 'Business Trip' },
-  'reports.status.suspended': { vi: 'Tạm Nghỉ', en: 'Suspended' },
+  'reports.status.probation': { vi: 'Thử Việc', en: 'Probation' },
+  'reports.status.intern': { vi: 'Thực Tập', en: 'Intern' },
   
   // Leave Types
   'reports.leave.annual': { vi: 'Phép Năm', en: 'Annual Leave' },

@@ -11,16 +11,21 @@ type Props = {
 }
 
 export default function DepartmentTable({ data, language = 'vi' }: Props) {
+  // Only show departments that have employees
+  const departments = data.filter((d) => d.employees > 0)
+
   const formatCurrency = (num: number): string => {
     if (language === 'vi') {
-      return `${(num / 1000).toFixed(2)} tỷ`
+      if (num >= 1000) return `${(num / 1000).toFixed(2)} tỷ`
+      return `${Math.round(num)} triệu`
     }
-    return `$${(num * 0.33).toFixed(0)}K`
+    if (num >= 1000) return `$${((num * 0.00033)).toFixed(2)}M`
+    return `$${(num * 0.033).toFixed(1)}K`
   }
 
   const formatAvgSalary = (num: number): string => {
     if (language === 'vi') {
-      return `${num} triệu`
+      return `${Math.round(num)} triệu`
     }
     return `$${(num * 0.033).toFixed(1)}K`
   }
@@ -32,7 +37,7 @@ export default function DepartmentTable({ data, language = 'vi' }: Props) {
     return 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
   }
 
-  const totals = data.reduce(
+  const totals = departments.reduce(
     (acc, dept) => ({
       employees: acc.employees + dept.employees,
       totalSalary: acc.totalSalary + dept.totalSalary,
@@ -86,7 +91,7 @@ export default function DepartmentTable({ data, language = 'vi' }: Props) {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
-            {data.map((dept) => (
+            {departments.map((dept) => (
               <tr
                 key={dept.id}
                 className="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"

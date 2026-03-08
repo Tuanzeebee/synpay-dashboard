@@ -14,10 +14,12 @@ import org.springframework.transaction.annotation.Transactional;
 import com.companyx.synpay_dashboard.dto.response.LoginResponse;
 import com.companyx.synpay_dashboard.entity.auth.Account;
 import com.companyx.synpay_dashboard.entity.auth.AccountRole;
+import com.companyx.synpay_dashboard.entity.auth.RefreshToken;
 import com.companyx.synpay_dashboard.entity.auth.Role;
 import com.companyx.synpay_dashboard.exceptions.BusinessException;
 import com.companyx.synpay_dashboard.repository.auth.AccountRepository;
 import com.companyx.synpay_dashboard.repository.auth.PermissionRepository;
+import com.companyx.synpay_dashboard.repository.auth.RefreshTokenRepository;
 import com.companyx.synpay_dashboard.security.jwt.JwtTokenProvider;
 
 /**
@@ -41,17 +43,20 @@ public class AuthenticationService {
 
     private final AccountRepository accountRepository;
     private final PermissionRepository permissionRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final AuditLogService auditLogService;
 
     public AuthenticationService(AccountRepository accountRepository,
                                  PermissionRepository permissionRepository,
+                                 RefreshTokenRepository refreshTokenRepository,
                                  PasswordEncoder passwordEncoder,
                                  JwtTokenProvider jwtTokenProvider,
                                  AuditLogService auditLogService) {
         this.accountRepository = accountRepository;
         this.permissionRepository = permissionRepository;
+        this.refreshTokenRepository = refreshTokenRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtTokenProvider = jwtTokenProvider;
         this.auditLogService = auditLogService;
@@ -145,7 +150,16 @@ public class AuthenticationService {
 
         long expiresInSeconds = jwtTokenProvider.getExpirationMs() / 1000;
 
-        // 7. Update last_login_at
+        // 7. Generate refresh token
+        String rawRefreshToken = jwtTokenProvider.generateRefreshToken();
+        RefreshToken refreshTokenEntity = new RefreshToken(
+                JwtTokenProvider.hashToken(rawRefreshToken),
+                account.getAccountId(),
+                LocalDateTime.now().plusSeconds(jwtTokenProvider.getRefreshExpirationMs() / 1000)
+        );
+        refreshTokenRepository.save(refreshTokenEntity);
+
+        // 8. Update last_login_at
         account.setLastLoginAt(LocalDateTime.now());
         accountRepository.save(account);
 
@@ -168,7 +182,8 @@ public class AuthenticationService {
                 .accountId(account.getAccountId())
                 .role(roleCode)
                 .employeeId(account.getEmployeeId())
-                .permissions(permissions);
+                .permissions(permissions)
+                .refreshToken(rawRefreshToken);
     }
 
     /**
@@ -198,5 +213,107 @@ public class AuthenticationService {
                 ipAddress, userAgent);
 
         log.info("Logout successful – account_id={}", accountId);
+    }
+
+    /**
+     * Validates a refresh token and issues a new access token + rotated refresh token.
+     * <p>
+     * Security: if a revoked token is reused, all refresh tokens for the account
+     * are revoked (potential token theft detected).
+     *
+     * @param rawRefreshToken the refresh token sent by the client
+     * @param ipAddress       client IP
+     * @param userAgent       browser user-agent
+     * @return a new LoginResponse with fresh access + refresh tokens
+     * @throws BusinessException if the refresh token is invalid, expired, or reused
+     */
+    @Transactional(transactionManager = "authTransactionManager")
+    public LoginResponse refreshAccessToken(String rawRefreshToken,
+                                            String ipAddress,
+                                            String userAgent) {
+
+        String tokenHash = JwtTokenProvider.hashToken(rawRefreshToken);
+        RefreshToken stored = refreshTokenRepository.findByTokenHash(tokenHash)
+                .orElseThrow(() -> {
+                    log.warn("Refresh failed – token not found");
+                    return new BusinessException("REFRESH_TOKEN_INVALID");
+                });
+
+        // Detect reuse of a revoked token → possible theft
+        if (stored.isRevoked()) {
+            log.warn("Refresh token reuse detected for account_id={} — revoking all tokens",
+                    stored.getAccountId());
+            refreshTokenRepository.revokeAllByAccountId(stored.getAccountId());
+            auditLogService.log(
+                    stored.getAccountId(), "REFRESH_TOKEN_REUSE", "account",
+                    String.valueOf(stored.getAccountId()),
+                    null, Map.of("reason", "token_reuse_detected"),
+                    ipAddress, userAgent);
+            throw new BusinessException("REFRESH_TOKEN_REUSED");
+        }
+
+        // Check expiry
+        if (stored.getExpiresAt().isBefore(LocalDateTime.now())) {
+            stored.setRevoked(true);
+            refreshTokenRepository.save(stored);
+            log.warn("Refresh failed – token expired for account_id={}", stored.getAccountId());
+            throw new BusinessException("REFRESH_TOKEN_EXPIRED");
+        }
+
+        // Rotate: revoke old token
+        stored.setRevoked(true);
+        refreshTokenRepository.save(stored);
+
+        // Look up account with roles
+        Account account = accountRepository.findByIdWithRoles(stored.getAccountId())
+                .orElseThrow(() -> new BusinessException("Account not found"));
+
+        if (!"active".equalsIgnoreCase(account.getStatus())) {
+            refreshTokenRepository.revokeAllByAccountId(account.getAccountId());
+            throw new BusinessException("Account is not active");
+        }
+
+        // Resolve role
+        Set<AccountRole> accountRoles = account.getAccountRoles();
+        if (accountRoles == null || accountRoles.isEmpty()) {
+            throw new BusinessException("No role assigned to this account");
+        }
+        Role primaryRole = accountRoles.iterator().next().getRole();
+        String roleCode = primaryRole.getCode();
+
+        // Resolve permissions
+        List<String> permissions = permissionRepository
+                .findEnabledPermissionKeysByAccountId(account.getAccountId());
+
+        // Issue new access token
+        String newAccessToken = jwtTokenProvider.generateToken(
+                account.getAccountId(),
+                account.getEmail(),
+                account.getEmployeeId(),
+                roleCode,
+                permissions);
+
+        long expiresInSeconds = jwtTokenProvider.getExpirationMs() / 1000;
+
+        // Issue new refresh token
+        String newRawRefreshToken = jwtTokenProvider.generateRefreshToken();
+        RefreshToken newRefreshToken = new RefreshToken(
+                JwtTokenProvider.hashToken(newRawRefreshToken),
+                account.getAccountId(),
+                LocalDateTime.now().plusSeconds(jwtTokenProvider.getRefreshExpirationMs() / 1000)
+        );
+        refreshTokenRepository.save(newRefreshToken);
+
+        log.info("Token refreshed – account_id={}", account.getAccountId());
+
+        return new LoginResponse()
+                .accessToken(newAccessToken)
+                .tokenType("Bearer")
+                .expiresIn(expiresInSeconds)
+                .accountId(account.getAccountId())
+                .role(roleCode)
+                .employeeId(account.getEmployeeId())
+                .permissions(permissions)
+                .refreshToken(newRawRefreshToken);
     }
 }
