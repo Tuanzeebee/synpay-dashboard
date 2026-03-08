@@ -61,4 +61,7 @@ public final class PermissionConstants {
     public static final String REPORT_VIEW_HR        = "report.view_hr";
     public static final String REPORT_VIEW_PAYROLL   = "report.view_payroll";
     public static final String REPORT_EXPORT         = "report.export";
+
+    // ---- Dashboard ----
+    public static final String DASHBOARD_VIEW = "report.view_dashboard";
 }

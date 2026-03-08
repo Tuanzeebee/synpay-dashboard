@@ -53,4 +53,18 @@ public interface AttendanceRepository extends JpaRepository<AttendanceRecord, In
     List<AttendanceRecord> findAllFiltered(@Param("employeeId") Integer employeeId,
                                            @Param("departmentId") Integer departmentId,
                                            @Param("attendanceMonth") LocalDate attendanceMonth);
+
+    // ── Dashboard aggregate queries ──────────────────────────────
+
+    /** Sum of leave days for a given month. */
+    @Query("SELECT COALESCE(SUM(a.leaveDays), 0) FROM AttendanceRecord a WHERE a.attendanceMonth = :month")
+    int sumLeaveDaysByMonth(@Param("month") LocalDate month);
+
+    /** Sum of absent days for a given month. */
+    @Query("SELECT COALESCE(SUM(a.absentDays), 0) FROM AttendanceRecord a WHERE a.attendanceMonth = :month")
+    int sumAbsentDaysByMonth(@Param("month") LocalDate month);
+
+    /** Sum of work days for a given month. */
+    @Query("SELECT COALESCE(SUM(a.workDays), 0) FROM AttendanceRecord a WHERE a.attendanceMonth = :month")
+    int sumWorkDaysByMonth(@Param("month") LocalDate month);
 }

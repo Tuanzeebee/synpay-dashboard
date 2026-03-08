@@ -18,6 +18,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { routes } from '@/routes'
+import { useEmployees } from '@/hooks/useEmployees'
 
 type Language = 'vi' | 'en'
 
@@ -27,6 +28,10 @@ interface SidebarProps {
   activeRoute?: string
 }
 
+function fmtNum(n: number): string {
+  return n.toLocaleString('vi-VN')
+}
+
 function Sidebar({ language, t, activeRoute = '/' }: SidebarProps) {
   const isActive = useCallback((route: string) => {
     if (activeRoute === route) return true
@@ -34,6 +39,8 @@ function Sidebar({ language, t, activeRoute = '/' }: SidebarProps) {
     if (route !== '/' && activeRoute.startsWith(route)) return true
     return false
   }, [activeRoute])
+
+  const { totalElements } = useEmployees()
 
   return (
     <aside className="hidden lg:flex w-64 flex-col bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 sticky top-0 h-screen">
@@ -73,7 +80,7 @@ function Sidebar({ language, t, activeRoute = '/' }: SidebarProps) {
         >
           <Users className="w-5 h-5" />
           <span>{t('nav.employees')}</span>
-          <Badge className="ml-auto">342</Badge>
+          <Badge className="ml-auto">{fmtNum(totalElements)}</Badge>
         </Link>
 
         <Link

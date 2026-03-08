@@ -1,5 +1,6 @@
 package com.companyx.synpay_dashboard.repository.payroll;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -51,4 +52,31 @@ public interface SalaryRepository extends JpaRepository<Salary, Integer> {
 
     @Query("SELECT DISTINCT s.salaryMonth FROM Salary s ORDER BY s.salaryMonth DESC")
     List<LocalDate> findDistinctSalaryMonths();
+
+    // ── Dashboard aggregate queries ──────────────────────────────
+
+    /** Total net salary for a given month. */
+    @Query("SELECT COALESCE(SUM(s.netSalary), 0) FROM Salary s WHERE s.salaryMonth = :month")
+    BigDecimal sumNetSalaryByMonth(@Param("month") LocalDate month);
+
+    /** Average net salary for a given month. */
+    @Query("SELECT COALESCE(AVG(s.netSalary), 0) FROM Salary s WHERE s.salaryMonth = :month")
+    BigDecimal avgNetSalaryByMonth(@Param("month") LocalDate month);
+
+    /** Monthly payroll totals within a date range, ordered by month. */
+    @Query("SELECT s.salaryMonth, SUM(s.netSalary) " +
+           "FROM Salary s " +
+           "WHERE s.salaryMonth BETWEEN :startMonth AND :endMonth " +
+           "GROUP BY s.salaryMonth " +
+           "ORDER BY s.salaryMonth ASC")
+    List<Object[]> sumNetSalaryGroupedByMonth(@Param("startMonth") LocalDate startMonth,
+                                              @Param("endMonth") LocalDate endMonth);
+
+    /** Net salary by department for a given month. */
+    @Query("SELECT e.departmentId, COALESCE(SUM(s.netSalary), 0) " +
+           "FROM Salary s JOIN s.employee e " +
+           "WHERE s.salaryMonth = :month AND e.departmentId IS NOT NULL " +
+           "GROUP BY e.departmentId " +
+           "ORDER BY SUM(s.netSalary) DESC")
+    List<Object[]> sumNetSalaryByDepartment(@Param("month") LocalDate month);
 }

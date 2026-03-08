@@ -25,10 +25,12 @@ interface ChartData {
   headcountData: readonly { month: string; value: number }[]
   payrollData: readonly { month: string; value: number }[]
   payrollDonutData: readonly { name: string; value: number; color: string }[]
+  totalPayroll?: number
+  payrollChangePercent?: number
   t: (key: string) => string
 }
 
-const DashboardCharts = memo(({ deptData, headcountData, payrollData, payrollDonutData, t }: ChartData) => {
+const DashboardCharts = memo(({ deptData, headcountData, payrollData, payrollDonutData, totalPayroll, payrollChangePercent, t }: ChartData) => {
   return (
     <>
       {/* Charts Row 1 */}
@@ -37,7 +39,7 @@ const DashboardCharts = memo(({ deptData, headcountData, payrollData, payrollDon
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
               <CardTitle>{t("chart.deptDistribution")}</CardTitle>
-              <CardDescription>Nhân viên đang làm việc theo phòng ban</CardDescription>
+              <CardDescription>{t("chart.deptDistributionDesc")}</CardDescription>
             </div>
             <Button variant="ghost" size="icon">
               <MoreHorizontal className="w-5 h-5" />
@@ -60,9 +62,9 @@ const DashboardCharts = memo(({ deptData, headcountData, payrollData, payrollDon
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
               <CardTitle>{t("chart.headcountTrend")}</CardTitle>
-              <CardDescription>Tổng số nhân viên theo thời gian</CardDescription>
+              <CardDescription>{t("chart.headcountTrendDesc")}</CardDescription>
             </div>
-            <Badge variant="secondary">12 Tháng</Badge>
+            <Badge variant="secondary">{t("chart.headcountPeriod")}</Badge>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={250}>
@@ -83,13 +85,15 @@ const DashboardCharts = memo(({ deptData, headcountData, payrollData, payrollDon
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle>{t("chart.payrollTrend")}</CardTitle>
-            <CardDescription>Tổng bảng lương đã xử lý trong 12 tháng qua</CardDescription>
+            <CardDescription>{t("chart.payrollTrendDesc")}</CardDescription>
             <div className="flex items-baseline gap-3 mt-4">
-              <div className="text-3xl font-bold">98,5 {t("currency.billion")}</div>
-              <div className="flex items-center gap-1 text-sm font-semibold text-emerald-600">
-                <ArrowUp className="w-4 h-4" />
-                <span>+1,2%</span>
-              </div>
+              <div className="text-3xl font-bold">{totalPayroll != null ? totalPayroll.toLocaleString('vi-VN', { maximumFractionDigits: 1 }) : '--'} {t("currency.billion")}</div>
+              {payrollChangePercent != null && (
+                <div className="flex items-center gap-1 text-sm font-semibold text-emerald-600">
+                  <ArrowUp className="w-4 h-4" />
+                  <span>+{payrollChangePercent.toLocaleString('vi-VN', { maximumFractionDigits: 1 })}%</span>
+                </div>
+              )}
             </div>
           </CardHeader>
           <CardContent>
@@ -107,8 +111,8 @@ const DashboardCharts = memo(({ deptData, headcountData, payrollData, payrollDon
 
         <Card>
           <CardHeader>
-            <CardTitle>Lương Theo Phòng Ban</CardTitle>
-            <CardDescription>Phân bổ tháng hiện tại</CardDescription>
+            <CardTitle>{t("chart.payrollByDept")}</CardTitle>
+            <CardDescription>{t("chart.payrollByDeptDesc")}</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col items-center">
             <ResponsiveContainer width="100%" height={200}>

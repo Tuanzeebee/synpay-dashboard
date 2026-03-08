@@ -23,6 +23,7 @@ from routes.positions import router as positions_router
 from routes.payroll import router as payroll_router
 from routes.attendance import router as attendance_router
 from routes.reports import router as reports_router
+from routes.dashboard import router as dashboard_router
 
 logging.basicConfig(
     level=logging.INFO,
@@ -66,6 +67,7 @@ app.include_router(positions_router)
 app.include_router(payroll_router)
 app.include_router(attendance_router)
 app.include_router(reports_router)
+app.include_router(dashboard_router)
 
 
 @app.get("/health", tags=["Health"])

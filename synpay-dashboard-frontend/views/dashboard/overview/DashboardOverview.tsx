@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useMemo, memo, useCallback } from "react"
+import { useDashboard } from "@/hooks/useDashboard"
 import {
   Download,
   ArrowUp,
@@ -30,54 +31,14 @@ const DashboardCharts = dynamic(() => import('./components/DashboardCharts'), {
   ssr: false
 })
 
-// Memoized chart data - computed once
-const DEPT_DATA = [
-  { name: "engineering", value: 320 },
-  { name: "sales", value: 240 },
-  { name: "marketing", value: 180 },
-  { name: "hr", value: 45 },
-  { name: "finance", value: 60 },
-  { name: "support", value: 150 },
-  { name: "operations", value: 120 },
-  { name: "legal", value: 25 },
-] as const
+// Vietnamese number formatting helpers
+function fmtNum(n: number): string {
+  return n.toLocaleString('vi-VN')
+}
 
-const HEADCOUNT_DATA = [
-  { month: "T1", value: 980 },
-  { month: "T2", value: 1020 },
-  { month: "T3", value: 1050 },
-  { month: "T4", value: 1080 },
-  { month: "T5", value: 1100 },
-  { month: "T6", value: 1120 },
-  { month: "T7", value: 1150 },
-  { month: "T8", value: 1180 },
-  { month: "T9", value: 1200 },
-  { month: "T10", value: 1220 },
-  { month: "T11", value: 1240 },
-  { month: "T12", value: 1248 },
-] as const
-
-const PAYROLL_DATA = [
-  { month: "T1", value: 88 },
-  { month: "T2", value: 89 },
-  { month: "T3", value: 91 },
-  { month: "T4", value: 92 },
-  { month: "T5", value: 93 },
-  { month: "T6", value: 94 },
-  { month: "T7", value: 95 },
-  { month: "T8", value: 96 },
-  { month: "T9", value: 97 },
-  { month: "T10", value: 98 },
-  { month: "T11", value: 98.2 },
-  { month: "T12", value: 98.5 },
-] as const
-
-const PAYROLL_DONUT_DATA = [
-  { name: "Kỹ Thuật", value: 45, color: "#3b82f6" },
-  { name: "Kinh Doanh", value: 25, color: "#22d3ee" },
-  { name: "Marketing", value: 15, color: "#818cf8" },
-  { name: "Khác", value: 15, color: "#cbd5e1" },
-] as const
+function fmtPercent(n: number): string {
+  return n.toLocaleString('vi-VN', { minimumFractionDigits: 0, maximumFractionDigits: 1 })
+}
 
 // Memoized KPI card component
 const KPICard = memo(({ title, value, change, icon: Icon, trend }: {
@@ -171,6 +132,14 @@ type Props = {}
 function DashboardOverview({}: Props) {
   const { language, toggleLanguage, t } = useLanguage()
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const { overview, isLoading } = useDashboard()
+
+  const kpis = overview?.kpis
+  const deptData = overview?.deptData ?? []
+  const headcountData = overview?.headcountData ?? []
+  const payrollData = overview?.payrollData ?? []
+  const payrollDonutData = overview?.payrollDonutData ?? []
+  const alerts = overview?.alerts ?? []
 
   const refreshPage = useCallback(() => {
     window.location.reload()
@@ -209,42 +178,42 @@ function DashboardOverview({}: Props) {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
             <KPICard 
               title={t("kpi.totalEmployees")}
-              value="1.248"
-              change={`2,4% ${t("kpi.vsLastMonth")}`}
+              value={kpis ? fmtNum(kpis.totalEmployees) : "--"}
+              change={kpis ? `${fmtPercent(kpis.employeeGrowthPercent)}% ${t("kpi.vsLastMonth")}` : undefined}
               icon={Users}
               trend="up"
             />
             <KPICard 
               title={t("kpi.active")}
-              value="1.180"
-              change={`94,5% ${t("kpi.ofTotal")}`}
+              value={kpis ? fmtNum(kpis.activeEmployees) : "--"}
+              change={kpis ? `${fmtPercent(kpis.activePercent)}% ${t("kpi.ofTotal")}` : undefined}
               icon={CheckCircle}
               trend="neutral"
             />
             <KPICard 
               title={t("kpi.monthlyPayroll")}
-              value={`98 ${t("currency.billion")}`}
-              change={`1,2% ${t("kpi.vsLastMonth")}`}
+              value={kpis ? `${fmtNum(kpis.monthlyPayroll)} ${t("currency.billion")}` : "--"}
+              change={kpis ? `${fmtPercent(kpis.payrollGrowthPercent)}% ${t("kpi.vsLastMonth")}` : undefined}
               icon={DollarSign}
               trend="up"
             />
             <KPICard 
               title={t("kpi.avgSalary")}
-              value={`85 ${t("currency.million")}`}
+              value={kpis ? `${fmtNum(kpis.avgSalary)} ${t("currency.million")}` : "--"}
               change={t("kpi.annually")}
               icon={BarChart2}
               trend="neutral"
             />
             <KPICard 
               title={t("kpi.leaveDays")}
-              value="342"
-              change={`5,8% ${t("kpi.vsLastMonth")}`}
+              value={kpis ? fmtNum(kpis.leaveDays) : "--"}
+              change={kpis ? `${fmtPercent(kpis.leaveGrowthPercent)}% ${t("kpi.vsLastMonth")}` : undefined}
               icon={Calendar}
               trend="up"
             />
             <KPICard 
               title={t("kpi.alerts")}
-              value="12"
+              value={kpis ? fmtNum(kpis.alertCount) : "--"}
               change={t("kpi.needsAction")}
               icon={AlertTriangle}
               trend="down"
@@ -253,10 +222,12 @@ function DashboardOverview({}: Props) {
 
           {/* Charts - Lazy loaded */}
           <DashboardCharts 
-            deptData={DEPT_DATA}
-            headcountData={HEADCOUNT_DATA}
-            payrollData={PAYROLL_DATA}
-            payrollDonutData={PAYROLL_DONUT_DATA}
+            deptData={deptData}
+            headcountData={headcountData}
+            payrollData={payrollData}
+            payrollDonutData={payrollDonutData}
+            totalPayroll={kpis?.monthlyPayroll}
+            payrollChangePercent={kpis?.payrollGrowthPercent}
             t={t}
           />
 
@@ -267,38 +238,25 @@ function DashboardOverview({}: Props) {
                 <div className="flex items-center gap-3">
                   <CardTitle>{t("alerts.title")}</CardTitle>
                   <div className="flex gap-2">
-                    <Badge variant="destructive">Nghiêm Trọng</Badge>
-                    <Badge variant="secondary">Cảnh Báo</Badge>
+                    <Badge variant="destructive">{t("alerts.critical")}</Badge>
+                    <Badge variant="secondary">{t("alerts.warning")}</Badge>
                   </div>
                 </div>
                 <Button variant="link">{t("alerts.viewAll")}</Button>
               </CardHeader>
               <CardContent className="p-0">
                 <div className="divide-y divide-slate-100 dark:divide-slate-700">
-                  <AlertItem 
-                    severity="Nghiêm Trọng"
-                    category="Tuân Thủ"
-                    title="Cảnh Báo Visa Hết Hạn"
-                    description="5 nhân viên có visa sắp hết hạn trong 30 ngày."
-                    time="2 giờ trước"
-                    borderColor="border-l-rose-500"
-                  />
-                  <AlertItem 
-                    severity="Nghiêm Trọng"
-                    category="Bảng Lương"
-                    title="Làm Thêm Giờ Chưa Xử Lý"
-                    description="Phòng Kỹ Thuật có các đơn làm thêm giờ chờ phê duyệt."
-                    time="5 giờ trước"
-                    borderColor="border-l-rose-500"
-                  />
-                  <AlertItem 
-                    severity="Cảnh Báo"
-                    category="Chấm Công"
-                    title="Tỷ Lệ Vắng Mặt Cao"
-                    description="Phòng Hỗ Trợ Khách Hàng có tỷ lệ vắng mặt 15% hôm nay."
-                    time="1 ngày trước"
-                    borderColor="border-l-amber-500"
-                  />
+                  {alerts.map((alert, i) => (
+                    <AlertItem
+                      key={i}
+                      severity={alert.severity}
+                      category={alert.category}
+                      title={alert.title}
+                      description={alert.description}
+                      time={alert.time}
+                      borderColor={alert.severity === 'Nghiêm Trọng' ? 'border-l-rose-500' : 'border-l-amber-500'}
+                    />
+                  ))}
                 </div>
               </CardContent>
             </Card>

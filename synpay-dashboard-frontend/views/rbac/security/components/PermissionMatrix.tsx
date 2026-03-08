@@ -56,6 +56,25 @@ export default function PermissionMatrix({
   onSaveChanges,
   onDiscardChanges,
 }: Props) {
+    // Quick select handler: select all or by action for a domain and role
+    const handleQuickSelect = (roleId: number, domain: string, type: 'all' | string) => {
+      const actions = domainActions[domain] ?? [];
+      actions.forEach((action) => {
+        if (type === 'all' || action === type) {
+          onTogglePermission(roleId, domain, action, true);
+        }
+      });
+    };
+
+    // Quick unselect handler: unselect all or by action for a domain and role
+    const handleQuickUnselect = (roleId: number, domain: string, type: 'all' | string) => {
+      const actions = domainActions[domain] ?? [];
+      actions.forEach((action) => {
+        if (type === 'all' || action === type) {
+          onTogglePermission(roleId, domain, action, false);
+        }
+      });
+    };
   const [searchQuery, setSearchQuery] = useState('')
   const { domains, roles } = matrix
 
@@ -184,7 +203,7 @@ export default function PermissionMatrix({
       </div>
 
       {/* ── Matrix Table ──────────────────────────────────────── */}
-      <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden max-h-[800px]">
+      <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden max-h-[800px] overflow-y-auto">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-10">
@@ -230,10 +249,7 @@ export default function PermissionMatrix({
                   <React.Fragment key={domain}>
                     {/* Domain header row */}
                     <tr className="bg-slate-100 dark:bg-slate-700/50">
-                      <td
-                        colSpan={2 + roles.length}
-                        className="px-6 py-3"
-                      >
+                      <td colSpan={2} className="px-6 py-3">
                         <div className="flex items-center gap-2">
                           {domainEnabled === domainTotal ? (
                             <ShieldCheck className="w-4 h-4 text-emerald-500" />
@@ -248,6 +264,30 @@ export default function PermissionMatrix({
                           </span>
                         </div>
                       </td>
+                      {/* Quick select buttons for each role */}
+                      {roles.map((role) => (
+                        <td key={role.roleId} className="px-2 py-3 text-center">
+                          <div className="flex flex-wrap gap-1 justify-center">
+                            <Button size="xs" variant="outline" className="text-xs px-2 py-0.5"
+                              onClick={() => handleQuickSelect(role.roleId, domain, 'all')} disabled={isSaving}>
+                              {language === 'vi' ? 'Chọn tất' : 'Select all'}
+                            </Button>
+                            <Button size="xs" variant="ghost" className="text-xs px-2 py-0.5"
+                              onClick={() => handleQuickUnselect(role.roleId, domain, 'all')} disabled={isSaving}>
+                              {language === 'vi' ? 'Bỏ tất' : 'Unselect all'}
+                            </Button>
+                            {/* Quick select by action type */}
+                            {['read','write','create','delete','config'].map((act) => (
+                              (domainActions[domain]?.includes(act)) ? (
+                                <Button key={act} size="xs" variant="ghost" className="text-xs px-2 py-0.5"
+                                  onClick={() => handleQuickSelect(role.roleId, domain, act)} disabled={isSaving}>
+                                  {ACTION_LABELS[act]?.[language] || act}
+                                </Button>
+                              ) : null
+                            ))}
+                          </div>
+                        </td>
+                      ))}
                     </tr>
 
                     {/* Permission rows */}

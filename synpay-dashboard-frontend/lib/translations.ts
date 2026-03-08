@@ -41,8 +41,14 @@ export const translations = {
   
   // Charts
   'chart.deptDistribution': { vi: 'Phân Bổ Phòng Ban', en: 'Department Distribution' },
+  'chart.deptDistributionDesc': { vi: 'Nhân viên đang làm việc theo phòng ban', en: 'Active employees by department' },
   'chart.headcountTrend': { vi: 'Xu Hướng Nhân Sự', en: 'Headcount Trend' },
+  'chart.headcountTrendDesc': { vi: 'Tổng số nhân viên theo thời gian', en: 'Total employees over time' },
+  'chart.headcountPeriod': { vi: '12 Tháng', en: '12 Months' },
   'chart.payrollTrend': { vi: 'Xu Hướng Bảng Lương Hàng Tháng', en: 'Monthly Payroll Trend' },
+  'chart.payrollTrendDesc': { vi: 'Tổng bảng lương đã xử lý trong 12 tháng qua', en: 'Total payroll processed in the last 12 months' },
+  'chart.payrollByDept': { vi: 'Lương Theo Phòng Ban', en: 'Payroll by Department' },
+  'chart.payrollByDeptDesc': { vi: 'Phân bổ tháng hiện tại', en: 'Current month allocation' },
   
   // Departments
   'dept.hr': { vi: 'Nhân Sự', en: 'HR' },
@@ -58,6 +64,10 @@ export const translations = {
   'dept.engineering': { vi: 'Kỹ Thuật', en: 'Engineering' },
   'dept.support': { vi: 'Hỗ Trợ', en: 'Support' },
   'dept.legal': { vi: 'Pháp Lý', en: 'Legal' },
+  'dept.phòng_bảo_trì': { vi: 'Bảo Trì', en: 'Maintenance' },
+  'dept.phòng_nhân_sự': { vi: 'Nhân Sự', en: 'HR' },
+  'dept.phòng_kỹ_thuật': { vi: 'Kỹ Thuật', en: 'Engineering' },
+  'dept.phòng_sản_xuất': { vi: 'Sản Xuất', en: 'Production' },
   
   // Quick Actions
   'quickActions.title': { vi: 'Thao Tác Nhanh', en: 'Quick Actions' },
@@ -69,6 +79,8 @@ export const translations = {
   // Alerts
   'alerts.title': { vi: 'Cảnh Báo & Rủi Ro', en: 'Alerts & Risks' },
   'alerts.viewAll': { vi: 'Xem Tất Cả', en: 'View All' },
+  'alerts.critical': { vi: 'Nghiêm Trọng', en: 'Critical' },
+  'alerts.warning': { vi: 'Cảnh Báo', en: 'Warning' },
   
   // Notifications Page
   'notifications.pageTitle': { vi: 'Thông Báo & Cảnh Báo', en: 'Notifications & Alerts' },
