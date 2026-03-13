@@ -48,6 +48,7 @@ export interface AuthState {
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
 const USER_KEY = 'synpay_auth_user'
+const REFRESH_TOKEN_KEY = 'synpay_refresh_token'
 
 // ── In-Memory Token ──────────────────────────────────────────────
 
@@ -59,6 +60,30 @@ export function getStoredToken(): string | null {
 
 export function setAccessToken(token: string | null): void {
   _accessToken = token
+}
+
+// ── Refresh Token Storage (localStorage) ─────────────────────────
+
+export function getStoredRefreshToken(): string | null {
+  if (typeof window === 'undefined') return null
+  try {
+    return localStorage.getItem(REFRESH_TOKEN_KEY)
+  } catch {
+    return null
+  }
+}
+
+export function setStoredRefreshToken(token: string | null): void {
+  if (typeof window === 'undefined') return
+  try {
+    if (token) {
+      localStorage.setItem(REFRESH_TOKEN_KEY, token)
+    } else {
+      localStorage.removeItem(REFRESH_TOKEN_KEY)
+    }
+  } catch {
+    // Silently fail if localStorage is not available
+  }
 }
 
 // ── User Profile Storage (localStorage) ──────────────────────────
@@ -73,14 +98,18 @@ export function getStoredUser(): AuthUser | null {
   }
 }
 
-export function storeAuth(token: string, user: AuthUser): void {
+export function storeAuth(token: string, user: AuthUser, refreshToken: string | null = null): void {
   _accessToken = token
   localStorage.setItem(USER_KEY, JSON.stringify(user))
+  if (refreshToken) {
+    setStoredRefreshToken(refreshToken)
+  }
 }
 
 export function clearAuth(): void {
   _accessToken = null
   localStorage.removeItem(USER_KEY)
+  setStoredRefreshToken(null)
 }
 
 // ── Permission Helpers ───────────────────────────────────────────
@@ -154,23 +183,54 @@ export function toAuthUser(email: string, data: LoginResponseData): AuthUser {
 }
 
 /**
- * Attempt to refresh the access token using the httpOnly refresh cookie.
+ * Attempt to refresh the access token using the stored refresh_token.
  * Returns the new access token on success, or null if refresh failed.
  */
 export async function refreshAccessToken(): Promise<LoginResponseData | null> {
   try {
+    const refreshToken = getStoredRefreshToken()
+    console.log('[refreshAccessToken] Starting refresh attempt...')
+    console.log('[refreshAccessToken] Refresh token available:', !!refreshToken)
+    
+    if (!refreshToken) {
+      console.warn('[refreshAccessToken] No refresh token stored')
+      return null
+    }
+
     const response = await fetch(`${API_BASE}/api/auth/refresh`, {
       method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
       credentials: 'include',
+      body: JSON.stringify({ refresh_token: refreshToken }),
     })
 
-    if (!response.ok) return null
+    console.log('[refreshAccessToken] Response status:', response.status)
+
+    if (!response.ok) {
+      console.warn('[refreshAccessToken] Refresh failed with status', response.status)
+      return null
+    }
 
     const body: ApiEnvelope<LoginResponseData> = await response.json()
-    if (!body.success || !body.data) return null
+    console.log('[refreshAccessToken] Response success:', body.success)
+    
+    if (!body.success || !body.data) {
+      console.warn('[refreshAccessToken] Success false or no data in response')
+      return null
+    }
 
+    // Update stored refresh token if server issued a new one
+    if (body.data.refresh_token) {
+      console.log('[refreshAccessToken] New refresh token received, updating storage')
+      setStoredRefreshToken(body.data.refresh_token)
+    }
+
+    console.log('[refreshAccessToken] Refresh successful, token obtained')
     return body.data
-  } catch {
+  } catch (err) {
+    console.error('[refreshAccessToken] Error:', err)
     return null
   }
 }

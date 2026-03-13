@@ -20,19 +20,19 @@ spring:
     hr:
       jdbc-url: jdbc:sqlserver://localhost:1433;databaseName=HUMAN;encrypt=true;trustServerCertificate=true
       username: sa
-      password: Ilovedu20@
+      password: Ilovedu24@
       driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
 
     payroll:
       jdbc-url: jdbc:mysql://localhost:3306/payroll?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
       username: root
-      password: Ilovedu20@
+      password: Ilovedu24@
       driver-class-name: com.mysql.cj.jdbc.Driver
 
     auth:
       jdbc-url: jdbc:mysql://localhost:3306/auth_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
       username: root
-      password: Ilovedu20@
+      password: Ilovedu24@
       driver-class-name: com.mysql.cj.jdbc.Driver
 
 app:

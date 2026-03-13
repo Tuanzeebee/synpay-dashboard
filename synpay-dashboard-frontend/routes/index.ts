@@ -30,6 +30,7 @@ export const routes = {
   
   // Settings
   settings: '/settings',
+  myprofile: '/myprofile',
 } as const
 
 export type RouteKey = keyof typeof routes
@@ -80,5 +81,10 @@ export const routeMetadata: Record<string, RouteMetadata> = {
     path: '/reports',
     title: { vi: 'Báo Cáo & Phân Tích', en: 'Reports & Analytics' },
     icon: 'BarChart3',
+  },
+  myprofile: {
+    path: '/myprofile',
+    title: { vi: 'Hồ Sơ Của Tôi', en: 'My Profile' },
+    icon: 'User',
   },
 }

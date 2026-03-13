@@ -2,6 +2,7 @@
 
 import { useState, useMemo, memo, useCallback } from "react"
 import { useDashboard } from "@/hooks/useDashboard"
+import { useRequireAuth } from "@/hooks/useRequireAuth"
 import {
   Download,
   ArrowUp,
@@ -132,6 +133,7 @@ type Props = {}
 function DashboardOverview({}: Props) {
   const { language, toggleLanguage, t } = useLanguage()
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const auth = useRequireAuth() // Wait for auth to be loaded
   const { overview, isLoading } = useDashboard()
 
   const kpis = overview?.kpis

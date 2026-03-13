@@ -30,7 +30,7 @@ DB_HR = {
     "server": get_env("HR_DB_SERVER", "localhost:1433"),
     "database": get_env("HR_DB_NAME", "HUMAN"),
     "uid": get_env("HR_DB_USER", "sa"),
-    "pwd": get_env("HR_DB_PASSWORD", "Ilovedu20@"),
+    "pwd": get_env("HR_DB_PASSWORD", "Ilovedu24@"),
 }
 
 # Payroll Database - MySQL
@@ -40,7 +40,7 @@ DB_PAYROLL = {
     "port": int(get_env("PAYROLL_DB_PORT", "3306")),
     "database": get_env("PAYROLL_DB_NAME", "payroll"),
     "user": get_env("PAYROLL_DB_USER", "root"),
-    "password": get_env("PAYROLL_DB_PASSWORD", "Ilovedu20@"),
+    "password": get_env("PAYROLL_DB_PASSWORD", "Ilovedu24@"),
 }
 
 # Auth Database - MySQL
@@ -50,7 +50,7 @@ DB_AUTH = {
     "port": int(get_env("AUTH_DB_PORT", "3306")),
     "database": get_env("AUTH_DB_NAME", "auth_db"),
     "user": get_env("AUTH_DB_USER", "root"),
-    "password": get_env("AUTH_DB_PASSWORD", "Ilovedu20@"),
+    "password": get_env("AUTH_DB_PASSWORD", "Ilovedu24@"),
 }
 
 

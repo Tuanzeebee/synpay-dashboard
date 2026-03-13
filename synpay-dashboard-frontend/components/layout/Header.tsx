@@ -12,13 +12,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import NotificationBell from '@/components/ui/NotificationBell'
 import {
   Menu,
   Languages,
   RefreshCw,
   Sun,
   Moon,
-  Bell,
   ChevronDown,
   User,
   Settings,
@@ -100,10 +100,7 @@ function Header({ language = 'vi', onLanguageToggle, onRefresh, onMenuToggle, t 
             <Moon className="w-5 h-5 block dark:hidden" />
           </Button>
 
-          <Button variant="ghost" size="icon" className="relative">
-            <Bell className="w-5 h-5" />
-            <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
-          </Button>
+          <NotificationBell t={t} />
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

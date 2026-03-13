@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useCallback, useEffect, useRef } from 'react'
+import { useAuth } from '@/components/providers/AuthProvider'
 import {
   fetchRoles,
   fetchRole,
@@ -35,7 +36,12 @@ interface UseRolesReturn extends UseRolesState {
 
 // ── Hook ─────────────────────────────────────────────────────────
 
-export function useRoles(): UseRolesReturn {
+/**
+ * Hook to manage RBAC roles and permissions.
+ * Waits for authentication to be verified before fetching.
+ */
+export function useRoles(skipAuthCheck = false): UseRolesReturn {
+  const auth = useAuth()
   const [state, setState] = useState<UseRolesState>({
     roles: [],
     selectedRole: null,
@@ -65,7 +71,11 @@ export function useRoles(): UseRolesReturn {
     }
   }, [])
 
-  useEffect(() => { refresh() }, [refresh])
+  useEffect(() => { 
+    if (skipAuthCheck || (!auth.isLoading && auth.isAuthenticated)) {
+      refresh()
+    }
+  }, [skipAuthCheck, auth.isLoading, auth.isAuthenticated, refresh])
 
   // ── Load role detail (with permissions) ────────────────────────
 

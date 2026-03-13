@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useCallback, useEffect, useRef } from 'react'
+import { useAuth } from '@/components/providers/AuthProvider'
 import {
   fetchDashboardOverview,
   fetchDashboardHr,
@@ -67,7 +68,15 @@ export interface UseDashboardReturn extends UseDashboardState {
 
 // ── Hook ─────────────────────────────────────────────────────────
 
-export function useDashboard(): UseDashboardReturn {
+/**
+ * Hook to fetch dashboard data from API endpoints.
+ * 
+ * IMPORTANT: By default, fetching is delayed until authentication is verified.
+ * This prevents 401 errors on page refresh. Pass skipAuthCheck=true only if you're
+ * confident that the auth token is already loaded (e.g., from a protected page).
+ */
+export function useDashboard(skipAuthCheck = false): UseDashboardReturn {
+  const auth = useAuth()
   const [state, setState] = useState<UseDashboardState>({
     overview: null,
     hr: null,
@@ -194,9 +203,11 @@ export function useDashboard(): UseDashboardReturn {
   // ── Auto-load on mount ─────────────────────────────────────
 
   useEffect(() => {
-    refresh()
+    if (skipAuthCheck || (!auth.isLoading && auth.isAuthenticated)) {
+      refresh()
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [skipAuthCheck, auth.isLoading, auth.isAuthenticated])
 
   return {
     ...state,

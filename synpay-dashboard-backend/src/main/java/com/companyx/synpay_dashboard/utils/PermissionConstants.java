@@ -64,4 +64,12 @@ public final class PermissionConstants {
 
     // ---- Dashboard ----
     public static final String DASHBOARD_VIEW = "report.view_dashboard";
+
+    // ---- Notifications ----
+    public static final String NOTIFICATION_READ      = "notification.read";
+    public static final String NOTIFICATION_MARK_READ = "notification.mark_read";
+    public static final String NOTIFICATION_ADMIN     = "notification.admin";
+
+    // ---- Email Queue ----
+    public static final String EMAIL_QUEUE_VIEW = "email_queue.view";
 }

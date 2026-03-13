@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useCallback, useEffect, useRef } from 'react'
+import { useAuth } from '@/components/providers/AuthProvider'
 import {
   fetchUsers,
   createUser,
@@ -36,7 +37,12 @@ interface UseUsersReturn extends UseUsersState {
 
 // ── Hook ─────────────────────────────────────────────────────────
 
-export function useUsers(): UseUsersReturn {
+/**
+ * Hook to fetch and manage users.
+ * Waits for authentication to be verified before fetching to prevent 401 errors on page refresh.
+ */
+export function useUsers(skipAuthCheck = false): UseUsersReturn {
+  const auth = useAuth()
   const [state, setState] = useState<UseUsersState>({
     users: [],
     isLoading: true,
@@ -68,7 +74,11 @@ export function useUsers(): UseUsersReturn {
   }, [])
 
   // Load on mount
-  useEffect(() => { refresh() }, [refresh])
+  useEffect(() => { 
+    if (skipAuthCheck || (!auth.isLoading && auth.isAuthenticated)) {
+      refresh()
+    }
+  }, [skipAuthCheck, auth.isLoading, auth.isAuthenticated, refresh])
 
   // ── Create user ─────────────────────────────────────────────
 

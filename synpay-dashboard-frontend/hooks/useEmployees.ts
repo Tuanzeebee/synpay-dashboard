@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useCallback, useEffect, useRef } from 'react'
+import { useAuth } from '@/components/providers/AuthProvider'
 import {
   fetchEmployees,
   fetchEmployee,
@@ -51,7 +52,12 @@ interface UseEmployeesReturn extends UseEmployeesState {
 
 // ── Hook ─────────────────────────────────────────────────────────
 
-export function useEmployees(initialParams?: EmployeeListParams): UseEmployeesReturn {
+/**
+ * Hook to manage employees.
+ * Waits for authentication to be verified before fetching.
+ */
+export function useEmployees(initialParams?: EmployeeListParams, skipAuthCheck = false): UseEmployeesReturn {
+  const auth = useAuth()
   const [state, setState] = useState<UseEmployeesState>({
     employees: [],
     totalElements: 0,
@@ -105,9 +111,11 @@ export function useEmployees(initialParams?: EmployeeListParams): UseEmployeesRe
 
   // Load on mount
   useEffect(() => {
-    loadEmployees(initialParams ?? { page: 0, size: 10 })
+    if (skipAuthCheck || (!auth.isLoading && auth.isAuthenticated)) {
+      loadEmployees(initialParams ?? { page: 0, size: 10 })
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [skipAuthCheck, auth.isLoading, auth.isAuthenticated])
 
   // ── Get single detail ──────────────────────────────────────
 

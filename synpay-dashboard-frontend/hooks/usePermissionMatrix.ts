@@ -8,6 +8,7 @@
  */
 
 import { useState, useCallback, useEffect, useRef } from 'react'
+import { useAuth } from '@/components/providers/AuthProvider'
 import {
   fetchPermissionMatrix,
   togglePermission,
@@ -55,7 +56,12 @@ export interface UsePermissionMatrixReturn extends UsePermissionMatrixState {
 
 // ── Hook ─────────────────────────────────────────────────────────
 
-export function usePermissionMatrix(): UsePermissionMatrixReturn {
+/**
+ * Hook to manage permission matrix and RBAC configuration.
+ * Waits for authentication to be verified before fetching.
+ */
+export function usePermissionMatrix(skipAuthCheck = false): UsePermissionMatrixReturn {
+  const auth = useAuth()
   const [state, setState] = useState<UsePermissionMatrixState>({
     matrix: null,
     summary: null,
@@ -99,7 +105,11 @@ export function usePermissionMatrix(): UsePermissionMatrixReturn {
   }, [])
 
   // Auto-load on mount
-  useEffect(() => { refresh() }, [refresh])
+  useEffect(() => { 
+    if (skipAuthCheck || (!auth.isLoading && auth.isAuthenticated)) {
+      refresh()
+    }
+  }, [skipAuthCheck, auth.isLoading, auth.isAuthenticated, refresh])
 
   // ── Local Toggle (no API call) ───────────────────────────────
 

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useCallback, useEffect, useRef } from 'react'
+import { useAuth } from '@/components/providers/AuthProvider'
 import {
   fetchPayrollList,
   fetchSalaryDetail,
@@ -119,7 +120,12 @@ interface UsePayrollReturn extends UsePayrollState {
 
 // ── Hook ─────────────────────────────────────────────────────────
 
-export function usePayroll(initialParams?: PayrollListParams): UsePayrollReturn {
+/**
+ * Hook to manage payroll/salary records.
+ * Waits for authentication to be verified before fetching.
+ */
+export function usePayroll(initialParams?: PayrollListParams, skipAuthCheck = false): UsePayrollReturn {
+  const auth = useAuth()
   const [state, setState] = useState<UsePayrollState>({
     salaries: [],
     salaryMonths: [],
@@ -174,17 +180,19 @@ export function usePayroll(initialParams?: PayrollListParams): UsePayrollReturn 
 
   // Load on mount
   useEffect(() => {
-    loadSalaries(initialParams ?? { page: 0, size: 20 })
-    // Fetch distinct salary months
-    fetchSalaryMonths()
-      .then((months) => {
-        if (mountedRef.current) {
-          setState((s) => ({ ...s, salaryMonths: months }))
-        }
-      })
-      .catch(() => { /* non-critical */ })
+    if (skipAuthCheck || (!auth.isLoading && auth.isAuthenticated)) {
+      loadSalaries(initialParams ?? { page: 0, size: 20 })
+      // Fetch distinct salary months
+      fetchSalaryMonths()
+        .then((months) => {
+          if (mountedRef.current) {
+            setState((s) => ({ ...s, salaryMonths: months }))
+          }
+        })
+        .catch(() => { /* non-critical */ })
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [skipAuthCheck, auth.isLoading, auth.isAuthenticated])
 
   // ── Get single detail ──────────────────────────────────────
 

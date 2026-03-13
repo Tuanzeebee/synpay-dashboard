@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useCallback, useEffect, useRef } from 'react'
+import { useAuth } from '@/components/providers/AuthProvider'
 import {
   fetchAttendanceList,
   fetchAttendanceDetail,
@@ -105,7 +106,12 @@ interface UseAttendanceReturn extends UseAttendanceState {
 
 // ── Hook ─────────────────────────────────────────────────────────
 
-export function useAttendance(initialParams?: AttendanceListParams): UseAttendanceReturn {
+/**
+ * Hook to manage attendance records.
+ * Waits for authentication to be verified before fetching.
+ */
+export function useAttendance(initialParams?: AttendanceListParams, skipAuthCheck = false): UseAttendanceReturn {
+  const auth = useAuth()
   const [state, setState] = useState<UseAttendanceState>({
     attendances: [],
     totalElements: 0,
@@ -159,9 +165,11 @@ export function useAttendance(initialParams?: AttendanceListParams): UseAttendan
 
   // Load on mount
   useEffect(() => {
-    loadAttendance(initialParams ?? { page: 0, size: 20 })
+    if (skipAuthCheck || (!auth.isLoading && auth.isAuthenticated)) {
+      loadAttendance(initialParams ?? { page: 0, size: 20 })
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [skipAuthCheck, auth.isLoading, auth.isAuthenticated])
 
   // ── Get single detail ──────────────────────────────────────
 

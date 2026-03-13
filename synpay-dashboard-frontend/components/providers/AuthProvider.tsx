@@ -77,7 +77,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       refreshAccessToken().then((data) => {
         if (data) {
           const refreshedUser = toAuthUser(storedUser.email, data)
-          storeAuth(data.access_token, refreshedUser)
+          storeAuth(data.access_token, refreshedUser, data.refresh_token)
           setToken(data.access_token)
           setUser(refreshedUser)
         } else {
@@ -98,7 +98,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const data = await apiLogin(request)
     const authUser = toAuthUser(request.email, data)
 
-    storeAuth(data.access_token, authUser)
+    storeAuth(data.access_token, authUser, data.refresh_token)
     setToken(data.access_token)
     setUser(authUser)
 

@@ -26,11 +26,14 @@ public class PositionService {
     private static final Logger log = LoggerFactory.getLogger(PositionService.class);
 
     private final PositionRepository positionRepository;
+    private final PayrollSyncService payrollSyncService;
     private final AuditLogService auditLogService;
 
     public PositionService(PositionRepository positionRepository,
+                           PayrollSyncService payrollSyncService,
                            AuditLogService auditLogService) {
         this.positionRepository = positionRepository;
+        this.payrollSyncService = payrollSyncService;
         this.auditLogService = auditLogService;
     }
 
@@ -71,20 +74,37 @@ public class PositionService {
     public PositionResponse createPosition(CreatePositionRequest request,
                                            Integer actorAccountId,
                                            String ip, String ua) {
-        Position position = new Position();
-        position.setPositionName(request.getPositionName());
+        try {
+            // 1. Save to HR database
+            Position position = new Position();
+            position.setPositionName(request.getPositionName());
 
-        position = positionRepository.save(position);
+            position = positionRepository.save(position);
+            log.info("→ Position saved to HR DB: id={}, name={}", position.getPositionId(), position.getPositionName());
 
-        PositionResponse response = toResponse(position);
+            // 2. Sync to Payroll database
+            try {
+                payrollSyncService.syncPositionCreate(position);
+                log.info("✓ Position synced to both databases: id={}", position.getPositionId());
+            } catch (Exception syncError) {
+                log.error("✗ Payroll sync failed! Triggering rollback for HR data: id={}", position.getPositionId(), syncError);
+                throw new RuntimeException("Failed to sync position to payroll database. Operation rolled back.", syncError);
+            }
 
-        auditLogService.log(actorAccountId, "POSITION_CREATE", "position",
-                position.getPositionId().toString(), null,
-                Map.of("positionName", position.getPositionName()),
-                ip, ua);
+            PositionResponse response = toResponse(position);
 
-        log.info("Position created: id={}, name={}", position.getPositionId(), position.getPositionName());
-        return response;
+            auditLogService.log(actorAccountId, "POSITION_CREATE", "position",
+                    position.getPositionId().toString(), null,
+                    Map.of("positionName", position.getPositionName()),
+                    ip, ua);
+
+            log.info("✓ Position created successfully in both databases: id={}, name={}", 
+                     position.getPositionId(), position.getPositionName());
+            return response;
+        } catch (RuntimeException e) {
+            log.error("✗ CREATE POSITION FAILED - Transaction rolled back: {}", e.getMessage());
+            throw e;
+        }
     }
 
     // ========================== UPDATE ==========================
@@ -94,28 +114,44 @@ public class PositionService {
                                            UpdatePositionRequest request,
                                            Integer actorAccountId,
                                            String ip, String ua) {
-        Position position = positionRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Position", id));
+        try {
+            // 1. Update HR database
+            Position position = positionRepository.findById(id)
+                    .orElseThrow(() -> new ResourceNotFoundException("Position", id));
 
-        Map<String, Object> oldValue = Map.of(
-                "positionName", position.getPositionName());
+            Map<String, Object> oldValue = Map.of(
+                    "positionName", position.getPositionName());
 
-        if (request.getPositionName() != null) {
-            position.setPositionName(request.getPositionName());
+            if (request.getPositionName() != null) {
+                position.setPositionName(request.getPositionName());
+            }
+
+            position = positionRepository.save(position);
+            log.info("→ Position updated in HR DB: id={}, name={}", id, position.getPositionName());
+
+            // 2. Sync to Payroll database
+            try {
+                payrollSyncService.syncPositionUpdate(position);
+                log.info("✓ Position update synced to both databases: id={}", id);
+            } catch (Exception syncError) {
+                log.error("✗ Payroll sync failed! Triggering rollback for HR update: id={}", id, syncError);
+                throw new RuntimeException("Failed to sync position update to payroll database. Operation rolled back.", syncError);
+            }
+
+            PositionResponse response = toResponse(position);
+
+            Map<String, Object> newValue = Map.of(
+                    "positionName", position.getPositionName());
+
+            auditLogService.log(actorAccountId, "POSITION_UPDATE", "position",
+                    id.toString(), oldValue, newValue, ip, ua);
+
+            log.info("✓ Position updated successfully in both databases: id={}", id);
+            return response;
+        } catch (RuntimeException e) {
+            log.error("✗ UPDATE POSITION FAILED - Transaction rolled back: {}", e.getMessage());
+            throw e;
         }
-
-        position = positionRepository.save(position);
-
-        PositionResponse response = toResponse(position);
-
-        Map<String, Object> newValue = Map.of(
-                "positionName", position.getPositionName());
-
-        auditLogService.log(actorAccountId, "POSITION_UPDATE", "position",
-                id.toString(), oldValue, newValue, ip, ua);
-
-        log.info("Position updated: id={}", id);
-        return response;
     }
 
     // ========================== DELETE ==========================
@@ -123,18 +159,35 @@ public class PositionService {
     @Transactional(transactionManager = "hrTransactionManager")
     public void deletePosition(Integer id, Integer actorAccountId,
                                String ip, String ua) {
-        Position position = positionRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Position", id));
+        try {
+            // 1. Get from HR database
+            Position position = positionRepository.findById(id)
+                    .orElseThrow(() -> new ResourceNotFoundException("Position", id));
 
-        Map<String, Object> oldValue = Map.of(
-                "positionName", position.getPositionName());
+            Map<String, Object> oldValue = Map.of(
+                    "positionName", position.getPositionName());
 
-        positionRepository.delete(position);
+            // 2. Delete from payroll database first
+            try {
+                payrollSyncService.syncPositionDelete(id);
+                log.info("→ Position deleted from Payroll DB: id={}", id);
+            } catch (Exception syncError) {
+                log.error("✗ Payroll deletion failed! Triggering rollback: id={}", id, syncError);
+                throw new RuntimeException("Failed to delete position from payroll database. Operation rolled back.", syncError);
+            }
 
-        auditLogService.log(actorAccountId, "POSITION_DELETE", "position",
-                id.toString(), oldValue, null, ip, ua);
+            // 3. Delete from HR database
+            positionRepository.delete(position);
+            log.info("→ Position deleted from HR DB: id={}", id);
 
-        log.info("Position deleted: id={}, name={}", id, position.getPositionName());
+            auditLogService.log(actorAccountId, "POSITION_DELETE", "position",
+                    id.toString(), oldValue, null, ip, ua);
+
+            log.info("✓ Position deleted successfully from both databases: id={}, name={}", id, position.getPositionName());
+        } catch (RuntimeException e) {
+            log.error("✗ DELETE POSITION FAILED - Transaction rolled back: {}", e.getMessage());
+            throw e;
+        }
     }
 
     // ========================== MAPPER ==========================

@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { LanguageProvider } from "@/components/providers/LanguageProvider";
 import { AuthProvider } from "@/components/providers/AuthProvider";
+import { AuthLoadingScreen } from "@/components/loading/AuthLoadingScreen";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -33,6 +34,7 @@ export default function RootLayout({
         >
           <LanguageProvider>
             <AuthProvider>
+              <AuthLoadingScreen />
               {children}
             </AuthProvider>
           </LanguageProvider>

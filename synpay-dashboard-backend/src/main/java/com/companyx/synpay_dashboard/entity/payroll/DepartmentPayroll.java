@@ -2,15 +2,13 @@ package com.companyx.synpay_dashboard.entity.payroll;
 
 import java.time.LocalDateTime;
 
-import org.hibernate.annotations.Immutable;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 
 @Entity
-@Immutable
 @Table(name = "departments_payroll")
 public class DepartmentPayroll {
 
@@ -21,10 +19,21 @@ public class DepartmentPayroll {
     @Column(name = "DepartmentName", nullable = false, length = 100)
     private String departmentName;
 
-    @Column(name = "SyncedAt")
+    @Column(name = "SyncedAt", updatable = false)
     private LocalDateTime syncedAt;
 
+    @PrePersist
+    protected void onCreate() {
+        this.syncedAt = LocalDateTime.now();
+    }
+
+    // ----- Getters & Setters -----
+
     public Integer getDepartmentId() { return departmentId; }
+    public void setDepartmentId(Integer departmentId) { this.departmentId = departmentId; }
+
     public String getDepartmentName() { return departmentName; }
+    public void setDepartmentName(String departmentName) { this.departmentName = departmentName; }
+
     public LocalDateTime getSyncedAt() { return syncedAt; }
 }

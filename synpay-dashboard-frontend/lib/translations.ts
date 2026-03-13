@@ -14,6 +14,7 @@ export const translations = {
   'nav.audit': { vi: 'Nhật Ký Kiểm Toán', en: 'Audit Log' },
   'nav.settings': { vi: 'Cài Đặt', en: 'Settings' },
   'nav.departments': { vi: 'Phòng Ban', en: 'Departments' },
+  'nav.myprofile': { vi: 'Hồ Sơ Của Tôi', en: 'My Profile' },
   
   // User
   'user.role': { vi: 'Giám Đốc Nhân Sự', en: 'HR Director' },
