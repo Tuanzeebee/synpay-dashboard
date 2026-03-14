@@ -47,6 +47,12 @@ export default function AlertDetailModal({ alert, isOpen, onClose, onAcknowledge
   const getTimeAgo = (date: Date) => {
     const now = new Date()
     const diff = now.getTime() - date.getTime()
+
+    // Handle future dates or very recent ones
+    if (diff < 60000) {
+      return language === 'vi' ? 'Vừa xong' : 'Just now'
+    }
+
     const minutes = Math.floor(diff / 60000)
     const hours = Math.floor(diff / 3600000)
 

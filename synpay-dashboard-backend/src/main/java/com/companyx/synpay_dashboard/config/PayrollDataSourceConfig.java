@@ -54,6 +54,7 @@ public class PayrollDataSourceConfig {
     }
 
     @Bean
+    @SuppressWarnings("null")
     public PlatformTransactionManager payrollTransactionManager(
             @Qualifier("payrollEntityManagerFactory") EntityManagerFactory payrollEntityManagerFactory) {
         return new JpaTransactionManager(payrollEntityManagerFactory);

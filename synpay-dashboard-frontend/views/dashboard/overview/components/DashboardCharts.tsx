@@ -138,7 +138,7 @@ const DashboardCharts = memo(({ deptData, headcountData, payrollData, payrollDon
                 <div key={i} className="flex items-center justify-between text-sm">
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
-                    <span className="text-slate-600 dark:text-slate-300">{item.name}</span>
+                    <span className="text-slate-600 dark:text-slate-300">{t(`dept.${item.name}`)}</span>
                   </div>
                   <span className="font-semibold">{item.value}%</span>
                 </div>

@@ -72,7 +72,11 @@ public class DashboardService {
             Map.entry("Nghiên Cứu", "rd"),
             Map.entry("Chăm Sóc Khách Hàng", "customer"),
             Map.entry("Hỗ Trợ", "support"),
-            Map.entry("Pháp Lý", "legal")
+            Map.entry("Pháp Lý", "legal"),
+            Map.entry("Phòng Kinh Doanh", "sales"),
+            Map.entry("Phòng Kế Toán", "accounting"),
+            Map.entry("Phòng Bảo Trì", "maintenance"),
+            Map.entry("Phòng Nhân Sự", "hr")
     );
 
     private final EmployeeRepository employeeRepository;
@@ -369,7 +373,8 @@ public class DashboardService {
             Integer deptId = ((Number) row[0]).intValue();
             BigDecimal total = (BigDecimal) row[1];
             grandTotal = grandTotal.add(total);
-            String name = deptNames.getOrDefault(deptId, "Khác");
+            String rawName = deptNames.getOrDefault(deptId, "Khác");
+            String name = DEPT_NAME_TO_KEY.getOrDefault(rawName, rawName.equals("Khác") ? "others" : rawName.toLowerCase().replaceAll("\\s+", "_"));
             entries.add(new DeptPayrollEntry(name, total));
         }
 
@@ -396,7 +401,7 @@ public class DashboardService {
         if (othersTotal.compareTo(BigDecimal.ZERO) > 0 && grandTotal.compareTo(BigDecimal.ZERO) > 0) {
             double othersPct = othersTotal.divide(grandTotal, 4, RoundingMode.HALF_UP)
                     .multiply(BigDecimal.valueOf(100)).doubleValue();
-            result.add(new DonutItem("Khác", round(othersPct, 1), DONUT_COLORS[DONUT_COLORS.length - 1]));
+            result.add(new DonutItem("others", round(othersPct, 1), DONUT_COLORS[DONUT_COLORS.length - 1]));
         }
 
         return result;
@@ -478,6 +483,7 @@ public class DashboardService {
     private String formatRelativeTime(LocalDateTime dateTime) {
         if (dateTime == null) return "";
         long minutes = ChronoUnit.MINUTES.between(dateTime, LocalDateTime.now());
+        if (minutes < 1) return "Vừa xong";
         if (minutes < 60) return minutes + " phút trước";
         long hours = minutes / 60;
         if (hours < 24) return hours + " giờ trước";

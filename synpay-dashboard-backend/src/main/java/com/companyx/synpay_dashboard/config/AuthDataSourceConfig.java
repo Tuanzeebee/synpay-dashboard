@@ -54,6 +54,7 @@ public class AuthDataSourceConfig {
     }
 
     @Bean
+    @SuppressWarnings("null")
     public PlatformTransactionManager authTransactionManager(
             @Qualifier("authEntityManagerFactory") EntityManagerFactory authEntityManagerFactory) {
         return new JpaTransactionManager(authEntityManagerFactory);

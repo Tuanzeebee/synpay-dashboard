@@ -65,10 +65,15 @@ export const translations = {
   'dept.engineering': { vi: 'Kỹ Thuật', en: 'Engineering' },
   'dept.support': { vi: 'Hỗ Trợ', en: 'Support' },
   'dept.legal': { vi: 'Pháp Lý', en: 'Legal' },
+  'dept.accounting': { vi: 'Kế Toán', en: 'Accounting' },
+  'dept.phòng_kinh_doanh': { vi: 'Phòng Kinh Doanh', en: 'Sales Department' },
+  'dept.phòng_kế_toán': { vi: 'Phòng Kế Toán', en: 'Accounting Department' },
   'dept.phòng_bảo_trì': { vi: 'Bảo Trì', en: 'Maintenance' },
   'dept.phòng_nhân_sự': { vi: 'Nhân Sự', en: 'HR' },
   'dept.phòng_kỹ_thuật': { vi: 'Kỹ Thuật', en: 'Engineering' },
   'dept.phòng_sản_xuất': { vi: 'Sản Xuất', en: 'Production' },
+  'dept.others': { vi: 'Khác', en: 'Others' },
+  'dept.Khác': { vi: 'Khác', en: 'Others' },
   
   // Quick Actions
   'quickActions.title': { vi: 'Thao Tác Nhanh', en: 'Quick Actions' },
@@ -89,6 +94,10 @@ export const translations = {
   'notifications.newNotifications': { vi: 'Thông Báo Mới', en: 'New Notifications' },
   'notifications.markAllRead': { vi: 'Đánh dấu đã đọc', en: 'Mark all as read' },
   'notifications.viewAllNotifications': { vi: 'Xem tất cả thông báo', en: 'View all notifications' },
+  'notifications.all_read': { vi: 'Đã đọc tất cả', en: 'All caught up' },
+  'notifications.no_new': { vi: 'Không có thông báo mới', en: 'No new notifications' },
+  'notifications.unread': { vi: 'chưa đọc', en: 'Unread' },
+  'notifications.view_all': { vi: 'Xem tất cả thông báo', en: 'View all notifications' },
   
   // Filters
   'filters.label': { vi: 'Bộ Lọc:', en: 'Filters:' },
@@ -119,7 +128,9 @@ export const translations = {
   'alertStatus.acknowledged': { vi: 'Đã xác nhận', en: 'Acknowledged' },
   
   // Actions
+  'actions.mark_all_read': { vi: 'Đánh dấu tất cả đã đọc', en: 'Mark all as read' },
   'actions.bulkActions': { vi: 'Hành động hàng loạt', en: 'Bulk actions' },
+  'actions.logout': { vi: 'Đăng xuất', en: 'Logout' },
   'actions.refresh': { vi: 'Làm mới', en: 'Refresh' },
   'actions.itemsSelected': { vi: 'mục đã chọn', en: 'items selected' },
   'actions.markAsRead': { vi: 'Đánh dấu đã đọc', en: 'Mark as read' },

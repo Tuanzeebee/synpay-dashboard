@@ -124,18 +124,18 @@ function Header({ language = 'vi', onLanguageToggle, onRefresh, onMenuToggle, t 
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => router.push('/myprofile')}>
                 <User className="w-4 h-4 mr-2" />
-                My Profile
+                {t('nav.myprofile')}
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <Settings className="w-4 h-4 mr-2" />
-                Account Settings
+                {t('nav.settings')}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem className="text-red-600" onClick={handleLogout}>
                 <LogOut className="w-4 h-4 mr-2" />
-                Logout
+                {t('actions.logout') || 'Logout'}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

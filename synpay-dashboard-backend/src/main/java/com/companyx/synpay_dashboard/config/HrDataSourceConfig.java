@@ -57,6 +57,7 @@ public class HrDataSourceConfig {
 
     @Primary
     @Bean
+    @SuppressWarnings("null")
     public PlatformTransactionManager hrTransactionManager(EntityManagerFactory hrEntityManagerFactory) {
         return new JpaTransactionManager(hrEntityManagerFactory);
     }

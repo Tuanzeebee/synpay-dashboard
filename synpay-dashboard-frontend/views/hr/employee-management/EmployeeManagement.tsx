@@ -213,7 +213,6 @@ export default function EmployeeManagement() {
   const [detailEmployee, setDetailEmployee] = useState<ApiEmployeeResponse | null>(null)
   const [showProfileDrawer, setShowProfileDrawer] = useState(false)
   const [showFormModal, setShowFormModal] = useState(false)
-  const [showDeactivateModal, setShowDeactivateModal] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [formMode, setFormMode] = useState<FormMode>('create')
   const [formData, setFormData] = useState<FormData>(emptyForm)
@@ -277,12 +276,6 @@ export default function EmployeeManagement() {
     })
     setFormError(null)
     setShowFormModal(true)
-    setShowProfileDrawer(false)
-  }, [])
-
-  const openDeactivateModal = useCallback((emp: ApiEmployeeResponse) => {
-    setSelectedEmployee(emp)
-    setShowDeactivateModal(true)
     setShowProfileDrawer(false)
   }, [])
 
@@ -355,18 +348,6 @@ export default function EmployeeManagement() {
       setFormError(msg)
     }
   }, [formMode, formData, selectedEmployee, create, update])
-
-  // ── Deactivate (change status to Inactive) ─────────────────
-  const handleDeactivate = useCallback(async () => {
-    if (!selectedEmployee) return
-    try {
-      await changeStatus(selectedEmployee.employeeId, 'Nghỉ việc')
-      setShowDeactivateModal(false)
-      setSelectedEmployee(null)
-    } catch {
-      // error captured by hook state
-    }
-  }, [selectedEmployee, changeStatus])
 
   // ── Delete employee ────────────────────────────────────────
   const handleDeleteEmployee = useCallback(async () => {
@@ -670,19 +651,6 @@ export default function EmployeeManagement() {
                             >
                               <Edit2 className="w-4 h-4" />
                             </Button>
-                            {employee.status === 'Đang làm việc' && (
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  openDeactivateModal(employee)
-                                }}
-                                className="text-slate-400 dark:text-slate-500 hover:text-amber-600 dark:hover:text-amber-400"
-                              >
-                                <AlertTriangle className="w-4 h-4" />
-                              </Button>
-                            )}
                             <Button
                               variant="ghost"
                               size="icon"
@@ -880,16 +848,6 @@ export default function EmployeeManagement() {
                   <Edit2 className="w-4 h-4 mr-2" />
                   Chỉnh Sửa
                 </Button>
-                {detailEmployee.status === 'Đang làm việc' && (
-                  <Button
-                    variant="outline"
-                    onClick={() => openDeactivateModal(detailEmployee)}
-                    className="border-amber-200 dark:border-amber-800 text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20"
-                  >
-                    <AlertTriangle className="w-4 h-4 mr-2" />
-                    Vô hiệu hóa
-                  </Button>
-                )}
                 <Button
                   variant="outline"
                   onClick={() => openDeleteModal(detailEmployee)}
@@ -1117,48 +1075,6 @@ export default function EmployeeManagement() {
                 </Button>
               </div>
             </form>
-          </div>
-        </div>
-      )}
-
-      {/* ─── Deactivate Confirmation Modal ───────────────────── */}
-      {showDeactivateModal && selectedEmployee && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div
-            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-            onClick={() => setShowDeactivateModal(false)}
-          />
-          <div className="relative bg-white dark:bg-slate-800 rounded-lg shadow-2xl w-full max-w-md animate-in zoom-in-95">
-            <div className="p-6">
-              <div className="flex items-start gap-4">
-                <div className="flex-shrink-0 w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center">
-                  <AlertTriangle className="w-6 h-6 text-amber-600 dark:text-amber-400" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">
-                    Xác Nhận Vô Hiệu Hóa
-                  </h3>
-                  <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
-                    Bạn có chắc chắn muốn vô hiệu hóa nhân viên &quot;
-                    {selectedEmployee.fullName}&quot; (#{selectedEmployee.employeeId})?
-                    Trạng thái sẽ chuyển sang &quot;Nghỉ việc&quot;.
-                  </p>
-                </div>
-              </div>
-              <div className="flex justify-end gap-3 mt-6">
-                <Button
-                  variant="outline"
-                  onClick={() => setShowDeactivateModal(false)}
-                  disabled={isSaving}
-                >
-                  Hủy
-                </Button>
-                <Button variant="destructive" onClick={handleDeactivate} disabled={isSaving}>
-                  {isSaving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                  Vô Hiệu Hóa
-                </Button>
-              </div>
-            </div>
           </div>
         </div>
       )}
